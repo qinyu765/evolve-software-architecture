@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import shutil
 import subprocess
+import tarfile
 import tempfile
 from pathlib import Path
 
@@ -26,12 +28,42 @@ def repo_root(path: Path) -> Path:
     return Path(git(path, "rev-parse", "--show-toplevel")).resolve()
 
 
+def materialize_package(repo: Path, ref: str, destination: Path) -> Path:
+    """Materialize one historical package into a temporary directory."""
+    archive = subprocess.run(
+        ["git", "archive", "--format=tar", ref, f"skills/{NAME}"],
+        cwd=repo,
+        stdout=subprocess.PIPE,
+        check=True,
+    ).stdout
+    with tarfile.open(fileobj=io.BytesIO(archive), mode="r:") as bundle:
+        bundle.extractall(destination)
+    return destination / "skills" / NAME
+
+
+def assert_matches(repo: Path, ref: str, actual: Path, temp_root: Path) -> None:
+    expected = materialize_package(repo, ref, temp_root)
+    result = subprocess.run(["diff", "-ru", str(expected), str(actual)], check=False)
+    if result.returncode:
+        raise SystemExit(
+            "existing vendor copy differs from its locked source; refusing to overwrite local changes"
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", required=True, type=Path, help="target repository")
     parser.add_argument("--ref", default="HEAD", help="release tag or commit to record")
     parser.add_argument("--check", action="store_true", help="compare without writing")
+    parser.add_argument(
+        "--update",
+        action="store_true",
+        help="safely replace an existing copy whose locked version is unchanged locally",
+    )
     args = parser.parse_args()
+
+    if args.check and args.update:
+        parser.error("--check and --update cannot be combined")
 
     source = Path(__file__).resolve().parents[1]
     target = repo_root(args.target.expanduser().resolve())
@@ -56,13 +88,25 @@ def main() -> int:
         print(f"vendor copy is current: {destination}")
         return 0
 
-    if destination.exists():
-        raise SystemExit(f"refusing to overwrite existing vendor copy: {destination}; remove it only after review")
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(package, destination)
     locks = {}
     if lock_path.exists():
         locks = json.loads(lock_path.read_text(encoding="utf-8"))
+
+    if destination.exists() and not args.update:
+        raise SystemExit(
+            f"refusing to overwrite existing vendor copy: {destination}; use --update after review"
+        )
+    if args.update:
+        previous = locks.get(NAME, {})
+        previous_ref = previous.get("commit") or previous.get("version")
+        if not previous_ref:
+            raise SystemExit("cannot update without a locked source commit or version")
+        with tempfile.TemporaryDirectory() as temp:
+            assert_matches(source, previous_ref, destination, Path(temp))
+        shutil.rmtree(destination)
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(package, destination)
     locks[NAME] = {
         "source": SOURCE_URL,
         "version": args.ref,
