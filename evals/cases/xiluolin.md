@@ -3,10 +3,10 @@
 ## Source
 
 - Repository: <https://github.com/qinyu765/xiluolin>
-- Evaluation reference: a published, GitHub-visible commit selected when this case is run.
+- Evaluation reference: `5789d00f94e8857e11e86b3bee2755fbd1987822` (<https://github.com/qinyu765/xiluolin/commit/5789d00f94e8857e11e86b3bee2755fbd1987822>).
 - Local development reference: `/Users/timekettle/Developer/Code/mine/xiluolin`.
 
-Do not copy the XiLuoLin source tree into this repository. The evaluator should inspect the selected commit in a temporary checkout and record the commit it used.
+Do not copy the XiLuoLin source tree into this repository. Inspect the pinned commit in a temporary checkout. Update this case deliberately when a newer public commit is required; never substitute an unpublished local commit silently.
 
 ## Scenario
 
