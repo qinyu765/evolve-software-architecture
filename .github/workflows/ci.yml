@@ -1,0 +1,25 @@
+name: Validate Skill
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate package
+        run: python3 scripts/validate-skill.py
+      - name: Compile helpers
+        run: python3 -m py_compile skills/evolve-software-architecture/scripts/collect_repo_signals.py
+      - name: Check repository references
+        run: |
+          test -f README.md
+          test -f ROADMAP.md
+          test -f LICENSE
+          test -f THIRD_PARTY_NOTICES.md

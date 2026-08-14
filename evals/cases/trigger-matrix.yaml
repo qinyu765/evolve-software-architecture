@@ -1,0 +1,32 @@
+version: 1
+skill: evolve-software-architecture
+
+positive:
+  - id: architecture-review-xiluolin
+    prompt: "评估当前 XiLuoLin 的语音输入链路，给出未来增加多个识别 provider 时的架构方向和渐进迁移方案。"
+    expected: [trigger, evidence_first, quality_tradeoffs, options, migration]
+  - id: process-boundary-design
+    prompt: "设计一个跨 Rust native process 与前端的长期 IPC 方案，需要考虑版本兼容、错误传播和测试。"
+    expected: [trigger, desktop_adapter, process_boundary, verification]
+  - id: debt-direction
+    prompt: "这个仓库的模块耦合已经影响后续扩展，请基于现状判断应该先重构哪条边界。"
+    expected: [trigger, hotspots, options, reversible_steps]
+
+negative:
+  - id: local-style-fix
+    prompt: "把设置页按钮颜色改成蓝色。"
+    expected: [no_implicit_trigger]
+  - id: rename
+    prompt: "把变量 userName 重命名为 displayName。"
+    expected: [no_implicit_trigger]
+  - id: routine-update
+    prompt: "升级这个补丁版本依赖并修复锁文件。"
+    expected: [no_implicit_trigger]
+
+promotion:
+  - id: xiluolin-specific
+    rule: "XiLuoLin domain facts remain in this case and are not promoted to core references."
+  - id: desktop-rule
+    rule: "A desktop rule needs a platform invariant or evidence from two desktop repositories."
+  - id: core-rule
+    rule: "A core rule needs evidence from two materially different project types."
