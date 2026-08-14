@@ -8,12 +8,13 @@ The roadmap expands one axis at a time so a failure can be attributed to a proje
 - Desktop/Tauri adapter.
 - Structured Markdown output contract.
 - Positive and negative trigger cases.
-- Controlled vendor copy into XiLuoLin only after the release tag exists.
+- Release-pinned vendor copy, drift detection, and safe updates for XiLuoLin.
 
 ## v0.2 — Desktop generalization
 
 - Validate against a second desktop repository.
-- Add drift checking and release-to-project synchronization.
+- Run isolated model-based forward evaluations for the trigger matrix and review rubric.
+- Stabilize trigger precision before adding another lifecycle mode.
 - Promote only platform invariants or repeated desktop findings.
 
 ## v0.3 — Non-UI stress test

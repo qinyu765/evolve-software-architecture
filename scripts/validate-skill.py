@@ -37,6 +37,9 @@ def main() -> int:
     if closing < 0:
         fail("SKILL.md frontmatter is not closed")
     frontmatter = content[4:closing]
+    frontmatter_keys = re.findall(r"^([a-zA-Z0-9_-]+):", frontmatter, re.MULTILINE)
+    if frontmatter_keys != ["name", "description"]:
+        fail("SKILL.md frontmatter must contain only name and description")
     name_match = re.search(r"^name:\s*([a-z0-9-]+)\s*$", frontmatter, re.MULTILINE)
     description_match = re.search(r"^description:\s*(.+)$", frontmatter, re.MULTILINE)
     if not name_match or name_match.group(1) != NAME:
@@ -45,6 +48,10 @@ def main() -> int:
         fail("SKILL.md description must explain capability and triggers")
     if len(content.splitlines()) > 500:
         fail("SKILL.md must stay under 500 lines")
+    forbidden = ["README.md", "CHANGELOG.md", "INSTALLATION_GUIDE.md"]
+    for name in forbidden:
+        if (skill / name).exists():
+            fail(f"installable Skill contains repository documentation: {name}")
     for relative in [
         "references/core/assessment-framework.md",
         "references/core/quality-attributes.md",
@@ -54,6 +61,23 @@ def main() -> int:
     ]:
         if not (skill / relative).is_file():
             fail(f"missing required reference: {relative}")
+    for target in re.findall(r"\]\(([^)]+)\)", content):
+        if target.startswith(("http://", "https://", "#")):
+            continue
+        resolved = (skill / target.split("#", 1)[0]).resolve()
+        if skill.resolve() not in resolved.parents or not resolved.exists():
+            fail(f"broken or unsafe SKILL.md link: {target}")
+
+    metadata_content = metadata.read_text(encoding="utf-8")
+    display = re.search(r'^\s+display_name:\s+"([^"]+)"$', metadata_content, re.MULTILINE)
+    short = re.search(r'^\s+short_description:\s+"([^"]+)"$', metadata_content, re.MULTILINE)
+    prompt = re.search(r'^\s+default_prompt:\s+"([^"]+)"$', metadata_content, re.MULTILINE)
+    if not display or not short or not prompt:
+        fail("agents/openai.yaml is missing quoted interface metadata")
+    if not 25 <= len(short.group(1)) <= 64:
+        fail("openai.yaml short_description must be 25-64 characters")
+    if f"${NAME}" not in prompt.group(1):
+        fail("openai.yaml default_prompt must mention the skill explicitly")
     print(f"valid: {skill}")
     print(f"lines: {len(content.splitlines())}")
     return 0

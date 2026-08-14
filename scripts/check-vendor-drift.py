@@ -1,36 +1,39 @@
 #!/usr/bin/env python3
-"""Check a XiLuoLin-style vendor copy without changing either repository."""
+"""Verify a project copy against the exact release recorded in its vendor lock."""
 
 from __future__ import annotations
 
 import argparse
-import subprocess
 import tempfile
 from pathlib import Path
-import shutil
 
-
-NAME = "evolve-software-architecture"
+from vendor_lib import (
+    NAME,
+    assert_tree_matches,
+    locked_commit,
+    materialize_package,
+    read_locks,
+    repo_root,
+)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", required=True, type=Path)
     args = parser.parse_args()
-    source = Path(__file__).resolve().parents[1] / "skills" / NAME
-    target = args.target.expanduser().resolve()
+    source = Path(__file__).resolve().parents[1]
+    target = repo_root(args.target.expanduser().resolve())
     destination = target / ".agents" / "skills" / NAME
-    if not destination.is_dir():
-        print(f"missing vendor copy: {destination}")
-        return 1
+    lock_path = target / ".agents" / "vendor-lock.json"
+    entry = read_locks(lock_path).get(NAME)
+    if not entry:
+        raise SystemExit(f"missing {NAME} entry in {lock_path}")
+    commit, legacy_tag_object = locked_commit(source, entry)
     with tempfile.TemporaryDirectory() as temp:
-        expected = Path(temp) / NAME
-        shutil.copytree(source, expected)
-        result = subprocess.run(["diff", "-ru", str(expected), str(destination)], check=False)
-    if result.returncode:
-        print("vendor drift detected")
-        return 1
-    print("vendor copy matches source package")
+        expected = materialize_package(source, commit, Path(temp))
+        assert_tree_matches(expected, destination)
+    suffix = " (legacy tag-object lock)" if legacy_tag_object else ""
+    print(f"vendor copy matches {entry['version']} at {commit}{suffix}")
     return 0
 
 

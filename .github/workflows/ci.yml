@@ -10,13 +10,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Validate package
         run: python3 scripts/validate-skill.py
       - name: Compile helpers
-        run: python3 -m py_compile skills/evolve-software-architecture/scripts/collect_repo_signals.py
+        run: python3 -m py_compile scripts/*.py skills/evolve-software-architecture/scripts/*.py
+      - name: Test release-pinned vendoring
+        run: python3 -m unittest discover -s tests -v
       - name: Check repository references
         run: |
           test -f README.md

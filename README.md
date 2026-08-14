@@ -15,10 +15,11 @@ It is not a promise of a final architecture. The goal is to reduce future change
 For Codex and other Agent Skills-compatible tools:
 
 ```bash
-npx skills@latest add qinyu765/evolve-software-architecture
+npx skills@latest add qinyu765/evolve-software-architecture \
+  --skill evolve-software-architecture --agent codex --copy --yes
 ```
 
-For a repository that wants the Skill available to every contributor, install it under `.agents/skills` and commit the resulting directory. Do not install both a project copy and a user-level copy of the same Skill in the same working context.
+This installs the current public source into `.agents/skills` and writes the ecosystem `skills-lock.json`. For a release-pinned project copy such as XiLuoLin, clone this repository and run `python3 scripts/vendor-skill.py --target <repo> --ref <release-tag>`; the custom `.agents/vendor-lock.json` records the exact tag and peeled commit. Do not install both a project copy and a user-level copy of the same Skill in the same working context.
 
 ## Repository layout
 
@@ -32,6 +33,7 @@ For a repository that wants the Skill available to every contributor, install it
 
 ```bash
 python3 scripts/validate-skill.py
+python3 -m unittest discover -s tests -v
 python3 -m py_compile skills/evolve-software-architecture/scripts/collect_repo_signals.py
 python3 skills/evolve-software-architecture/scripts/collect_repo_signals.py --repo .
 ```
