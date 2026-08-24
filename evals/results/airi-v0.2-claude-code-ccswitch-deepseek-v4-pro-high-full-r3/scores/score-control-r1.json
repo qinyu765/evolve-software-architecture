@@ -1,0 +1,48 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (apps/stage-tamagotchi); no crates/ legacy Tauri directory exists in this checkout",
+    "runtime_boundaries_identified": [
+      "Electron main process hosting the extension host (ExtensionHost constructed with runtime 'electron')",
+      "plugin-sdk runtime/transport boundary: electron/node/web runtimes; in-memory transport implemented, websocket/web-worker/node-worker transports throw 'not implemented' stubs",
+      "Eventa IPC contexts spanning main/renderer/preload per window (the missing window-namespaced context, worked around via setMaxListeners)",
+      "In-process background services in main: channel-server (WebSocket/TLS/QR pairing on injeca lifecycle), airi-http-server (ServerManager ordered start/reverse stop), godot-stage, mcp-servers, tray",
+      "Process exit lifecycle split across bootkit emitAppBeforeQuit + injeca.stop + the plugin host's own app.once('before-quit') dispose"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "factual_errors": [
+    {
+      "claim": "目前靠 12 处 ipcMain.setMaxListeners(0/100) 硬扛；其余 11 处 setMaxListeners(0)",
+      "repository_evidence": "Grep of apps/stage-tamagotchi finds 1x ipcMain.setMaxListeners(100) (src/main/index.ts:58) and 14x ipcMain.setMaxListeners(0): windows/onboarding/index.ts:68, windows/about/rpc/index.electron.ts:22, windows/widgets/rpc/index.electron.ts:22, windows/widgets/index.ts:325, windows/shared/referenced-window.ts:44, windows/main/rpc/index.electron.ts:46, windows/inlay/rpc/index.electron.ts:19, windows/main/index.ts:214, windows/chat/rpc/index.electron.ts:27, windows/desktop-overlay/rpc/index.electron.ts:37, windows/dashboard/rpc/index.electron.ts:27, windows/settings/rpc/index.electron.ts:50, windows/caption/index.ts:304, windows/dashboard/index.ts:165; plus 1x ipcRenderer.setMaxListeners(0) in src/preload/shared.ts:12.",
+      "explanation": "The answer undercounts the workaround sites: it says 11 setMaxListeners(0) calls, but there are 14 in the main process plus one in preload (15 total non-100 calls). The finding's direction is unchanged (the problem is slightly larger than stated), but the specific counts 11 and 12 are wrong."
+    },
+    {
+      "claim": "多窗口已经存在约 13 个窗口管理器（main/widgets/chat/settings/spotlight/caption/about/notice/onboarding/devtools/dashboard/inlay/desktop-overlay/beat-sync）",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/windows/*/index.ts contains 14 window-manager directories: about, beat-sync, caption, chat, dashboard, desktop-overlay, devtools, inlay, main, notice, onboarding, settings, spotlight, widgets (plus shared/, which is not a manager).",
+      "explanation": "The parenthetical enumerates 14 distinct window managers while the label says '约 13' (approximately 13). The enumeration itself is correct; the stated number is off by one and internally inconsistent with the list, mitigated only by '约'."
+    },
+    {
+      "claim": "packages/plugin-sdk/package.json:6 是 \"private\": true",
+      "repository_evidence": "packages/plugin-sdk/package.json line 5 is \"private\": true,; line 6 is the \"description\" field.",
+      "explanation": "Off-by-one line number. The substance (the package is private and has exports defined) is correct."
+    },
+    {
+      "claim": "http-server/index.ts:22-38 的 servers: []",
+      "repository_evidence": "The literal servers: [] appears at the call site apps/stage-tamagotchi/src/main/index.ts:160 (setupBuiltInServer({ servers: [] })); http-server/index.ts:22-38 defines setupBuiltInServer whose default is ...(params.servers ?? []).",
+      "explanation": "The citation points at the definition rather than the call site where servers: [] is actually written. The substance — the HTTP server manager is wired with an empty server list — is correct."
+    }
+  ],
+  "rationale": "Verified against the current checkout. The desktop platform is Electron (apps/stage-tamagotchi); the legacy Tauri `crates/` directory is gone (Tauri appears only in historical blog posts), and the answer correctly treats Electron as current rather than any legacy platform. Nearly every cited path, line range, and symbol checks out: ExtensionHost lifecycle (announced/active/degraded/withdrawn bindings), manifest v1 contract (shared/types.ts:233-253), three built-in kits (widget/gamelet/tool), extensions-v1.json persistence + static-assets + auto-reload (plugins/host), ServerManager ordered start/reverse stop, channel-server WebSocket/TLS/QR pairing, the 14-window manager inventory with reusable/referenced primitives, plugin-sdk private:true + exports, permission default (resolvedGrant falls back to manifest.permissions when permissionResolver is absent), incompatible-version declared but unchecked in resolveKitApi, websocket/web-worker/node-worker transport stubs, ExposePolicy declared but unenforced, plugin-protocol delivery/RouteTargetExpression defined but unused by the desktop app, sandbox:false across windows, and the three-way exit lifecycle. The answer scores full marks on all nine dimensions: it classifies scope with confidence, grounds claims in evidence, explains where friction spreads and why, gives explicit quality-attribute trade-offs, compares three viable options including the status quo, makes a recommendation that follows from the stated drivers, and lays out a six-step incremental, observable, reversible migration with concrete verification (grep exit criteria, regression/golden tests, typecheck/lint/vitest). The four recorded errors are minor counting or citation nits and do not contradict the architecture findings or the recommendation. Total 18/18."
+}

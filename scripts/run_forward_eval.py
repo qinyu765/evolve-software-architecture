@@ -476,10 +476,12 @@ def claude_command(
     if model is not None:
         command.extend(["--model", model])
     if schema is not None:
+        claude_schema = load_json(schema)
+        claude_schema.pop("$schema", None)
         command.extend(
             [
                 "--json-schema",
-                json.dumps(load_json(schema), ensure_ascii=False, separators=(",", ":")),
+                json.dumps(claude_schema, ensure_ascii=False, separators=(",", ":")),
             ]
         )
     return command
@@ -910,12 +912,41 @@ def main(argv: list[str] | None = None) -> int:
         "profile": profile,
         "planned_calls": len(matrix),
     }
+    prior_failures: list[dict[str, Any]] = []
     if output_dir.exists():
         if not args.resume:
             raise EvaluationError(f"output directory already exists: {output_dir}")
         if manifest_path.exists():
-            raise EvaluationError(f"evaluation is already complete: {manifest_path}")
-        if not partial_manifest_path.is_file():
+            previous_manifest = load_json(manifest_path)
+            previous_summary_path = output_dir / "summary.json"
+            if not previous_summary_path.is_file():
+                raise EvaluationError(
+                    f"completed manifest is missing summary: {previous_summary_path}"
+                )
+            previous_summary = load_json(previous_summary_path)
+            if previous_summary.get("dataset_complete"):
+                raise EvaluationError(f"evaluation is already complete: {manifest_path}")
+            previous_identity = {
+                key: previous_manifest.get(key)
+                for key in ("case", "repository", "skill", "profile", "planned_calls")
+            }
+            if previous_identity != identity:
+                raise EvaluationError(
+                    "resume profile does not match the incomplete evaluation"
+                )
+            started = previous_manifest["started_at"]
+            prior_failures = [
+                record
+                for record in previous_manifest.get("results", [])
+                if not record.get("success")
+            ]
+            write_json(
+                partial_manifest_path,
+                {"schema_version": 1, "identity": identity, "started_at": started},
+            )
+            for record in previous_manifest.get("results", []):
+                write_json(checkpoints / f"{record['id']}.json", record)
+        elif not partial_manifest_path.is_file():
             raise EvaluationError(
                 f"cannot resume without {partial_manifest_path.name}: {output_dir}"
             )
@@ -1153,6 +1184,8 @@ def main(argv: list[str] | None = None) -> int:
                 }
             ),
         }
+        if prior_failures:
+            manifest["prior_failures"] = prior_failures
         write_json(manifest_path, manifest)
         partial_manifest_path.unlink()
         shutil.rmtree(checkpoints, ignore_errors=True)

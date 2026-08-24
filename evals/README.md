@@ -44,6 +44,22 @@ python3 scripts/run_forward_eval.py \
 
 The manifest keeps the configuration manager, CLI model argument, declared model label, and runtime-reported `observed_models` separate. This profile is exploratory and is not combined with the fixed Codex baseline.
 
-The `--model` value is the configured Claude Code alias used by this environment; replace it for another setup. `--model-label` records the evaluator's declared provider model separately from the runtime alias and the model identifiers reported by Claude Code. Routing invocations use `dontAsk` permission mode with only `Read`, `Glob`, `Grep`, and the read-only `Skill` loader, and disable session persistence. This removes Bash and all editing tools instead of relying on Claude's plan mode, which may create user-level plan files. Omitting `Skill` invalidates routing measurements because the model cannot load a matched Skill. The Claude profile stops a call after 720 seconds without retrying that timeout; the Codex profile uses 900 seconds. A model argument, alias mapping, runtime, effort, timeout, permission mode, tool set, or prompt change requires a new output directory and profile.
+Run the complete three-repetition Claude Code profile in a separate directory:
+
+```bash
+python3 scripts/run_forward_eval.py \
+  --runtime claude-code \
+  --model fable \
+  --model-label deepseek-v4-pro \
+  --reasoning-effort high \
+  --repetitions 3 \
+  --max-concurrency 3 \
+  --airi-source ../airi \
+  --output-dir evals/results/airi-v0.2-claude-code-ccswitch-deepseek-v4-pro-high-full-r3
+```
+
+The committed complete profile passes routing at 9/9 positive and 0/9 negative loads. It fails the behavior improvement gate because both variants saturate the current rubric at 18/18, despite scorers recording nine control factual errors and five treatment factual errors. It also fails generalization because treatment answers do not consistently identify main, preload, and renderer as current boundaries. These are baseline observations, not in-run remediation instructions.
+
+The `--model` value is the configured Claude Code alias used by this environment; replace it for another setup. `--model-label` records the evaluator's declared provider model separately from the runtime alias and the model identifiers reported by Claude Code. Routing invocations use `dontAsk` permission mode with only `Read`, `Glob`, `Grep`, and the read-only `Skill` loader, and disable session persistence. This removes Bash and all editing tools instead of relying on Claude's plan mode, which may create user-level plan files. Omitting `Skill` invalidates routing measurements because the model cannot load a matched Skill. The Claude profile stops a call after 720 seconds without retrying that timeout; the Codex profile uses 900 seconds. An incomplete manifest can resume the exact same identity and preserves prior infrastructure failures. A model argument, alias mapping, runtime, effort, timeout, permission mode, tool set, or prompt change requires a new output directory and profile.
 
 The runner creates temporary control and treatment clones at the pinned AIRI commit, preserves AIRI's repository Skills, installs only the released architecture Skill in treatment, and uses read-only ephemeral Codex executions. It commits no checkpoint directory, partial manifest, session data, JSONL, temporary clones, credentials, provider configuration, or absolute local paths. A failed gate is retained as baseline evidence; remediation belongs in a later change.

@@ -1,0 +1,38 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (apps/stage-tamagotchi, electron-vite + electron-builder); no Tauri runtime in the checkout.",
+    "runtime_boundaries_identified": [
+      "Eventa IPC between renderer windows and the Electron main process (global scope, 16 setMaxListeners(0|100) workarounds)",
+      "plugin-sdk host<->plugin protocol (ExtensionManifestV1 / permission / kit / ExtensionHost contract; in-process fs loader real, plugin/local.ts and plugin/remote.ts stubs, remote websocket channel TODO)",
+      "server-runtime WebSocket protocol (host<->remote peer; auth, handshake, registry sync, consumer routing, heartbeat; independently runnable via src/bin/run.ts, currently embedded as Electron channel-server)",
+      "injeca DI module boundary + lifecycle (provider namespaces, lifecycle.appHooks.onStart/onStop)",
+      "Window handle contracts (createReusableWindow, createReferencedWindowManager, setupBaseWindowElectronInvokes)"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "factual_errors": [
+    {
+      "claim": "窗口有约 14 个 manager（含 inlay/dashboard），每个的 DI 接线手写在 main/index.ts:132-270。",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/index.ts wires 12 windows (about, beat-sync, caption, chat, desktop-overlay, devtools, main, notice, onboarding, settings, spotlight, widgets). inlay is wired in src/main/tray/index.ts:194 (setupInlayWindow), and dashboard is not wired in main/index.ts at all (only referenced within its own files).",
+      "explanation": "Minor overstatement: 14 window directories exist, but not each one's DI wiring lives in main/index.ts — inlay is wired via the tray and dashboard has no main-process wiring."
+    },
+    {
+      "claim": "16 处 setMaxListeners 变通分布于 main/index.ts、preload/shared.ts 以及每个 window 的 rpc/index.electron.ts。",
+      "repository_evidence": "Grep confirms exactly 16 setMaxListeners calls, but five live in window index.ts files (caption/index.ts:304, onboarding/index.ts:68, dashboard/index.ts:165, widgets/index.ts:325, main/index.ts:214) and one in windows/shared/referenced-window.ts:44, not only in rpc/index.electron.ts.",
+      "explanation": "The count (16) is accurate; the distribution is slightly mischaracterized — several calls are in window index.ts and a shared helper, not exclusively per-window rpc/index.electron.ts."
+    }
+  ],
+  "rationale": "The review is thorough, accurate, and ready for a user decision. It classifies the repo from multiple signals (Electron main as sole runtime host, three unaligned protocol surfaces), and its citations are dense and overwhelmingly verified: ExtensionManifestV1 at plugin-host/shared/types.ts:233-253, ExtensionHost at core.ts:205-233, FileSystemLoader's runtime→default→electron order at fs.ts:48-59 with dynamic import at fs.ts:72-76, the empty plugin/local.ts and plugin/remote.ts, websocket TODOs, the tool-registry REVIEW (plugins/host/index.ts:436-441) and CapabilityDescriptor TODO (shared/eventa/index.ts:218-220), Server interface at server/index.ts:29-35, the server-runtime migration comments (index.ts:230-232, 323-340, 1052-1054), the /ws literal dedup TODO (channel-server/index.ts:103-105), setupBaseWindowElectronInvokes (windows/shared/window.ts:134-149), and both window-reuse contracts. Current friction is concretely located (global Eventa scope spreading to every window, linear DI wiring, ownership debts, half-done identity routing). Quality attributes are ranked across three options with explicit trade-offs, and options A (status quo) and C (radical generalization) are real alternatives to the recommended B. Migration P0-P5 is incremental, observable (concrete vitest/typecheck commands), and independently reversible, with a rollback strategy. Verification is concrete (golden tests, per-window delivery test, WebSocketExtensionPeer integration test, sample third-party plugin). No project-specific facts are smuggled into general rules. The only issues are two minor distribution inaccuracies (inlay/dashboard wiring location; setMaxListeners placement), which do not affect the architecture conclusion."
+}

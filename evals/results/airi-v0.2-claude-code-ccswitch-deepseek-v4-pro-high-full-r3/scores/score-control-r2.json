@@ -1,0 +1,43 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (apps/stage-tamagotchi); no legacy desktop directory exists in this checkout (AGENTS.md's legacy crates/ Tauri is absent), and the answer consistently treats Electron as current.",
+    "runtime_boundaries_identified": [
+      "Electron main process (ipcMain, per-window managers, injeca composition root)",
+      "Electron preload/renderer windows reached via Eventa IPC adapters",
+      "plugin-sdk host runtimes: electron / node / web",
+      "headless Node server runtime (packages/server-runtime, bin/run.ts, createServer on port 6121)",
+      "desktop-embedded server channel (same createServer reused inside Electron main)"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "factual_errors": [
+    {
+      "claim": "The plugin host depends on a concrete widgetsManager and Step 3 recommends narrowing SetupExtensionHostOptions.widgetsManager to the already-defined ExtensionHostGameletWidgetsManager minimal interface.",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/services/airi/plugins/types.ts:71-73 already declares `widgetsManager: ExtensionHostGameletWidgetsManager`, and kits/gamelet/orchestration.ts:27 already takes that same minimal interface as its parameter.",
+      "explanation": "The type boundary is already the minimal interface, so the 'concrete dependency' fracture is overstated and that part of Step 3 is already implemented; only the runtime value (the full widgets provider) still satisfies it structurally."
+    },
+    {
+      "claim": "Several line-number citations: permissionResolver at plugin-host/core.ts:224, REVIEW at host/index.ts:435, componentName 'extension-ui' at kits/gamelet/orchestration.ts:26, setMaxListeners at main/index.ts:55 / referenced-window.ts:41 / preload/shared.ts:9.",
+      "repository_evidence": "permissionResolver assignment is core.ts:225 (field at 216); REVIEW comment is host/index.ts:437; 'extension-ui' literal is orchestration.ts:43; setMaxListeners(100) is main/index.ts:58, setMaxListeners(0) is referenced-window.ts:44 and preload/shared.ts:12.",
+      "explanation": "Off-by-a-few-lines citations; the cited symbols all exist and the substance is correct, but the exact line anchors do not match."
+    },
+    {
+      "claim": "The injeca composition root at main/index.ts:130 wires 14+ windows including dashboard and inlay.",
+      "repository_evidence": "main/index.ts wires ~12 window providers; apps/stage-tamagotchi/src/main/windows/dashboard/index.ts has no production call site in the repo, and inlay is invoked from tray/index.ts:194 rather than the main injeca root.",
+      "explanation": "Fourteen window managers do exist across src/main/windows, so the overall scale claim holds, but the composition-root location is imprecise for dashboard and inlay."
+    }
+  ],
+  "rationale": "The review is grounded in a broad set of repository facts that I verified directly: the plugin-protocol identity/permission/event dictionary (packages/plugin-protocol/src/types/events.ts), ExtensionHost with electron/node/web runtimes and Valibot-validated ExtensionManifestV1 (plugin-sdk), the three desktop kits (gamelet/tool/widget), the 15 setMaxListeners sites and the window-namespacing TODO, the duplicated PluginManifestSummary definitions (one missing autoReload) and the capabilities.ts:42 TODO, server-runtime's setupApp/createServer/bin/run.ts plus the channel-server reuse at index.ts:367, the legacy/identity routing REVIEWs and /ws dedup TODO, createReferencedWindowManager, createReusableWindow, setupBaseWindowElectronInvokes, single-instance guard, and createConfig with autoHeal. The three options include the current shape, the recommendation (stabilize contracts before frameworks) follows directly from the identified frictions, and the migration steps are incremental with concrete, reversible acceptance criteria (typecheck, grep counts, targeted vitest, failure modes such as cross-window event crosstalk). Quality attributes are traded off explicitly in the comparison table (evolvability, security boundary, background reuse, isolation, cost, risk, rollback) with the plugin-trust/process-isolation point flagged as the top-priority decision. The answer keeps project-specific facts (Eventa, plugin-protocol, server-runtime) from leaking into generic rules. The only substantive inaccuracy is the overstated 'concrete widgetsManager' fracture (the minimal interface already exists at the type boundary), plus minor line-number offsets and a slight imprecision on which windows the composition root wires; none undermine the core diagnosis or the actionability of the plan."
+}
