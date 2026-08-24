@@ -1,0 +1,63 @@
+{
+  "dataset_complete": true,
+  "phases": "routing",
+  "routing": {
+    "positive": {
+      "successful": 3,
+      "loaded": 3,
+      "planned": 3
+    },
+    "negative": {
+      "successful": 3,
+      "loaded": 0,
+      "planned": 3
+    }
+  },
+  "routing_thresholds": {
+    "positive_minimum_loaded": 3,
+    "negative_maximum_loaded": 0
+  },
+  "behavior": {
+    "control": {
+      "scored": 0,
+      "average": null,
+      "totals": [],
+      "dimension_minimums": {
+        "scope_and_classification": null,
+        "evidence": null,
+        "current_friction": null,
+        "quality_attributes": null,
+        "options": null,
+        "recommendation": null,
+        "migration": null,
+        "verification": null,
+        "generalization": null
+      },
+      "factual_errors": 0
+    },
+    "treatment": {
+      "scored": 0,
+      "average": null,
+      "totals": [],
+      "dimension_minimums": {
+        "scope_and_classification": null,
+        "evidence": null,
+        "current_friction": null,
+        "quality_attributes": null,
+        "options": null,
+        "recommendation": null,
+        "migration": null,
+        "verification": null,
+        "generalization": null
+      },
+      "factual_errors": 0
+    }
+  },
+  "gates": {
+    "routing": true,
+    "behavior": null,
+    "generalization": null,
+    "overall": true
+  },
+  "skipped": []
+}

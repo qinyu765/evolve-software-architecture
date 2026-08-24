@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Independent architecture review score",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "scope_and_classification": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "evidence": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "current_friction": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "quality_attributes": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "options": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "recommendation": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "migration": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "verification": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "generalization": { "type": "integer", "minimum": 0, "maximum": 2 }
+      },
+      "required": [
+        "scope_and_classification",
+        "evidence",
+        "current_friction",
+        "quality_attributes",
+        "options",
+        "recommendation",
+        "migration",
+        "verification",
+        "generalization"
+      ]
+    },
+    "total": { "type": "integer", "minimum": 0, "maximum": 18 },
+    "acceptance_checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "current_desktop_platform": { "type": "string" },
+        "runtime_boundaries_identified": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "legacy_platform_treated_as_current": { "type": "boolean" }
+      },
+      "required": [
+        "current_desktop_platform",
+        "runtime_boundaries_identified",
+        "legacy_platform_treated_as_current"
+      ]
+    },
+    "factual_errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "claim": { "type": "string" },
+          "repository_evidence": { "type": "string" },
+          "explanation": { "type": "string" }
+        },
+        "required": ["claim", "repository_evidence", "explanation"]
+      }
+    },
+    "rationale": { "type": "string" }
+  },
+  "required": [
+    "dimensions",
+    "total",
+    "acceptance_checks",
+    "factual_errors",
+    "rationale"
+  ]
+}
