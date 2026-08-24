@@ -9,6 +9,7 @@ from unittest import mock
 
 from scripts.run_forward_eval import (
     AttemptResult,
+    EvaluationError,
     Invocation,
     aggregate_results,
     assert_control_uncontaminated,
@@ -22,6 +23,7 @@ from scripts.run_forward_eval import (
     main,
     parse_claude_output,
     redact_text,
+    redact_value,
     run_case_groups,
     scorer_prompt,
     skill_parent,
@@ -110,7 +112,7 @@ class ForwardEvaluationTest(unittest.TestCase):
         changed["routing"]["negative"][0]["prompt"] += " changed"
         self.assertNotEqual(case_digest(self.case), case_digest(changed))
 
-    def test_failed_case_stops_later_repetitions(self) -> None:
+    def test_case_stops_after_two_consecutive_failed_repetitions(self) -> None:
         invocations = [
             Invocation(f"case-r{index}", "routing", "case", "positive", index, "p")
             for index in (1, 2, 3)
@@ -123,9 +125,32 @@ class ForwardEvaluationTest(unittest.TestCase):
         results, skipped = run_case_groups(
             invocations, 3, 3, run_one, lambda result: checkpointed.append(result.invocation.id)
         )
-        self.assertEqual(len(results), 1)
-        self.assertEqual(checkpointed, ["case-r1"])
-        self.assertEqual(skipped, ["case-r2", "case-r3"])
+        self.assertEqual(len(results), 2)
+        self.assertEqual(checkpointed, ["case-r1", "case-r2"])
+        self.assertEqual(skipped, ["case-r3"])
+
+    def test_checkpointed_success_resets_consecutive_failure_streak(self) -> None:
+        invocations = [
+            Invocation(f"case-r{index}", "routing", "case", "positive", index, "p")
+            for index in (1, 3, 4)
+        ]
+
+        def run_one(invocation: Invocation):
+            return type("Result", (), {"invocation": invocation, "success": False})()
+
+        results, skipped = run_case_groups(
+            invocations,
+            4,
+            1,
+            run_one,
+            successful_repetitions={("case", 2)},
+        )
+        self.assertEqual([result.invocation.id for result in results], [
+            "case-r1",
+            "case-r3",
+            "case-r4",
+        ])
+        self.assertEqual(skipped, [])
 
     def test_score_aggregation_applies_all_gates(self) -> None:
         marker = self.case["routing"]["marker_token"]
@@ -188,6 +213,40 @@ class ForwardEvaluationTest(unittest.TestCase):
             self.assertNotIn(str(known), redacted)
             self.assertNotIn("alice", redacted)
             self.assertNotIn("bob", redacted)
+
+    def test_redaction_removes_symlink_spelling_and_eval_temp_roots(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            target = root / "target"
+            target.mkdir()
+            link = root / "link"
+            link.symlink_to(target, target_is_directory=True)
+            eval_path = (
+                "/var/folders/fs/example/T/airi-forward-eval-checkouts-abc/control"
+            )
+            escaped_eval_path = eval_path.replace("/", r"\/")
+            redacted = redact_text(
+                f"{link}/file {eval_path}/file {escaped_eval_path}/file "
+                f"[evidence](<{eval_path}/file>)",
+                [link],
+            )
+            self.assertNotIn(str(link), redacted)
+            self.assertNotIn("airi-forward-eval-checkouts-abc", redacted)
+            self.assertIn("[evidence](</evaluation-path/control/file>)", redacted)
+
+    def test_redact_value_recurses_into_structured_scores(self) -> None:
+        value = {
+            "rationale": "/Users/alice/repo",
+            "factual_errors": [
+                {"repository_evidence": "/var/folders/fs/example/T/airi-forward-eval-checkouts-abc/control"}
+            ],
+        }
+        redacted = redact_value(value)
+        self.assertNotIn("alice", redacted["rationale"])
+        self.assertNotIn(
+            "airi-forward-eval-checkouts-abc",
+            redacted["factual_errors"][0]["repository_evidence"],
+        )
 
     def test_dry_run_does_not_require_codex(self) -> None:
         result = subprocess.run(
@@ -400,6 +459,10 @@ class ForwardEvaluationTest(unittest.TestCase):
             self.assertEqual(invocation.phase, "score")
             return AttemptResult(0, json.dumps(score))
 
+        def second_failed_scorer(invocation, *_args, **_kwargs):
+            self.assertEqual(invocation.phase, "score")
+            return AttemptResult(1, "", stderr="invalid schema")
+
         with tempfile.TemporaryDirectory() as temporary:
             temporary_path = Path(temporary)
             output = temporary_path / "results"
@@ -425,18 +488,169 @@ class ForwardEvaluationTest(unittest.TestCase):
                 sum(not record["success"] for record in first_manifest["results"]), 6
             )
 
+            real_write_json = write_json
+
+            def interrupt_before_checkpoint_reconstruction(path, value):
+                if path.parent.name == ".checkpoints":
+                    raise RuntimeError("interrupted checkpoint reconstruction")
+                real_write_json(path, value)
+
+            with (
+                mock.patch("scripts.run_forward_eval.codex_version", return_value="0.144.4"),
+                mock.patch("scripts.run_forward_eval.write_json", side_effect=interrupt_before_checkpoint_reconstruction),
+            ):
+                with self.assertRaisesRegex(
+                    RuntimeError, "interrupted checkpoint reconstruction"
+                ):
+                    main(
+                        [
+                            *arguments,
+                            "--resume",
+                            "--call-timeout-seconds",
+                            "1800",
+                        ]
+                    )
+            self.assertFalse((output / "partial-manifest.json").exists())
+
+            with (
+                mock.patch("scripts.run_forward_eval.codex_version", return_value="0.144.4"),
+                mock.patch("scripts.run_forward_eval.prepare_checkouts", return_value=checkouts),
+                mock.patch("scripts.run_forward_eval.assert_clean"),
+                mock.patch("scripts.run_forward_eval.run_codex", side_effect=second_failed_scorer) as run,
+            ):
+                self.assertEqual(
+                    main(
+                        [
+                            *arguments,
+                            "--resume",
+                            "--call-timeout-seconds",
+                            "1800",
+                        ]
+                    ),
+                    2,
+                )
+                self.assertEqual(run.call_count, 6)
+
             with (
                 mock.patch("scripts.run_forward_eval.codex_version", return_value="0.144.4"),
                 mock.patch("scripts.run_forward_eval.prepare_checkouts", return_value=checkouts),
                 mock.patch("scripts.run_forward_eval.assert_clean"),
                 mock.patch("scripts.run_forward_eval.run_codex", side_effect=successful_scorer) as run,
             ):
-                self.assertEqual(main([*arguments, "--resume"]), 0)
+                self.assertEqual(
+                    main(
+                        [
+                            *arguments,
+                            "--resume",
+                            "--call-timeout-seconds",
+                            "1800",
+                        ]
+                    ),
+                    0,
+                )
                 self.assertEqual(run.call_count, 6)
 
             final_manifest = load_json(output / "manifest.json")
-            self.assertEqual(len(final_manifest["prior_failures"]), 6)
+            self.assertEqual(len(final_manifest["prior_failures"]), 12)
+            self.assertEqual(
+                {record["error"] for record in final_manifest["prior_failures"]},
+                {"invalid schema"},
+            )
+            self.assertEqual(final_manifest["profile"]["call_timeout_seconds"], 1800)
+            self.assertEqual(
+                final_manifest["resume_history"],
+                [
+                    {
+                        "previous_call_timeout_seconds": 900,
+                        "call_timeout_seconds": 1800,
+                    }
+                ],
+            )
             self.assertTrue(load_json(output / "summary.json")["dataset_complete"])
+
+    def test_newer_partial_state_rejects_timeout_decrease_before_checkpoint_write(
+        self,
+    ) -> None:
+        marker = self.case["routing"]["marker_token"]
+
+        def fail_scores(invocation, *_args, **_kwargs):
+            if invocation.phase == "score":
+                return AttemptResult(1, "", stderr="scorer failed")
+            if invocation.phase == "routing" and invocation.variant == "positive":
+                return AttemptResult(0, marker)
+            return AttemptResult(0, "fixture answer")
+
+        with tempfile.TemporaryDirectory() as temporary:
+            temporary_path = Path(temporary)
+            output = temporary_path / "results"
+            source = temporary_path / "airi"
+            source.mkdir()
+            checkouts = {"control": source, "treatment": source}
+            arguments = [
+                "--airi-source",
+                str(source),
+                "--output-dir",
+                str(output),
+            ]
+            with (
+                mock.patch("scripts.run_forward_eval.codex_version", return_value="0.144.4"),
+                mock.patch("scripts.run_forward_eval.prepare_checkouts", return_value=checkouts),
+                mock.patch("scripts.run_forward_eval.assert_clean"),
+                mock.patch("scripts.run_forward_eval.run_codex", side_effect=fail_scores),
+            ):
+                self.assertEqual(main(arguments), 2)
+
+            manifest = load_json(output / "manifest.json")
+            identity = {
+                key: manifest[key]
+                for key in ("case", "repository", "skill", "profile", "planned_calls")
+            }
+            identity["profile"] = dict(identity["profile"])
+            identity["profile"]["call_timeout_seconds"] = 1800
+            write_json(
+                output / "partial-manifest.json",
+                {
+                    "schema_version": 1,
+                    "identity": identity,
+                    "started_at": manifest["started_at"],
+                    "resume_history": [
+                        {
+                            "previous_call_timeout_seconds": 900,
+                            "call_timeout_seconds": 1800,
+                        }
+                    ],
+                },
+            )
+            checkpoint = next(
+                record
+                for record in manifest["results"]
+                if record["id"] == "routing-positive-ipc-evolution-r1"
+            )
+            checkpoint["metadata"] = {"sentinel": "newer-partial"}
+            checkpoint_path = output / ".checkpoints" / f"{checkpoint['id']}.json"
+            write_json(checkpoint_path, checkpoint)
+
+            with (
+                mock.patch("scripts.run_forward_eval.codex_version", return_value="0.144.4"),
+                mock.patch(
+                    "scripts.run_forward_eval.prepare_checkouts", return_value=checkouts
+                ),
+                mock.patch("scripts.run_forward_eval.assert_clean"),
+                mock.patch("scripts.run_forward_eval.run_codex") as run,
+            ):
+                with self.assertRaisesRegex(EvaluationError, "profile does not match"):
+                    main(
+                        [
+                            *arguments,
+                            "--resume",
+                            "--call-timeout-seconds",
+                            "1200",
+                        ]
+                    )
+                run.assert_not_called()
+            self.assertEqual(
+                load_json(checkpoint_path)["metadata"], {"sentinel": "newer-partial"}
+            )
 
 
 if __name__ == "__main__":

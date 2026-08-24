@@ -16,6 +16,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import uuid
 from collections.abc import Callable, Iterable
 from pathlib import Path
 from typing import Any
@@ -273,12 +274,55 @@ def prepare_checkouts(
 
 
 def redact_text(text: str, paths: Iterable[Path] = ()) -> str:
-    redacted = text
-    for path in sorted((str(path.resolve()) for path in paths), key=len, reverse=True):
-        redacted = redacted.replace(path, "<evaluation-path>")
-    redacted = re.sub(r"/Users/[^/\s]+", "/Users/<redacted>", redacted)
-    redacted = re.sub(r"/home/[^/\s]+", "/home/<redacted>", redacted)
+    redacted = text.replace(r"\/", "/").replace(
+        "<evaluation-path>", "/evaluation-path"
+    )
+    spellings = {
+        spelling
+        for path in paths
+        for spelling in (str(path.absolute()), str(path.resolve()))
+    }
+    for path in sorted(spellings, key=len, reverse=True):
+        redacted = redacted.replace(path, "/evaluation-path")
+    redacted = re.sub(
+        r"/(?:private/)?var/folders/[^/\s]+/[^/\s]+/T/"
+        r"airi-forward-eval-(?:checkouts|transient)-[^/\s)\"']+",
+        "/evaluation-path",
+        redacted,
+    )
+    redacted = re.sub(r"/Users/[^/\s]+", "/Users/redacted-user", redacted)
+    redacted = re.sub(r"/home/[^/\s]+", "/home/redacted-user", redacted)
     return redacted
+
+
+def redact_value(value: Any, paths: Iterable[Path] = ()) -> Any:
+    if isinstance(value, str):
+        return redact_text(value, paths)
+    if isinstance(value, list):
+        return [redact_value(item, paths) for item in value]
+    if isinstance(value, dict):
+        return {key: redact_value(item, paths) for key, item in value.items()}
+    return value
+
+
+def resume_identity_compatible(
+    previous: dict[str, Any], current: dict[str, Any]
+) -> bool:
+    previous_static = {key: value for key, value in previous.items() if key != "profile"}
+    current_static = {key: value for key, value in current.items() if key != "profile"}
+    if previous_static != current_static:
+        return False
+
+    previous_profile = dict(previous.get("profile", {}))
+    current_profile = dict(current.get("profile", {}))
+    previous_timeout = previous_profile.pop("call_timeout_seconds", None)
+    current_timeout = current_profile.pop("call_timeout_seconds", None)
+    return (
+        previous_profile == current_profile
+        and isinstance(previous_timeout, int)
+        and isinstance(current_timeout, int)
+        and current_timeout >= previous_timeout
+    )
 
 
 def retryable_failure(result: AttemptResult) -> bool:
@@ -326,16 +370,23 @@ def run_case_groups(
     max_concurrency: int,
     run_one: Callable[[Invocation], RunResult],
     on_result: Callable[[RunResult], None] | None = None,
+    successful_repetitions: set[tuple[str, int]] | None = None,
 ) -> tuple[list[RunResult], list[str]]:
+    successful_repetitions = successful_repetitions or set()
     by_case: dict[str, dict[int, Invocation]] = {}
     for invocation in invocations:
         by_case.setdefault(invocation.case_id, {})[invocation.repetition] = invocation
     stopped: set[str] = set()
+    consecutive_failures: dict[str, int] = {}
     results: list[RunResult] = []
     skipped: list[str] = []
     for repetition in range(1, repetitions + 1):
         wave: list[Invocation] = []
         for case_id, samples in by_case.items():
+            if (case_id, repetition) in successful_repetitions:
+                consecutive_failures[case_id] = 0
+                stopped.discard(case_id)
+                continue
             invocation = samples.get(repetition)
             if invocation is None:
                 continue
@@ -352,8 +403,15 @@ def run_case_groups(
                 if on_result is not None:
                     on_result(result)
                 results.append(result)
-                if not result.success:
-                    stopped.add(result.invocation.case_id)
+                case_id = result.invocation.case_id
+                if result.success:
+                    consecutive_failures[case_id] = 0
+                else:
+                    consecutive_failures[case_id] = (
+                        consecutive_failures.get(case_id, 0) + 1
+                    )
+                    if consecutive_failures[case_id] >= 2:
+                        stopped.add(case_id)
     return sorted(results, key=lambda result: result.invocation.id), sorted(skipped)
 
 
@@ -912,11 +970,15 @@ def main(argv: list[str] | None = None) -> int:
         "profile": profile,
         "planned_calls": len(matrix),
     }
+    run_id = uuid.uuid4().hex
     prior_failures: list[dict[str, Any]] = []
+    resume_history: list[dict[str, int]] = []
     if output_dir.exists():
         if not args.resume:
             raise EvaluationError(f"output directory already exists: {output_dir}")
-        if manifest_path.exists():
+        if partial_manifest_path.is_file():
+            partial_manifest = load_json(partial_manifest_path)
+        elif manifest_path.exists():
             previous_manifest = load_json(manifest_path)
             previous_summary_path = output_dir / "summary.json"
             if not previous_summary_path.is_file():
@@ -930,36 +992,102 @@ def main(argv: list[str] | None = None) -> int:
                 key: previous_manifest.get(key)
                 for key in ("case", "repository", "skill", "profile", "planned_calls")
             }
-            if previous_identity != identity:
+            if not resume_identity_compatible(previous_identity, identity):
                 raise EvaluationError(
                     "resume profile does not match the incomplete evaluation"
                 )
             started = previous_manifest["started_at"]
-            prior_failures = [
-                record
-                for record in previous_manifest.get("results", [])
-                if not record.get("success")
-            ]
-            write_json(
-                partial_manifest_path,
-                {"schema_version": 1, "identity": identity, "started_at": started},
+            resume_history = list(previous_manifest.get("resume_history", []))
+            previous_timeout = previous_identity["profile"]["call_timeout_seconds"]
+            if previous_timeout != call_timeout_seconds:
+                resume_history.append(
+                    {
+                        "previous_call_timeout_seconds": previous_timeout,
+                        "call_timeout_seconds": call_timeout_seconds,
+                    }
+                )
+            previous_run_id = previous_manifest.get("run_id") or (
+                "legacy:" + previous_manifest.get("completed_at", started)
             )
+            previous_recorded_at = previous_manifest.get("completed_at", started)
+            prior_failures = [
+                {
+                    **event,
+                    "run_id": event.get("run_id", previous_run_id),
+                    "recorded_at": event.get("recorded_at", previous_recorded_at),
+                }
+                for event in previous_manifest.get("prior_failures", [])
+            ]
+            for record in previous_manifest.get("results", []):
+                if record.get("success"):
+                    continue
+                already_recorded = any(
+                    event.get("run_id") == previous_run_id
+                    and event.get("id") == record.get("id")
+                    and event.get("error") == record.get("error")
+                    and event.get("attempts") == record.get("attempts")
+                    for event in prior_failures
+                )
+                if not already_recorded:
+                    prior_failures.append(
+                        {
+                            **record,
+                            "run_id": previous_run_id,
+                            "recorded_at": previous_recorded_at,
+                        }
+                    )
             for record in previous_manifest.get("results", []):
                 write_json(checkpoints / f"{record['id']}.json", record)
-        elif not partial_manifest_path.is_file():
+            write_json(
+                partial_manifest_path,
+                {
+                    "schema_version": 1,
+                    "identity": identity,
+                    "started_at": started,
+                    "resume_history": resume_history,
+                    "prior_failures": prior_failures,
+                },
+            )
+            partial_manifest = load_json(partial_manifest_path)
+        else:
             raise EvaluationError(
                 f"cannot resume without {partial_manifest_path.name}: {output_dir}"
             )
-        partial_manifest = load_json(partial_manifest_path)
-        if partial_manifest.get("identity") != identity:
+        partial_identity = partial_manifest.get("identity", {})
+        if not resume_identity_compatible(partial_identity, identity):
             raise EvaluationError("resume profile does not match the interrupted evaluation")
+        resume_history = list(partial_manifest.get("resume_history", resume_history))
+        prior_failures = list(partial_manifest.get("prior_failures", prior_failures))
+        previous_timeout = partial_identity["profile"]["call_timeout_seconds"]
+        if previous_timeout != call_timeout_seconds:
+            resume_history.append(
+                {
+                    "previous_call_timeout_seconds": previous_timeout,
+                    "call_timeout_seconds": call_timeout_seconds,
+                }
+            )
+            write_json(
+                partial_manifest_path,
+                {
+                    "schema_version": 1,
+                    "identity": identity,
+                    "started_at": partial_manifest["started_at"],
+                    "resume_history": resume_history,
+                    "prior_failures": prior_failures,
+                },
+            )
         started = partial_manifest["started_at"]
     else:
         output_dir.mkdir(parents=True)
         started = dt.datetime.now(dt.timezone.utc).isoformat()
         write_json(
             partial_manifest_path,
-            {"schema_version": 1, "identity": identity, "started_at": started},
+            {
+                "schema_version": 1,
+                "identity": identity,
+                "started_at": started,
+                "prior_failures": prior_failures,
+            },
         )
 
     transient = Path(tempfile.mkdtemp(prefix="airi-forward-eval-transient-"))
@@ -1008,6 +1136,24 @@ def main(argv: list[str] | None = None) -> int:
         results_by_id[result.invocation.id] = result
         record = result_record(result, known_paths)
         records_by_id[result.invocation.id] = record
+        if not result.success:
+            prior_failures.append(
+                {
+                    **record,
+                    "run_id": run_id,
+                    "recorded_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+                }
+            )
+            write_json(
+                partial_manifest_path,
+                {
+                    "schema_version": 1,
+                    "identity": identity,
+                    "started_at": started,
+                    "resume_history": resume_history,
+                    "prior_failures": prior_failures,
+                },
+            )
         write_json(checkpoints / f"{result.invocation.id}.json", record)
 
     try:
@@ -1058,6 +1204,11 @@ def main(argv: list[str] | None = None) -> int:
             args.max_concurrency,
             run_producer,
             persist_result,
+            successful_repetitions={
+                (result.invocation.case_id, result.invocation.repetition)
+                for result in results_by_id.values()
+                if result.success and result.invocation.phase == "routing"
+            },
         )
         skipped.extend(routing_skipped)
 
@@ -1073,6 +1224,11 @@ def main(argv: list[str] | None = None) -> int:
             args.max_concurrency,
             run_producer,
             persist_result,
+            successful_repetitions={
+                (result.invocation.case_id, result.invocation.repetition)
+                for result in results_by_id.values()
+                if result.success and result.invocation.phase == "behavior"
+            },
         )
         skipped.extend(behavior_skipped)
         behavior_answers = {
@@ -1139,6 +1295,7 @@ def main(argv: list[str] | None = None) -> int:
                     result.success = False
                     result.error = str(error)
                 else:
+                    score = redact_value(score, known_paths)
                     scores[result.invocation.id] = score
                     write_json(
                         output_dir / "scores" / f"{result.invocation.id}.json", score
@@ -1151,6 +1308,11 @@ def main(argv: list[str] | None = None) -> int:
             args.max_concurrency,
             run_scorer,
             persist_score,
+            successful_repetitions={
+                (result.invocation.case_id, result.invocation.repetition)
+                for result in results_by_id.values()
+                if result.success and result.invocation.phase == "score"
+            },
         )
         skipped.extend(scorer_skipped)
 
@@ -1172,6 +1334,7 @@ def main(argv: list[str] | None = None) -> int:
         manifest = {
             "schema_version": 1,
             **identity,
+            "run_id": run_id,
             "started_at": started,
             "completed_at": dt.datetime.now(dt.timezone.utc).isoformat(),
             "results": sorted(records_by_id.values(), key=lambda item: item["id"]),
@@ -1186,6 +1349,8 @@ def main(argv: list[str] | None = None) -> int:
         }
         if prior_failures:
             manifest["prior_failures"] = prior_failures
+        if resume_history:
+            manifest["resume_history"] = resume_history
         write_json(manifest_path, manifest)
         partial_manifest_path.unlink()
         shutil.rmtree(checkpoints, ignore_errors=True)

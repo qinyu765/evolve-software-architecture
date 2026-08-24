@@ -1,0 +1,28 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (`apps/stage-tamagotchi`); `crates/` is legacy Tauri.",
+    "runtime_boundaries_identified": [
+      "Electron main/preload/renderer",
+      "In-process plugin host and filesystem loader",
+      "Eventa IPC/RPC and widget/iframe bridges",
+      "Per-feature BrowserWindow, reusable-window, and referenced-window modules",
+      "Injeca composition plus bootkit/Electron quit lifecycle",
+      "Server channel, MCP stdio, and Godot sidecar managers"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "factual_errors": [],
+  "rationale": "The review is evidence-backed and accurately reflects the checkout: Electron is current; plugin loading is in-process via dynamic import; window and lifecycle boundaries are distinct; transport designs are partly planned and partly unimplemented. It offers three viable options, explicit trade-offs, reversible phased migration, and concrete verification criteria."
+}

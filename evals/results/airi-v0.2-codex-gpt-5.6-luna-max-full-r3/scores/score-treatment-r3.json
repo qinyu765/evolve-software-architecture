@@ -1,0 +1,38 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 1,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 17,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron desktop app in apps/stage-tamagotchi",
+    "runtime_boundaries_identified": [
+      "Electron main ↔ renderer via window-scoped Eventa/IPC",
+      "Trusted embedded plugin host ↔ future external Node-process plugin supervisor",
+      "Plugin host ↔ manifest/session/module/permission/capability protocol",
+      "Renderer plugin UI ↔ sandbox iframe via asset and message transport",
+      "Electron main ↔ HTTP/MCP/Godot background managers and external resources"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "factual_errors": [
+    {
+      "claim": "The cited repository evidence is presented as evidence from the current checkout.",
+      "repository_evidence": "Current git root is /evaluation-path/control, while the raw answer's links point to the sibling /treatment checkout.",
+      "explanation": "The relative files and cited line content are verifiable in the current checkout, but the absolute evidence links are not current-checkout paths."
+    },
+    {
+      "claim": "Manifest permissions only constrain AIRI-exposed kits/APIs.",
+      "repository_evidence": "packages/plugin-sdk/src/plugin-host/shared/types.ts:387-392 defines permission areas apis, resources, capabilities, processors, and pipelines; core.ts:653-663 and 733-743 enforce more than API-kit access.",
+      "explanation": "The security conclusion is sound, but the permission surface is described too narrowly."
+    }
+  ],
+  "rationale": "The review substantively satisfies all nine dimensions: it correctly identifies Electron, compares three viable options, states trade-offs and consequences, and gives reversible checkpoints with concrete failure criteria. Evidence loses one point because the absolute citations target /treatment rather than the current /control checkout; one permission-scope statement is also overly narrow. The named evolve-software-architecture skill was unavailable."
+}
