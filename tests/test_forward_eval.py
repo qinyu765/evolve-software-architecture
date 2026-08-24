@@ -215,6 +215,12 @@ class ForwardEvaluationTest(unittest.TestCase):
         self.assertNotIn("--model", command)
         self.assertEqual(skill_parent("claude-code"), Path(".claude/skills"))
 
+    def test_claude_schema_omits_unsupported_draft_declaration(self) -> None:
+        command = claude_command(None, "high", ROOT / "evals" / "rubrics" / "architecture-review.schema.json")
+        schema = json.loads(command[command.index("--json-schema") + 1])
+        self.assertNotIn("$schema", schema)
+        self.assertEqual(schema["type"], "object")
+
     def test_claude_result_reports_observed_model(self) -> None:
         answer, metadata = parse_claude_output(
             json.dumps(
@@ -357,6 +363,80 @@ class ForwardEvaluationTest(unittest.TestCase):
             self.assertTrue(manifest_path.is_file())
             self.assertFalse((output / "partial-manifest.json").exists())
             self.assertFalse((output / ".checkpoints").exists())
+
+    def test_incomplete_manifest_resumes_only_failed_scorers(self) -> None:
+        marker = self.case["routing"]["marker_token"]
+        dimensions = {name: 2 for name in (
+            "scope_and_classification",
+            "evidence",
+            "current_friction",
+            "quality_attributes",
+            "options",
+            "recommendation",
+            "migration",
+            "verification",
+            "generalization",
+        )}
+        score = {
+            "dimensions": dimensions,
+            "total": 18,
+            "acceptance_checks": {
+                "current_desktop_platform": "Electron",
+                "runtime_boundaries_identified": ["main", "preload", "renderer"],
+                "legacy_platform_treated_as_current": False,
+            },
+            "factual_errors": [],
+            "rationale": "fixture",
+        }
+
+        def producer_with_failed_scorer(invocation, *_args, **_kwargs):
+            if invocation.phase == "score":
+                return AttemptResult(1, "", stderr="invalid schema")
+            if invocation.phase == "routing" and invocation.variant == "positive":
+                return AttemptResult(0, marker)
+            return AttemptResult(0, "fixture answer")
+
+        def successful_scorer(invocation, *_args, **_kwargs):
+            self.assertEqual(invocation.phase, "score")
+            return AttemptResult(0, json.dumps(score))
+
+        with tempfile.TemporaryDirectory() as temporary:
+            temporary_path = Path(temporary)
+            output = temporary_path / "results"
+            source = temporary_path / "airi"
+            source.mkdir()
+            checkouts = {"control": source, "treatment": source}
+            arguments = [
+                "--airi-source",
+                str(source),
+                "--output-dir",
+                str(output),
+            ]
+            with (
+                mock.patch("scripts.run_forward_eval.codex_version", return_value="0.144.4"),
+                mock.patch("scripts.run_forward_eval.prepare_checkouts", return_value=checkouts),
+                mock.patch("scripts.run_forward_eval.assert_clean"),
+                mock.patch("scripts.run_forward_eval.run_codex", side_effect=producer_with_failed_scorer),
+            ):
+                self.assertEqual(main(arguments), 2)
+
+            first_manifest = load_json(output / "manifest.json")
+            self.assertEqual(
+                sum(not record["success"] for record in first_manifest["results"]), 6
+            )
+
+            with (
+                mock.patch("scripts.run_forward_eval.codex_version", return_value="0.144.4"),
+                mock.patch("scripts.run_forward_eval.prepare_checkouts", return_value=checkouts),
+                mock.patch("scripts.run_forward_eval.assert_clean"),
+                mock.patch("scripts.run_forward_eval.run_codex", side_effect=successful_scorer) as run,
+            ):
+                self.assertEqual(main([*arguments, "--resume"]), 0)
+                self.assertEqual(run.call_count, 6)
+
+            final_manifest = load_json(output / "manifest.json")
+            self.assertEqual(len(final_manifest["prior_failures"]), 6)
+            self.assertTrue(load_json(output / "summary.json")["dataset_complete"])
 
 
 if __name__ == "__main__":

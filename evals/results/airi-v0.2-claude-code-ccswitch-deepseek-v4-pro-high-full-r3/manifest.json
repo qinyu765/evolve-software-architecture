@@ -1,0 +1,621 @@
+{
+  "schema_version": 1,
+  "case": {
+    "id": "airi-v0.2-baseline",
+    "sha256": "fa7140cdc9463c1e429f759c9c657092c85137fba7224645a865bb768d324cf6"
+  },
+  "repository": {
+    "name": "moeru-ai/airi",
+    "url": "https://github.com/moeru-ai/airi",
+    "commit": "5228f94123e42416435e7f7e8215df26f3bb065b"
+  },
+  "skill": {
+    "name": "evolve-software-architecture",
+    "url": "https://github.com/qinyu765/evolve-software-architecture",
+    "version": "v0.1.2",
+    "commit": "12ae54160ece0ee16f837226e1cd936c980b7c46"
+  },
+  "profile": {
+    "profile_id": "claude-code-ccswitch-deepseek-v4-pro-high",
+    "runtime": "claude-code",
+    "cli_version": "2.1.233",
+    "model": "deepseek-v4-pro",
+    "model_argument": "fable",
+    "configuration_manager": "CCSwitch",
+    "reasoning_effort": "high",
+    "call_timeout_seconds": 720,
+    "ephemeral": true,
+    "sandbox": "restricted-read-tools",
+    "max_concurrency": 3,
+    "repetitions": 3,
+    "phases": "all"
+  },
+  "planned_calls": 30,
+  "started_at": "2026-08-24T08:16:30.906952+00:00",
+  "completed_at": "2026-08-24T09:16:53.350770+00:00",
+  "results": [
+    {
+      "id": "behavior-control-r1",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 301756,
+        "num_turns": 53
+      }
+    },
+    {
+      "id": "behavior-control-r2",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 290230,
+        "num_turns": 45
+      }
+    },
+    {
+      "id": "behavior-control-r3",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 330796,
+        "num_turns": 45
+      }
+    },
+    {
+      "id": "behavior-treatment-r1",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 364800,
+        "num_turns": 56
+      }
+    },
+    {
+      "id": "behavior-treatment-r2",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 404906,
+        "num_turns": 47
+      }
+    },
+    {
+      "id": "behavior-treatment-r3",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 367499,
+        "num_turns": 57
+      }
+    },
+    {
+      "id": "routing-negative-local-style-fix-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 19272,
+        "num_turns": 2
+      }
+    },
+    {
+      "id": "routing-negative-local-style-fix-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 35366,
+        "num_turns": 6
+      }
+    },
+    {
+      "id": "routing-negative-local-style-fix-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 38045,
+        "num_turns": 5
+      }
+    },
+    {
+      "id": "routing-negative-rename-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 19933,
+        "num_turns": 4
+      }
+    },
+    {
+      "id": "routing-negative-rename-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 14894,
+        "num_turns": 2
+      }
+    },
+    {
+      "id": "routing-negative-rename-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 27369,
+        "num_turns": 5
+      }
+    },
+    {
+      "id": "routing-negative-routine-update-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 22595,
+        "num_turns": 3
+      }
+    },
+    {
+      "id": "routing-negative-routine-update-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 24131,
+        "num_turns": 7
+      }
+    },
+    {
+      "id": "routing-negative-routine-update-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 40557,
+        "num_turns": 4
+      }
+    },
+    {
+      "id": "routing-positive-debt-direction-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 392410,
+        "num_turns": 55
+      }
+    },
+    {
+      "id": "routing-positive-debt-direction-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 347973,
+        "num_turns": 40
+      }
+    },
+    {
+      "id": "routing-positive-debt-direction-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 387196,
+        "num_turns": 58
+      }
+    },
+    {
+      "id": "routing-positive-desktop-boundary-review-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 470963,
+        "num_turns": 74
+      }
+    },
+    {
+      "id": "routing-positive-desktop-boundary-review-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 413173,
+        "num_turns": 71
+      }
+    },
+    {
+      "id": "routing-positive-desktop-boundary-review-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 297013,
+        "num_turns": 55
+      }
+    },
+    {
+      "id": "routing-positive-ipc-evolution-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 390027,
+        "num_turns": 51
+      }
+    },
+    {
+      "id": "routing-positive-ipc-evolution-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 355844,
+        "num_turns": 60
+      }
+    },
+    {
+      "id": "routing-positive-ipc-evolution-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 402116,
+        "num_turns": 52
+      }
+    },
+    {
+      "id": "score-control-r1",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r1",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 419372,
+        "num_turns": 47
+      }
+    },
+    {
+      "id": "score-control-r2",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r2",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 356168,
+        "num_turns": 52
+      }
+    },
+    {
+      "id": "score-control-r3",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r3",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 301399,
+        "num_turns": 53
+      }
+    },
+    {
+      "id": "score-treatment-r1",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r1",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 302227,
+        "num_turns": 48
+      }
+    },
+    {
+      "id": "score-treatment-r2",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r2",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 232521,
+        "num_turns": 41
+      }
+    },
+    {
+      "id": "score-treatment-r3",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r3",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 300031,
+        "num_turns": 46
+      }
+    }
+  ],
+  "skipped": [],
+  "observed_models": [
+    "claude-fable-5[1M]",
+    "claude-haiku-4-5"
+  ],
+  "prior_failures": [
+    {
+      "id": "score-control-r1",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 1,
+      "success": false,
+      "attempts": 1,
+      "error": "Error: --json-schema is not a valid JSON Schema: no schema with key or ref \"https://json-schema.org/draft/2020-12/schema\"",
+      "source_id": "behavior-control-r1"
+    },
+    {
+      "id": "score-control-r2",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 2,
+      "success": false,
+      "attempts": 1,
+      "error": "Error: --json-schema is not a valid JSON Schema: no schema with key or ref \"https://json-schema.org/draft/2020-12/schema\"",
+      "source_id": "behavior-control-r2"
+    },
+    {
+      "id": "score-control-r3",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 3,
+      "success": false,
+      "attempts": 1,
+      "error": "Error: --json-schema is not a valid JSON Schema: no schema with key or ref \"https://json-schema.org/draft/2020-12/schema\"",
+      "source_id": "behavior-control-r3"
+    },
+    {
+      "id": "score-treatment-r1",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": false,
+      "attempts": 1,
+      "error": "Error: --json-schema is not a valid JSON Schema: no schema with key or ref \"https://json-schema.org/draft/2020-12/schema\"",
+      "source_id": "behavior-treatment-r1"
+    },
+    {
+      "id": "score-treatment-r2",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": false,
+      "attempts": 1,
+      "error": "Error: --json-schema is not a valid JSON Schema: no schema with key or ref \"https://json-schema.org/draft/2020-12/schema\"",
+      "source_id": "behavior-treatment-r2"
+    },
+    {
+      "id": "score-treatment-r3",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": false,
+      "attempts": 1,
+      "error": "Error: --json-schema is not a valid JSON Schema: no schema with key or ref \"https://json-schema.org/draft/2020-12/schema\"",
+      "source_id": "behavior-treatment-r3"
+    }
+  ]
+}

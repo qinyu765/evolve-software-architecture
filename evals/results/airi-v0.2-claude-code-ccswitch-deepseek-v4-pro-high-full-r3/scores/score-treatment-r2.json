@@ -1,0 +1,40 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (apps/stage-tamagotchi); no Tauri/rust desktop code exists in this checkout (crates/ is empty/absent).",
+    "runtime_boundaries_identified": [
+      "Electron main process (in-process plugin setup via await import(entrypoint), windows, tray, channel-server WS, http-server)",
+      "Plugin author contract (ExtensionManifestV1 + plugin-protocol neutral types) vs plugin execution location (in-process vs node-worker/utilityProcess/electron transport)",
+      "Declared-but-unimplemented transport seam (PluginTransport union: in-memory/websocket/web-worker/node-worker/electron; createPluginContext throws for all non-in-memory)",
+      "Per-window Eventa context (createContext(ipcMain, window))",
+      "injeca DI provider-key boundary (windows:X / modules:X / services:X)",
+      "server-runtime independent process (packages/server-runtime/src/bin/run.ts) vs in-app channel-server sharing createServer",
+      "WebSocket server channel / remote plugin peer boundary (server-sdk client-side WebSocketExtensionPeer vs plugin-sdk stub host channel)"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "factual_errors": [
+    {
+      "claim": "`createPluginContext` 仅测试引用 (createPluginContext is only referenced in tests)",
+      "repository_evidence": "Grep for `createPluginContext` across the repo returns only `packages/plugin-sdk/src/plugin-host/runtimes/node/index.ts:24`, `runtimes/web/index.ts:23`, `plugin-host/index.ts:2` (re-export), and `docs/design/multi-transport.md`. No test file references it.",
+      "explanation": "The symbol is declared, re-exported, and described in the design doc but is not referenced in any test. The substantive point of the evidence row (the isolation seam is declared but not implemented/wired) is correct; only the '仅测试引用' characterization is inaccurate."
+    },
+    {
+      "claim": "`ExtensionHostGameletWidgetsManager` 只有 push/update/remove widget (only push/update/remove widget)",
+      "repository_evidence": "`apps/stage-tamagotchi/src/main/services/airi/plugins/types.ts:45-56` defines six methods: `openWindow`, `pushWidget`, `updateWidget`, `removeWidget`, `getWidgetSnapshot`, `requestWidgetIframe`.",
+      "explanation": "The interface also exposes `openWindow` (plugins can open the widgets window), `getWidgetSnapshot`, and `requestWidgetIframe`, so '只有 push/update/remove' understates the surface. The dependent recommendation (defer declarative window-registration until plugins need to register new window types) still holds, since none of these methods registers a new window type."
+    }
+  ],
+  "rationale": "The review is grounded in the real repository: I verified ~20 distinct factual claims (in-process `await import(entrypoint)` in fs.ts:74, `new ExtensionHost({ runtime: 'electron' })` without permissionResolver at plugins/host/index.ts:236, the logical-only PermissionService, the all-throw `createPluginContext` transports, `setMaxListeners` TODOs, per-window `createContext(ipcMain, window)`, the three `/ws` literals, server-runtime's independent bin, client-side-only WebSocketExtensionPeer, and the Planned multi-transport design doc), all of which match. It correctly identifies Electron as the current desktop platform and does not treat the documented legacy Tauri (crates/) as current. Scope/classification, friction, a ranked quality-attribute table with trade-offs and verification, three options including status quo, a coherent recommendation with stable-vs-deferred boundaries, an incremental/reversible migration, and concrete completion criteria are all present and actionable. The two recorded factual errors are minor (a mischaracterization of where `createPluginContext` is referenced, and an incomplete enumeration of a 6-method interface) and do not change the architectural conclusion. The review explicitly keeps project-specific facts local rather than smuggling them into general rules. Total 18/18.",
+  "total": 18
+}
