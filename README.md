@@ -34,6 +34,7 @@ This installs the current public source into `.agents/skills` and writes the eco
 ```bash
 python3 scripts/validate-skill.py
 python3 -m unittest discover -s tests -v
+python3 scripts/run_forward_eval.py --dry-run
 python3 -m py_compile skills/evolve-software-architecture/scripts/collect_repo_signals.py
 python3 skills/evolve-software-architecture/scripts/collect_repo_signals.py --repo .
 ```

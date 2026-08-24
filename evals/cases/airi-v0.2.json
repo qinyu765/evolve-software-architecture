@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "id": "airi-v0.2-baseline",
+  "repository": {
+    "name": "moeru-ai/airi",
+    "url": "https://github.com/moeru-ai/airi",
+    "commit": "5228f94123e42416435e7f7e8215df26f3bb065b"
+  },
+  "skill": {
+    "name": "evolve-software-architecture",
+    "url": "https://github.com/qinyu765/evolve-software-architecture",
+    "version": "v0.1.2",
+    "commit": "12ae54160ece0ee16f837226e1cd936c980b7c46"
+  },
+  "codex": {
+    "profile_id": "codex-gpt-5.6-sol-high",
+    "runtime": "codex",
+    "cli_version": "0.144.4",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "high",
+    "call_timeout_seconds": 900,
+    "repetitions": 3,
+    "max_concurrency": 3
+  },
+  "claude_code": {
+    "runtime": "claude-code",
+    "cli_version": "2.1.233",
+    "configuration_manager": "CCSwitch",
+    "reasoning_effort": "high",
+    "call_timeout_seconds": 720,
+    "max_concurrency": 3
+  },
+  "routing": {
+    "marker_token": "[EVAL:evolve-software-architecture-loaded]",
+    "positive_minimum_loaded": 8,
+    "negative_maximum_loaded": 1,
+    "positive": [
+      {
+        "id": "desktop-boundary-review",
+        "prompt": "评估 AIRI 当前桌面应用的 main、preload、renderer 与共享 package 边界。考虑未来插件能力和多窗口扩展，给出长期架构方向、可逆迁移步骤和验证方法；只提供建议，不修改代码。"
+      },
+      {
+        "id": "ipc-evolution",
+        "prompt": "结合 AIRI 当前仓库，设计 Electron main、preload、renderer 之间可长期演进的 IPC 方案，需要权衡契约版本、错误传播、测试隔离和迁移成本；只提供建议，不修改代码。"
+      },
+      {
+        "id": "debt-direction",
+        "prompt": "AIRI 桌面端与共享 packages 的耦合正在增加。请基于真实文件和 Git 历史判断下一条最值得治理的架构边界，比较维持现状与重构方案，并给出渐进路线；只提供建议，不修改代码。"
+      }
+    ],
+    "negative": [
+      {
+        "id": "local-style-fix",
+        "prompt": "在 `apps/component-calling/src/pages/index.vue` 的 Send 按钮上，把 `bg=\"primary-200 dark:primary-900\"` 调整为蓝色 UnoCSS 背景类。只说明这一局部改动，不修改文件。"
+      },
+      {
+        "id": "rename",
+        "prompt": "在 `apps/component-calling/src/pages/index.vue` 中把 `handleChatSendMessage` 重命名为 `sendChatMessage`，并同步这个文件内的直接引用。只说明这一局部改动，不修改文件。"
+      },
+      {
+        "id": "routine-update",
+        "prompt": "把 `pnpm-workspace.yaml` catalog 中的 `@anthropic-ai/claude-code` 从 `^2.1.204` 更新到下一个补丁版 `^2.1.205`，并说明需要刷新 pnpm 锁文件。只说明这一常规升级，不修改文件。"
+      }
+    ]
+  },
+  "behavior": {
+    "id": "desktop-architecture-review",
+    "prompt": "结合 AIRI 当前仓库的真实结构，评估桌面应用未来增加第三方插件、更多窗口和独立后台能力时，哪些边界应该稳定，哪些抽象应该延后。请比较至少两个可行方案（合理时包括维持现状），说明质量属性权衡、成本、风险、回滚路径、不改变的后果，并给出可验证的渐进迁移路线。只提供架构建议，不修改代码。",
+    "treatment_invocations": {
+      "codex": "Use $evolve-software-architecture for this architecture review.\n\n",
+      "claude-code": "Use /evolve-software-architecture for this architecture review.\n\n"
+    },
+    "minimum_treatment_average": 14,
+    "minimum_improvement": 2,
+    "required_nonzero_dimensions": [
+      "evidence",
+      "options",
+      "recommendation",
+      "migration"
+    ]
+  }
+}
