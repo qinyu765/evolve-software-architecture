@@ -1,0 +1,360 @@
+{
+  "schema_version": 1,
+  "case": {
+    "id": "airi-v0.2-baseline",
+    "sha256": "fa7140cdc9463c1e429f759c9c657092c85137fba7224645a865bb768d324cf6"
+  },
+  "repository": {
+    "name": "moeru-ai/airi",
+    "url": "https://github.com/moeru-ai/airi",
+    "commit": "5228f94123e42416435e7f7e8215df26f3bb065b"
+  },
+  "skill": {
+    "name": "evolve-software-architecture",
+    "url": "https://github.com/qinyu765/evolve-software-architecture",
+    "version": "v0.1.2",
+    "commit": "12ae54160ece0ee16f837226e1cd936c980b7c46"
+  },
+  "profile": {
+    "profile_id": "codex-gpt-5-6-luna-max",
+    "runtime": "codex",
+    "cli_version": "0.144.4",
+    "model": "gpt-5.6-luna",
+    "model_argument": "gpt-5.6-luna",
+    "configuration_manager": null,
+    "reasoning_effort": "max",
+    "call_timeout_seconds": 1800,
+    "ephemeral": true,
+    "sandbox": "read-only",
+    "max_concurrency": 3,
+    "repetitions": 3,
+    "phases": "all"
+  },
+  "planned_calls": 30,
+  "started_at": "2026-08-24T09:42:18.021133+00:00",
+  "completed_at": "2026-08-24T13:08:03.527134+00:00",
+  "results": [
+    {
+      "id": "behavior-control-r1",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "behavior-control-r2",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "behavior-control-r3",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "behavior-treatment-r1",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "behavior-treatment-r2",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "behavior-treatment-r3",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-local-style-fix-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-local-style-fix-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-local-style-fix-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-rename-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-rename-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-rename-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-routine-update-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-routine-update-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-routine-update-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-debt-direction-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-debt-direction-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-debt-direction-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-desktop-boundary-review-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-desktop-boundary-review-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-desktop-boundary-review-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-ipc-evolution-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-ipc-evolution-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-ipc-evolution-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "score-control-r1",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r1"
+    },
+    {
+      "id": "score-control-r2",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r2"
+    },
+    {
+      "id": "score-control-r3",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r3"
+    },
+    {
+      "id": "score-treatment-r1",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r1"
+    },
+    {
+      "id": "score-treatment-r2",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r2"
+    },
+    {
+      "id": "score-treatment-r3",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r3"
+    }
+  ],
+  "skipped": [],
+  "observed_models": [],
+  "prior_failures": [
+    {
+      "id": "behavior-control-r2",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 2,
+      "success": false,
+      "attempts": 1,
+      "error": "evaluation call timed out after 900 seconds",
+      "metadata": {
+        "timed_out": true
+      }
+    },
+    {
+      "id": "behavior-treatment-r2",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": false,
+      "attempts": 1,
+      "error": "evaluation call timed out after 900 seconds",
+      "metadata": {
+        "timed_out": true
+      }
+    },
+    {
+      "id": "routing-positive-desktop-boundary-review-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": false,
+      "attempts": 1,
+      "error": "evaluation call timed out after 900 seconds",
+      "metadata": {
+        "timed_out": true
+      }
+    }
+  ],
+  "resume_history": [
+    {
+      "previous_call_timeout_seconds": 900,
+      "call_timeout_seconds": 1800
+    }
+  ]
+}

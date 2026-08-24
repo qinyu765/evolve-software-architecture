@@ -17,7 +17,7 @@ python3 scripts/run_forward_eval.py \
   --output-dir evals/results/airi-v0.2-baseline
 ```
 
-Each completed sample is atomically checkpointed before the next repetition. If the process is interrupted, resume only the exact same execution profile:
+Each completed sample is atomically checkpointed before the next repetition. If the process is interrupted, resume the same execution profile:
 
 ```bash
 python3 scripts/run_forward_eval.py \
@@ -26,7 +26,24 @@ python3 scripts/run_forward_eval.py \
   --resume
 ```
 
-An execution profile is the runtime, runtime version, model, reasoning effort, per-call timeout, repository commit, Skill release, complete case digest, and concurrency settings recorded in the partial manifest. Never fill a missing repetition with a different model, agent runtime, effort level, timeout, or prompt definition. Compare a Claude Code or other provider run as a separate profile with its own output directory and thresholds; do not pool its samples with the pinned Codex baseline.
+An execution profile is the runtime, runtime version, model, reasoning effort, per-call timeout, repository commit, Skill release, complete case digest, and concurrency settings recorded in the partial manifest. Never fill a missing repetition with a different model, agent runtime, effort level, or prompt definition. An incomplete run may only increase its hard timeout; the runner records the old and new values in `resume_history` and preserves failed attempts in `prior_failures`. Lowering the timeout or changing any other profile field is rejected. Compare a Claude Code or other provider run as a separate profile with its own output directory and thresholds; do not pool its samples with a Codex profile.
+
+Run the complete Codex Luna/max profile with a timeout that accommodates its observed architecture-answer latency:
+
+```bash
+python3 scripts/run_forward_eval.py \
+  --runtime codex \
+  --model gpt-5.6-luna \
+  --model-label gpt-5.6-luna \
+  --reasoning-effort max \
+  --repetitions 3 \
+  --max-concurrency 3 \
+  --call-timeout-seconds 1800 \
+  --airi-source ../airi \
+  --output-dir evals/results/airi-v0.2-codex-gpt-5.6-luna-max-full-r3
+```
+
+The committed Luna/max profile contains all 30 planned samples. It passes routing at 9/9 positive and 0/9 negative loads. Behavior averages 17.0/18 for control and 17.33/18 for treatment, so it fails the required two-point improvement. It also fails the strict generalization gate because two treatment scores do not list main, preload, and renderer together, although all three identify Electron as current and do not treat legacy Tauri as current. The initial 900-second run timed out three long samples; the recorded resume raised the hard timeout to 1800 seconds without changing the model, effort, repositories, prompts, or successful checkpoints.
 
 For a one-repetition Claude Code routing profile managed by CCSwitch, where `fable` is the CLI alias and `deepseek-v4-pro` is the user-declared model label:
 
@@ -42,7 +59,7 @@ python3 scripts/run_forward_eval.py \
   --output-dir evals/results/airi-v0.2-claude-code-deepseek-v4-pro-high-routing-r1
 ```
 
-The manifest keeps the configuration manager, CLI model argument, declared model label, and runtime-reported `observed_models` separate. This profile is exploratory and is not combined with the fixed Codex baseline.
+The manifest keeps the configuration manager, CLI model argument, declared model label, and runtime-reported `observed_models` separate. This profile is exploratory and is not combined with a Codex profile.
 
 Run the complete three-repetition Claude Code profile in a separate directory:
 
@@ -60,6 +77,6 @@ python3 scripts/run_forward_eval.py \
 
 The committed complete profile passes routing at 9/9 positive and 0/9 negative loads. It fails the behavior improvement gate because both variants saturate the current rubric at 18/18, despite scorers recording nine control factual errors and five treatment factual errors. It also fails generalization because treatment answers do not consistently identify main, preload, and renderer as current boundaries. These are baseline observations, not in-run remediation instructions.
 
-The `--model` value is the configured Claude Code alias used by this environment; replace it for another setup. `--model-label` records the evaluator's declared provider model separately from the runtime alias and the model identifiers reported by Claude Code. Routing invocations use `dontAsk` permission mode with only `Read`, `Glob`, `Grep`, and the read-only `Skill` loader, and disable session persistence. This removes Bash and all editing tools instead of relying on Claude's plan mode, which may create user-level plan files. Omitting `Skill` invalidates routing measurements because the model cannot load a matched Skill. The Claude profile stops a call after 720 seconds without retrying that timeout; the Codex profile uses 900 seconds. An incomplete manifest can resume the exact same identity and preserves prior infrastructure failures. A model argument, alias mapping, runtime, effort, timeout, permission mode, tool set, or prompt change requires a new output directory and profile.
+The `--model` value is the configured Claude Code alias used by this environment; replace it for another setup. `--model-label` records the evaluator's declared provider model separately from the runtime alias and the model identifiers reported by Claude Code. Routing invocations use `dontAsk` permission mode with only `Read`, `Glob`, `Grep`, and the read-only `Skill` loader, and disable session persistence. This removes Bash and all editing tools instead of relying on Claude's plan mode, which may create user-level plan files. Omitting `Skill` invalidates routing measurements because the model cannot load a matched Skill. The default Claude profile stops a call after 720 seconds without retrying that timeout; the case-default Codex profile uses 900 seconds. An incomplete manifest preserves prior infrastructure failures and may resume with the same timeout or a larger one. A model argument, alias mapping, runtime, effort, permission mode, tool set, prompt change, or timeout decrease requires a new output directory and profile.
 
 The runner creates temporary control and treatment clones at the pinned AIRI commit, preserves AIRI's repository Skills, installs only the released architecture Skill in treatment, and uses read-only ephemeral Codex executions. It commits no checkpoint directory, partial manifest, session data, JSONL, temporary clones, credentials, provider configuration, or absolute local paths. A failed gate is retained as baseline evidence; remediation belongs in a later change.

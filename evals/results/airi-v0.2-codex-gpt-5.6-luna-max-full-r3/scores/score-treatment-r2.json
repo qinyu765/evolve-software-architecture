@@ -1,0 +1,39 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 1,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 17,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron（apps/stage-tamagotchi；electron-vite/electron-builder，支持 Windows/macOS/Linux 构建）",
+    "runtime_boundaries_identified": [
+      "Electron main process and injeca lifecycle orchestration",
+      "BrowserWindow renderer instances and route-driven App.vue runtime",
+      "In-process plugin host and extension SDK",
+      "Plugin UI iframe with loopback asset/session boundary",
+      "MCP stdio and Godot child-process sidecars",
+      "Eventa IPC/event protocol boundaries"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "factual_errors": [
+    {
+      "claim": "非 spotlight 窗口都会创建较完整的 stage runtime。",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/windows/beat-sync/index.ts:10-25 loads beat-sync.html; src/renderer/beat-sync.main.ts contains the BeatSync runtime, while App.vue:256 creates fullStageRuntime.",
+      "explanation": "BeatSync 是非 spotlight 的窗口目录，但不执行 App.vue，因此该表述过于绝对。"
+    },
+    {
+      "claim": "通过 /chat、/settings、/widgets 等路由跳过部分初始化。",
+      "repository_evidence": "apps/stage-tamagotchi/src/renderer/App.vue:107-109,207-231,256,265-276.",
+      "explanation": "/chat 和 /widgets 确实跳过部分初始化；/settings 主要注册导航处理，并仍创建和初始化 fullStageRuntime，不是同类跳过分支。"
+    }
+  ],
+  "rationale": "总分 17/18。答复的方案比较、推荐、渐进迁移和验证标准都具体且可回滚；Evidence 扣 1 分，因上述两处 renderer 初始化描述被当前代码局部反驳。"
+}
