@@ -42,6 +42,13 @@ from scripts.run_forward_eval import (
 ROOT = Path(__file__).resolve().parents[1]
 CASE_PATH = ROOT / "evals" / "cases" / "airi-v0.2.json"
 MARKTEXT_CASE_PATH = ROOT / "evals" / "cases" / "marktext-v0.2.json"
+CLAUDE_MANIFEST_PATH = (
+    ROOT
+    / "evals"
+    / "results"
+    / "marktext-v0.2-claude-code-ccswitch-high-full-r3"
+    / "manifest.json"
+)
 
 
 class ForwardEvaluationTest(unittest.TestCase):
@@ -214,6 +221,18 @@ class ForwardEvaluationTest(unittest.TestCase):
             self.assertFalse(load_json(output / "summary.json")["dataset_complete"])
             self.assertEqual((source / "manifest.json").read_bytes(), source_manifest_bytes)
             self.assertEqual([path.read_bytes() for path in source_answers], source_answer_bytes)
+
+    def test_claude_profile_preserves_declared_and_observed_model_provenance(self) -> None:
+        manifest = load_json(CLAUDE_MANIFEST_PATH)
+        profile = manifest["profile"]
+        self.assertEqual(profile["runtime"], "claude-code")
+        self.assertEqual(profile["configuration_manager"], "CCSwitch")
+        self.assertEqual(profile["model"], "deepseek-v4-pro")
+        self.assertEqual(profile["model_argument"], "fable")
+        self.assertEqual(
+            set(manifest["observed_models"]),
+            {"claude-fable-5[1M]", "claude-haiku-4-5"},
+        )
 
     def test_score_phase_requires_rescore_source(self) -> None:
         with self.assertRaisesRegex(EvaluationError, "requires --rescore-from"):
