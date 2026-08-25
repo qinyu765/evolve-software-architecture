@@ -79,7 +79,7 @@ python3 scripts/run_forward_eval.py \
   --output-dir evals/results/airi-v0.2-claude-code-deepseek-v4-pro-high-routing-r1
 ```
 
-The manifest keeps the configuration manager, CLI model argument, declared model label, and runtime-reported `observed_models` separate. This profile is exploratory and is not combined with a Codex profile.
+The manifest keeps the configuration manager, CLI model argument, declared model label, and runtime-reported `observed_models` separate. `deepseek-v4-pro` is the user-declared provider label routed through CCSwitch; the Claude `modelUsage` names are runtime evidence, not a claim that the mapping can be inferred from those names. If the CCSwitch mapping, alias, or observed model set changes, create a new profile rather than resuming or pooling it with this one. This profile is exploratory and is not combined with a Codex profile.
 
 Run the complete three-repetition Claude Code profile in a separate directory:
 
