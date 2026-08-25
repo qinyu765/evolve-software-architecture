@@ -190,7 +190,7 @@ git commit -m "docs(evals): clarify Claude model provenance"
 
 ```bash
 python3 scripts/run_forward_eval.py --case evals/cases/marktext-v0.2.json --runtime claude-code --phases all --dry-run | python3 -c 'import json,sys; assert len(json.load(sys.stdin)) == 30; print("marktext calls: 30")'
-python3 scripts/run_forward_eval.py --case evals/cases/marktext-v0.2.json --runtime claude-code --phases score --dry-run | python3 -c 'import json,sys; assert len(json.load(sys.stdin)) == 6; print("score calls: 6")'
+python3 scripts/run_forward_eval.py --case evals/cases/marktext-v0.2.json --runtime claude-code --phases score --rescore-from /tmp/score-dry-run-source --dry-run | python3 -c 'import json,sys; assert len(json.load(sys.stdin)) == 6; print("score calls: 6")'
 ```
 
 - [ ] **Step 2: Verify existing result integrity**
