@@ -1,0 +1,693 @@
+{
+  "schema_version": 1,
+  "case": {
+    "id": "marktext-v0.2-baseline",
+    "sha256": "3b0d5c2c09acdb1c90884668265debb6550090ae7760406ff4acafac68a9a282"
+  },
+  "repository": {
+    "name": "marktext/marktext",
+    "url": "https://github.com/marktext/marktext",
+    "commit": "e52106fd1cdcbd33c1258b7b0cdc7013c4c5d86c",
+    "scope": "packages/desktop"
+  },
+  "skill": {
+    "name": "evolve-software-architecture",
+    "url": "https://github.com/qinyu765/evolve-software-architecture",
+    "version": "v0.1.2",
+    "commit": "12ae54160ece0ee16f837226e1cd936c980b7c46"
+  },
+  "contract": {
+    "rubric": {
+      "name": "architecture-review-v2.md",
+      "sha256": "d0158ae63a0e108206ef1db35b6f73af44fe1ff74c7abc0fc4c57b69e8ec8694"
+    },
+    "schema": {
+      "name": "architecture-review-v2.schema.json",
+      "sha256": "f562409a86ad24c236de1ff0ff615fa1ecd6478904dee6af37535aa198812815"
+    }
+  },
+  "profile": {
+    "profile_id": "claude-code-ccswitch-deepseek-v4-pro-high",
+    "runtime": "claude-code",
+    "cli_version": "2.1.233",
+    "model": "deepseek-v4-pro",
+    "model_argument": "fable",
+    "configuration_manager": "CCSwitch",
+    "reasoning_effort": "high",
+    "call_timeout_seconds": 900,
+    "ephemeral": true,
+    "sandbox": "restricted-read-tools",
+    "max_concurrency": 3,
+    "repetitions": 3,
+    "phases": "all"
+  },
+  "planned_calls": 30,
+  "run_id": "d0ed0e1b931247899f79bfc66a3948af",
+  "started_at": "2026-08-25T04:34:46.467500+00:00",
+  "completed_at": "2026-08-25T05:46:49.594156+00:00",
+  "results": [
+    {
+      "id": "behavior-control-r1",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 351836,
+        "num_turns": 44
+      }
+    },
+    {
+      "id": "behavior-control-r2",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 325044,
+        "num_turns": 44
+      }
+    },
+    {
+      "id": "behavior-control-r3",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 344237,
+        "num_turns": 60
+      }
+    },
+    {
+      "id": "behavior-treatment-r1",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 407866,
+        "num_turns": 61
+      }
+    },
+    {
+      "id": "behavior-treatment-r2",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 388244,
+        "num_turns": 64
+      }
+    },
+    {
+      "id": "behavior-treatment-r3",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 368641,
+        "num_turns": 63
+      }
+    },
+    {
+      "id": "routing-negative-local-rename-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 29451,
+        "num_turns": 3
+      }
+    },
+    {
+      "id": "routing-negative-local-rename-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 60499,
+        "num_turns": 5
+      }
+    },
+    {
+      "id": "routing-negative-local-rename-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 36622,
+        "num_turns": 4
+      }
+    },
+    {
+      "id": "routing-negative-local-style-fix-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 87975,
+        "num_turns": 15
+      }
+    },
+    {
+      "id": "routing-negative-local-style-fix-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 54633,
+        "num_turns": 7
+      }
+    },
+    {
+      "id": "routing-negative-local-style-fix-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 372813,
+        "num_turns": 24
+      }
+    },
+    {
+      "id": "routing-negative-routine-dependency-patch-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 95673,
+        "num_turns": 8
+      }
+    },
+    {
+      "id": "routing-negative-routine-dependency-patch-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 66898,
+        "num_turns": 8
+      }
+    },
+    {
+      "id": "routing-negative-routine-dependency-patch-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 42355,
+        "num_turns": 5
+      }
+    },
+    {
+      "id": "routing-positive-desktop-boundaries-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 433807,
+        "num_turns": 68
+      }
+    },
+    {
+      "id": "routing-positive-desktop-boundaries-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 293714,
+        "num_turns": 62
+      }
+    },
+    {
+      "id": "routing-positive-desktop-boundaries-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 345297,
+        "num_turns": 58
+      }
+    },
+    {
+      "id": "routing-positive-desktop-evolution-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 313967,
+        "num_turns": 46
+      }
+    },
+    {
+      "id": "routing-positive-desktop-evolution-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 329184,
+        "num_turns": 55
+      }
+    },
+    {
+      "id": "routing-positive-desktop-evolution-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 365239,
+        "num_turns": 53
+      }
+    },
+    {
+      "id": "routing-positive-ipc-contract-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 248204,
+        "num_turns": 36
+      }
+    },
+    {
+      "id": "routing-positive-ipc-contract-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 233522,
+        "num_turns": 41
+      }
+    },
+    {
+      "id": "routing-positive-ipc-contract-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 292783,
+        "num_turns": 36
+      }
+    },
+    {
+      "id": "score-control-r1",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r1",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 309221,
+        "num_turns": 38
+      }
+    },
+    {
+      "id": "score-control-r2",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r2",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 271711,
+        "num_turns": 30
+      }
+    },
+    {
+      "id": "score-control-r3",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 3,
+      "success": false,
+      "attempts": 1,
+      "error": "scorer factual error references an unknown dimension",
+      "source_id": "behavior-control-r3",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 318440,
+        "num_turns": 34
+      }
+    },
+    {
+      "id": "score-treatment-r1",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": false,
+      "attempts": 1,
+      "error": "accuracy unresolved_decision_conflict_count does not match documentation_drift",
+      "source_id": "behavior-treatment-r1",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 377739,
+        "num_turns": 52
+      }
+    },
+    {
+      "id": "score-treatment-r2",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r2",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 227906,
+        "num_turns": 34
+      }
+    },
+    {
+      "id": "score-treatment-r3",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": false,
+      "attempts": 1,
+      "error": "accuracy unresolved_decision_conflict_count does not match documentation_drift",
+      "source_id": "behavior-treatment-r3",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 283064,
+        "num_turns": 43
+      }
+    }
+  ],
+  "skipped": [],
+  "observed_models": [
+    "claude-fable-5[1M]",
+    "claude-haiku-4-5"
+  ],
+  "prior_failures": [
+    {
+      "id": "score-treatment-r1",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": false,
+      "attempts": 1,
+      "error": "accuracy unresolved_decision_conflict_count does not match documentation_drift",
+      "source_id": "behavior-treatment-r1",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 328784,
+        "num_turns": 48
+      },
+      "run_id": "6e73462ce8944a93b3a26a04782525e3",
+      "recorded_at": "2026-08-25T05:24:10.414733+00:00"
+    },
+    {
+      "id": "score-treatment-r3",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": false,
+      "attempts": 1,
+      "error": "accuracy unresolved_decision_conflict_count does not match documentation_drift",
+      "source_id": "behavior-treatment-r3",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 284206,
+        "num_turns": 51
+      },
+      "run_id": "6e73462ce8944a93b3a26a04782525e3",
+      "recorded_at": "2026-08-25T05:33:28.307258+00:00"
+    },
+    {
+      "id": "score-control-r3",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 3,
+      "success": false,
+      "attempts": 1,
+      "error": "scorer factual error references an unknown dimension",
+      "source_id": "behavior-control-r3",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 353660,
+        "num_turns": 37
+      },
+      "run_id": "6e73462ce8944a93b3a26a04782525e3",
+      "recorded_at": "2026-08-25T05:34:37.534470+00:00"
+    },
+    {
+      "id": "score-treatment-r1",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": false,
+      "attempts": 1,
+      "error": "accuracy unresolved_decision_conflict_count does not match documentation_drift",
+      "source_id": "behavior-treatment-r1",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 377739,
+        "num_turns": 52
+      },
+      "run_id": "d0ed0e1b931247899f79bfc66a3948af",
+      "recorded_at": "2026-08-25T05:41:30.224052+00:00"
+    },
+    {
+      "id": "score-treatment-r3",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": false,
+      "attempts": 1,
+      "error": "accuracy unresolved_decision_conflict_count does not match documentation_drift",
+      "source_id": "behavior-treatment-r3",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 283064,
+        "num_turns": 43
+      },
+      "run_id": "d0ed0e1b931247899f79bfc66a3948af",
+      "recorded_at": "2026-08-25T05:46:14.223858+00:00"
+    },
+    {
+      "id": "score-control-r3",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 3,
+      "success": false,
+      "attempts": 1,
+      "error": "scorer factual error references an unknown dimension",
+      "source_id": "behavior-control-r3",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 318440,
+        "num_turns": 34
+      },
+      "run_id": "d0ed0e1b931247899f79bfc66a3948af",
+      "recorded_at": "2026-08-25T05:46:49.592409+00:00"
+    }
+  ]
+}

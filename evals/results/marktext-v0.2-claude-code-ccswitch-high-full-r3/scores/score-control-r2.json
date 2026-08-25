@@ -1,0 +1,75 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron 42 three-process desktop app in packages/desktop (main process / sandboxed preload / sandboxed renderer), with the renderer consuming @muyajs/core as its editor engine",
+    "runtime_boundaries_identified": [
+      "Sandboxed renderer (contextIsolation: true, sandbox: true, nodeIntegration: false) with preload as the single bridge",
+      "Typed renderer<->main IPC contract (shared/types/ipc.ts) split into invoke/send/sync/main-event categories",
+      "Main-process IPC handlers (main/ipc/fs.ts, main/ipc/window.ts) that are not yet bound to the shared contract",
+      "Main-internal ipcMain.emit event bus (main/utils/internalIpc.ts) whose channel names are mislabeled in the contract as renderer->main",
+      "Editor engine boundary: @muyajs/core public API (src/index.ts single export) vs legacy packages/muyajs with zero runtime imports",
+      "Per-window stable buffer UUID + buffered-state persistence as crash-recovery identity distinct from win.id"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 3,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "IFileState 把 history/cursor/muyaIndexCursor/blocks/searchMatches 标成 unknown",
+      "repository_evidence": "packages/desktop/src/shared/types/files.ts:80 declares history: FileHistory (a typed interface) and :83 declares searchMatches: FileSearchMatches (typed); only cursor (:81), muyaIndexCursor (:85) and blocks (:89) are unknown.",
+      "explanation": "Two of the five enumerated fields are typed interfaces, not unknown. The underlying boundary rule (host-typed fields vs opaque engine blob) still holds via blocks/cursor/muyaIndexCursor and HistoryStackEntry's [key: string]: unknown, so the recommendation is unaffected.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "主进程内部 ipcMain.emit 总线完全无类型",
+      "repository_evidence": "packages/desktop/src/main/utils/internalIpc.ts:8-12 defines onInternalChannel<TArgs extends unknown[]>, and every call site in windowManager.ts:421-476 declares typed listener parameters (e.g. (windowId: number, pathname: string)).",
+      "explanation": "Internal channels are typed at each call site via the generic; what is missing is a central name->signature contract and consistent signatures. '完全无类型' overstates the situation, though the substantive finding (no single source of truth, inconsistent signatures like win.id vs BrowserWindow) is correct.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "electron.vite.config.ts:38 里已无运行时的 muya 别名",
+      "repository_evidence": "packages/desktop/electron.vite.config.ts:38 (and :58, :84) still declares 'muya': resolve(__dirname, '../muyajs'); the answer's own '应延后' list and Phase 5 correctly state the alias is still present.",
+      "explanation": "Garbled clause: a literal reading contradicts the file and the answer's later text. The intended meaning (the alias has no runtime consumers) is correct and matches the rest of the answer.",
+      "source_conflict": true,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "editor and preferences windows use contextIsolation: false + nodeIntegration: true",
+      "documentation_evidence": "CLAUDE.md:243-244 (Architecture section), which also cites src/main/config.js — a file that no longer exists (now config.ts).",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:11-18 and :35-40 set contextIsolation: true, sandbox: true, nodeIntegration: false for both windows; CLAUDE.md:82-83 itself states the correct sandboxed state; test/e2e/context-isolation.spec.ts:5-8 asserts it as the canary.",
+      "state": "conflict",
+      "decision_relevant": false
+    }
+  ],
+  "rationale": "The answer is a strong, evidence-dense architecture review. I independently verified ~20 load-bearing claims against implementation, config, tests, and docs: the sandbox triple and canary test (config.ts:11-18, context-isolation.spec.ts), the four-category IPC contract with unknown payloads and \"commits 5-8\" note (ipc.ts:1-18), the typed preload bridge and global.d.ts sync (preload/index.ts:26-67, global.d.ts:24-43), the unbound main handlers and the `event as unknown as IpcMainEvent` casts (window.ts:82/86), the real SerializedStat ctimeMs contract drift (fs.ts:6-13 vs files.ts:9-15), the ipcMain.emit internal bus and its mislabeling in IpcSendChannels with inconsistent signatures (internalIpc.ts, windowManager.ts:421-476, ipc.ts:183-201; renderer only sends the `mt::` variant), the @muyajs/core single export and zero legacy runtime imports, the stable per-window restoreBufferId UUID with write-file-atomic (editor.ts:139-145, editorBufferStore/index.ts:178-185), BUFFERED_STATE_VERSION, and the muya conformance lock/OT primitives. The answer is honest that git history could not be verified and flags its migration-stage inference as such — exemplary evidence practice. Three minor imprecisions (IFileState field enumeration, \"完全无类型\" overstatement, one garbled clause about the muya alias) are recorded but do not change any recommendation, so the accuracy gate passes. The repo's CLAUDE.md contains a stale contextIsolation:false claim that contradicts config.ts, but the answer correctly relied on implementation evidence, so this conflict is not decision-relevant. All nine dimensions are at full credit: the scope/confidence is explicit, every claim is sourced, friction is concrete and explained, quality-attribute trade-offs and verification are explicit, three options including the status-quo continuation are compared with cost/risk/rollback/consequence, the recommendation follows from the evidence, and the phased migration is incremental with concrete gates and revert paths."
+}

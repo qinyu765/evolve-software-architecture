@@ -1,0 +1,84 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (apps/stage-tamagotchi uses electron, electron-vite, and electron-builder; src/main is Electron main-process code). AGENTS.md mentions a legacy Tauri desktop under crates/, but no crates/ directory exists in this checkout.",
+    "runtime_boundaries_identified": [
+      "Electron main process (in-process plugin import(), injeca DI composition root, all windows + channel-server + http-server + tray share one process)",
+      "In-memory ExtensionHost plugin runtime ('electron' default; extension.setup(ctx) runs in-process)",
+      "Declared-but-unimplemented transport seam (in-memory / node-worker / electron / web-worker / websocket via createPluginContext, all non-in-memory branches throw)",
+      "Per-window Eventa IPC contexts (createContext(ipcMain, window) in windows/*/rpc/index.electron.ts)",
+      "In-app WebSocket server channel (port 6121, TLS, token, QR pairing) sharing createServer with the standalone server-runtime bin process (bin/run.ts)",
+      "Remote plugin boundary: client-side WebSocketExtensionPeer plus a stub host-side WS channel in plugin-sdk"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "gate_pass": true,
+    "material_error_count": 0,
+    "minor_error_count": 4,
+    "unresolved_decision_conflict_count": 0
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "createPluginContext is referenced only by tests (\"createPluginContext 仅测试引用\")",
+      "repository_evidence": "packages/plugin-sdk/src/plugin-host/index.ts:2 re-exports it; runtimes/node/index.ts:24 and runtimes/web/index.ts:23 define it; a repo-wide grep finds no .test.ts or production call site.",
+      "explanation": "The function is exported but unused by both production wiring and tests. The substantive point (transport seam declared but not wired) is correct; only the 'test-only' qualifier is wrong.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Every window has an independent Eventa context and the window module shape (index.ts + rpc/index.electron.ts) is uniform",
+      "repository_evidence": "rpc/index.electron.ts exists for 8 of 14 window modules (main, chat, dashboard, about, widgets, desktop-overlay, settings, inlay); caption/spotlight/onboarding create contexts inline, notice uses the shared referenced-window manager, and beat-sync/devtools have no createContext(ipcMain, ...) call.",
+      "explanation": "The pattern is dominant but not universal. The answer's enumerated file list is accurate and it later frames the shape as a seam to converge on, so impact is negligible.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The empty HTTP server manager call setupBuiltInServer({ servers: [] }) lives in http-server/index.ts",
+      "repository_evidence": "setupBuiltInServer is defined at apps/stage-tamagotchi/src/main/services/airi/http-server/index.ts:22; the empty call with servers: [] is at apps/stage-tamagotchi/src/main/index.ts:160.",
+      "explanation": "Definition vs. call-site conflation. The conclusion (an empty HTTP server manager is wired at startup) is correct.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The host-side WebSocket channel for remote plugins is only a stub and only a client-side peer exists",
+      "repository_evidence": "packages/server-runtime/src/index.ts:640 and :685 implement server-side peer:authenticate and extension:announce handling (auth check, registry sync, broadcast). packages/plugin-sdk/src/channels/remote/websocket/index.ts is a TODO stub.",
+      "explanation": "The remote plugin execution host is indeed unformed, but a full server-side protocol handler already exists in server-runtime. The answer separately acknowledges the extension:announce/peer:authenticate handshake, so the recommendation is unaffected.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "Multi-transport isolation is planned, not implemented (answer's use of the design doc)",
+      "documentation_evidence": "packages/plugin-sdk/docs/design/multi-transport.md marks Status 'Planned' and lists lifecycle orchestration, new transport stacks, and packaging/distribution as non-goals.",
+      "implementation_evidence": "packages/plugin-sdk/src/plugin-host/runtimes/node/index.ts:24-39 and runtimes/web/index.ts:23-38 throw for every non-in-memory transport; transports/index.ts only declares the union type.",
+      "state": "resolved",
+      "decision_relevant": false
+    }
+  ],
+  "rationale": "The review is accurate and well-scoped. It correctly classifies the desktop as Electron (apps/stage-tamagotchi) and explicitly rejects the Tauri-specific skill assumptions, so the legacy Tauri platform is not treated as current. Every load-bearing claim was verified against source: in-process `await import(entrypoint)` (plugin-sdk fs.ts:74 + core.ts:777-790), logical-only permission model (core.ts assertExtensionPermission/grantAllows + permissions.ts), `new ExtensionHost({ runtime: 'electron' })` with no permissionResolver (host/index.ts:236), the unimplemented transport seam (runtimes/node/index.ts throwing + transports union), the versioned manifest (shared/types.ts:322-328), the per-window createContext(ipcMain, window) pattern, both setMaxListeners debt sites, the narrow ExtensionHostGameletWidgetsManager interface, the server-* package split with server-runtime's standalone bin, the in-app WS channel (6121/TLS/token/QR), the client-side WebSocketExtensionPeer, and the three duplicated /ws literals (channel-server:105, server-sdk client.ts:174, server-runtime index.ts:1103). The multi-transport design doc is correctly treated as intent (Planned), not current state. Three viable options including status quo are compared with trade-offs, cost, risk, rollback, and invalidating evidence; the recommendation (方案 1 vertical slice, 方案 2 as a revisit condition) follows directly from the verified seams; migration is incremental, reversible, and observable. Four minor evidentiary imprecisions exist (createPluginContext \"test-only\" qualifier; \"every window\"/uniform-shape overstatement; http-server call-site attribution; remote host-channel stub understatement), none material or decision-relevant, so the accuracy gate passes."
+}

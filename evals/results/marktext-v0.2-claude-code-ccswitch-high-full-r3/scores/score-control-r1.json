@@ -1,0 +1,84 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "@muyajs/core (packages/muya) — the TypeScript engine rewrite now consumed by the desktop renderer. The legacy @marktext/muyajs (packages/muyajs) engine is retired with zero source references.",
+    "runtime_boundaries_identified": [
+      "Process isolation boundary: sandbox:true + contextIsolation:true + nodeIntegration:false with all Node access via the typed contextBridge surface",
+      "IPC channel structure boundary: four channel categories, mt:: naming convention, BrowserWindow.fromWebContents(e.sender) derivation, single-registration-point direction",
+      "Window lifecycle/type contract: WindowType {BASE,EDITOR,SETTINGS} + WindowLifecycle {NONE,LOADING,READY,QUITTED} + type query-param dispatch",
+      "File/document on-disk contract: encoding detection, BOM, internal-LF normalization, durable atomic write (write-file-atomic fsync), buffer-store schema",
+      "Engine host adapter boundary: desktop-owned narrow interface hiding the permissive Muya instance behind the hand-written muya-core.d.ts shim",
+      "Preload contextBridge API surface: shell/clipboard/webFrame/webUtils/windowControl/fs/path/ripgrep/uploader/fonts/i18n exposed via window.electron.* / global.d.ts"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 4,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "EditorWindow is 643 lines mixing lifecycle/file/buffer/restore concerns",
+      "repository_evidence": "packages/desktop/src/main/windows/editor.ts is 645 lines (grep line count)",
+      "explanation": "Off by two lines; the characterization (mixed concerns) is accurate and the number is illustrative, so it does not change any recommendation.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "ipc.ts:10-13 contains the deliberately-permissive payload comment",
+      "repository_evidence": "packages/desktop/src/shared/types/ipc.ts lines 10-12 carry that comment; line 13 is blank",
+      "explanation": "Off-by-one citation; the substance (permissive unknown[]/unknown during migration) is correct.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "editor.vue:136-139 contains the commented ag-* -> mu-* theme migration note",
+      "repository_evidence": "packages/desktop/src/renderer/src/components/editorWithTabs/editor.vue lines 137-139",
+      "explanation": "Off-by-one citation; the comment exists and says what the answer reports.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The proposed IPC contract test should exempt 'settings::change-tab, language-changed, update-buffer-state 这三个非 mt:: 例外'",
+      "repository_evidence": "All three ARE entries in ipc.ts (lines 288, 218, 85); the contract also contains ~25 additional non-mt channels (app-*, broadcast-*, watcher-*, window-*, screen-capture, set-user-preference, etc.)",
+      "explanation": "These three are already in the contract (clause (a) would catch them), and they are not the only non-mt names, so listing them as the exemption list is a muddled detail in the proposed test design. It does not affect the recommendation or any repo fact.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "verification"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "CLAUDE.md (Architecture + preload sections) states editor/preferences windows use contextIsolation:false + nodeIntegration:true, referencing packages/desktop/src/main/config.js",
+      "documentation_evidence": "Project CLAUDE.md 'Three-Process Electron Model' preload note and 'Architecture' summary",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:11-20 and :34-42 set contextIsolation:true, sandbox:true, nodeIntegration:false, webSecurity:false for both window types; the file is config.ts, not config.js. The same CLAUDE.md's Directory Structure/Code Style sections correctly describe the sandboxed renderer.",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "I independently verified the answer's load-bearing claims against implementation, configuration, tests, and the migration scoreboard. config.ts (not config.js) sets contextIsolation:true/sandbox:true/nodeIntegration:false/webSecurity:false for both window types, so the CLAUDE.md contradiction the answer leads with is real, and the answer correctly treats the stale docs as intent rather than current fact — this is a resolved drift, not an error. WindowType/WindowLifecycle closed sets (base.ts:16-29), the ~645-line EditorWindow mixing lifecycle/file/buffer/crash-recovery logic, findBestWindowToOpenIn scoring (windowManager.ts:256-305), the permissive IPC scaffold (ipc.ts:10-12), mixed internal/renderer channel namespaces, broadcast-web-image-added/removed emitted-but-unregistered (dataCenter 107/117), screen-capture dual use (ipc.ts:188 + app/index.ts:807), restoreBufferId hung on BrowserWindow (editor.ts:145, editorBufferStore 188-198), the write-file-atomic fsync path (filesystem/index.ts:40-48), watcher bug anchors (#1034/#1035/#1043/#3044/#3955), the hand-written muya-core.d.ts shim, dead muya alias + @marktext/muyajs dep (electron.vite.config.ts:38,58,84; tsconfig.base.json:29; package.json:62), and the PARITY_SCOREBOARD 15-gap/14-closed/PG14-xfail tally all check out, as does exclusive @muyajs/core import on the renderer side and the existence of every cited test (context-isolation, buffer-store-durable, application-menu-state, tabs, external-reload-undo, parity-*, launch). The answer cites paths/symbols precisely, distinguishes current evidence from documentation intent, explains where changes spread and why, compares status-quo-plus-alternatives at five decision points, derives one consistent direction, and gives incremental reversible phases with concrete completion gates. Defects are confined to three off-by-one/two line citations and one muddled parenthetical in the proposed IPC test; none is material or decision-relevant. Score 18/18, accuracy gate passes."
+}
