@@ -1,0 +1,285 @@
+{
+  "schema_version": 1,
+  "case": {
+    "id": "marktext-v0.2-baseline",
+    "sha256": "3b0d5c2c09acdb1c90884668265debb6550090ae7760406ff4acafac68a9a282"
+  },
+  "repository": {
+    "name": "marktext/marktext",
+    "url": "https://github.com/marktext/marktext",
+    "commit": "e52106fd1cdcbd33c1258b7b0cdc7013c4c5d86c",
+    "scope": "packages/desktop"
+  },
+  "skill": {
+    "name": "evolve-software-architecture",
+    "url": "https://github.com/qinyu765/evolve-software-architecture",
+    "version": "v0.1.2",
+    "commit": "12ae54160ece0ee16f837226e1cd936c980b7c46"
+  },
+  "contract": {
+    "rubric": {
+      "name": "architecture-review-v2.md",
+      "sha256": "d0158ae63a0e108206ef1db35b6f73af44fe1ff74c7abc0fc4c57b69e8ec8694"
+    },
+    "schema": {
+      "name": "architecture-review-v2.schema.json",
+      "sha256": "f562409a86ad24c236de1ff0ff615fa1ecd6478904dee6af37535aa198812815"
+    }
+  },
+  "profile": {
+    "profile_id": "claude-code-ccswitch-deepseek-v4-pro-high",
+    "runtime": "claude-code",
+    "cli_version": "2.1.233",
+    "model": "deepseek-v4-pro",
+    "model_argument": "fable",
+    "configuration_manager": "CCSwitch",
+    "reasoning_effort": "high",
+    "call_timeout_seconds": 900,
+    "ephemeral": true,
+    "sandbox": "restricted-read-tools",
+    "max_concurrency": 3,
+    "repetitions": 3,
+    "phases": "score"
+  },
+  "planned_calls": 6,
+  "rescore_source": {
+    "name": "marktext-v0.2-claude-code-ccswitch-high-full-r3",
+    "manifest_sha256": "7491ac7da8909abce04895f44ed94eac567a28c63ffb86198bfd5ab115ee7ef0",
+    "case_sha256": "3b0d5c2c09acdb1c90884668265debb6550090ae7760406ff4acafac68a9a282",
+    "profile_id": "claude-code-ccswitch-deepseek-v4-pro-high",
+    "runtime": "claude-code",
+    "contract_status": "matched",
+    "source_dataset_complete": false,
+    "producer_answers_complete": true
+  },
+  "run_id": "47d85739a19f44138c13f50ee5f587b5",
+  "started_at": "2026-08-25T06:38:27.110510+00:00",
+  "completed_at": "2026-08-25T07:05:36.712930+00:00",
+  "results": [
+    {
+      "id": "score-control-r1",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 1,
+      "success": false,
+      "attempts": 1,
+      "error": "accuracy unresolved_decision_conflict_count does not match documentation_drift",
+      "source_id": "behavior-control-r1",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 363650,
+        "num_turns": 43,
+        "failure_diagnostic": {
+          "path": "diagnostics/score-failures/score-control-r1-47d85739a19f44138c13f50ee5f587b5.json",
+          "sha256": "354abca10c98e1cac21202f7b324c41310a394bbdea72f75110338936418192d",
+          "payload_sha256": "63cf0f74fc924ebfc94b8901fb76657f1e145f3ef24a7dc1347de8aeb9d3b1e8"
+        }
+      }
+    },
+    {
+      "id": "score-control-r2",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 2,
+      "success": false,
+      "attempts": 1,
+      "error": "accuracy unresolved_decision_conflict_count does not match documentation_drift",
+      "source_id": "behavior-control-r2",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 362680,
+        "num_turns": 36,
+        "failure_diagnostic": {
+          "path": "diagnostics/score-failures/score-control-r2-47d85739a19f44138c13f50ee5f587b5.json",
+          "sha256": "46d7d6b551ec43d3791a26a3d378b8681483d4e794b612b92a12256400137781",
+          "payload_sha256": "0259b8ac36ebd9a77566ee28468441f8c3a8296a4dcbea57e1b0530a32f5cfef"
+        }
+      }
+    },
+    {
+      "id": "score-control-r3",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 3,
+      "success": false,
+      "attempts": 1,
+      "error": "evaluation call timed out after 900 seconds",
+      "source_id": "behavior-control-r3",
+      "metadata": {
+        "timed_out": true
+      }
+    },
+    {
+      "id": "score-treatment-r1",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": false,
+      "attempts": 1,
+      "error": "accuracy unresolved_decision_conflict_count does not match documentation_drift",
+      "source_id": "behavior-treatment-r1",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 350979,
+        "num_turns": 35,
+        "failure_diagnostic": {
+          "path": "diagnostics/score-failures/score-treatment-r1-47d85739a19f44138c13f50ee5f587b5.json",
+          "sha256": "d901b389239c04c6bf8bc7355b07174192cbb09e6b88ee011ed7ab577eaaac7f",
+          "payload_sha256": "f712c1b2c2b6e28bf2537b4399741116146dd16281955f76fe3b60684fd98951"
+        }
+      }
+    },
+    {
+      "id": "score-treatment-r2",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r2",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 315387,
+        "num_turns": 32
+      }
+    },
+    {
+      "id": "score-treatment-r3",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": false,
+      "attempts": 1,
+      "error": "evaluation call timed out after 900 seconds",
+      "source_id": "behavior-treatment-r3",
+      "metadata": {
+        "timed_out": true
+      }
+    }
+  ],
+  "skipped": [],
+  "observed_models": [
+    "claude-fable-5[1M]",
+    "claude-haiku-4-5"
+  ],
+  "prior_failures": [
+    {
+      "id": "score-treatment-r1",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": false,
+      "attempts": 1,
+      "error": "accuracy unresolved_decision_conflict_count does not match documentation_drift",
+      "source_id": "behavior-treatment-r1",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 350979,
+        "num_turns": 35,
+        "failure_diagnostic": {
+          "path": "diagnostics/score-failures/score-treatment-r1-47d85739a19f44138c13f50ee5f587b5.json",
+          "sha256": "d901b389239c04c6bf8bc7355b07174192cbb09e6b88ee011ed7ab577eaaac7f",
+          "payload_sha256": "f712c1b2c2b6e28bf2537b4399741116146dd16281955f76fe3b60684fd98951"
+        }
+      },
+      "run_id": "47d85739a19f44138c13f50ee5f587b5",
+      "recorded_at": "2026-08-25T06:44:20.116778+00:00"
+    },
+    {
+      "id": "score-control-r1",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 1,
+      "success": false,
+      "attempts": 1,
+      "error": "accuracy unresolved_decision_conflict_count does not match documentation_drift",
+      "source_id": "behavior-control-r1",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 363650,
+        "num_turns": 43,
+        "failure_diagnostic": {
+          "path": "diagnostics/score-failures/score-control-r1-47d85739a19f44138c13f50ee5f587b5.json",
+          "sha256": "354abca10c98e1cac21202f7b324c41310a394bbdea72f75110338936418192d",
+          "payload_sha256": "63cf0f74fc924ebfc94b8901fb76657f1e145f3ef24a7dc1347de8aeb9d3b1e8"
+        }
+      },
+      "run_id": "47d85739a19f44138c13f50ee5f587b5",
+      "recorded_at": "2026-08-25T06:44:32.955646+00:00"
+    },
+    {
+      "id": "score-control-r2",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 2,
+      "success": false,
+      "attempts": 1,
+      "error": "accuracy unresolved_decision_conflict_count does not match documentation_drift",
+      "source_id": "behavior-control-r2",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 362680,
+        "num_turns": 36,
+        "failure_diagnostic": {
+          "path": "diagnostics/score-failures/score-control-r2-47d85739a19f44138c13f50ee5f587b5.json",
+          "sha256": "46d7d6b551ec43d3791a26a3d378b8681483d4e794b612b92a12256400137781",
+          "payload_sha256": "0259b8ac36ebd9a77566ee28468441f8c3a8296a4dcbea57e1b0530a32f5cfef"
+        }
+      },
+      "run_id": "47d85739a19f44138c13f50ee5f587b5",
+      "recorded_at": "2026-08-25T06:50:36.616851+00:00"
+    },
+    {
+      "id": "score-treatment-r3",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": false,
+      "attempts": 1,
+      "error": "evaluation call timed out after 900 seconds",
+      "source_id": "behavior-treatment-r3",
+      "metadata": {
+        "timed_out": true
+      },
+      "run_id": "47d85739a19f44138c13f50ee5f587b5",
+      "recorded_at": "2026-08-25T07:05:36.709397+00:00"
+    },
+    {
+      "id": "score-control-r3",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 3,
+      "success": false,
+      "attempts": 1,
+      "error": "evaluation call timed out after 900 seconds",
+      "source_id": "behavior-control-r3",
+      "metadata": {
+        "timed_out": true
+      },
+      "run_id": "47d85739a19f44138c13f50ee5f587b5",
+      "recorded_at": "2026-08-25T07:05:36.711010+00:00"
+    }
+  ]
+}
