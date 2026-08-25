@@ -1126,11 +1126,13 @@ def load_rescore_behavior_answers(
     rubric_path: Path,
     schema_path: Path,
 ) -> tuple[dict[str, RunResult], dict[str, Any]]:
-    """Load only producer answers from a completed profile for score-only runs.
+    """Load producer answers for score-only runs.
 
     Older v0.2 result manifests did not record rubric/schema digests. They are
     accepted as legacy sources, while any newer manifest with a contract must
-    match the requested contract byte-for-byte.
+    match the requested contract byte-for-byte. The source dataset may be
+    incomplete when its producer answers are complete but scorer outputs were
+    rejected; score-only runs replace only that scoring phase.
     """
     source_dir = source_dir.resolve()
     manifest_path = source_dir / "manifest.json"
@@ -1138,11 +1140,10 @@ def load_rescore_behavior_answers(
     if not manifest_path.is_file() or not summary_path.is_file():
         raise EvaluationError(
             "rescore source must contain manifest.json and summary.json"
-        )
+    )
     manifest = load_json(manifest_path)
     summary = load_json(summary_path)
-    if not summary.get("dataset_complete"):
-        raise EvaluationError("rescore source is not complete")
+    source_dataset_complete = summary.get("dataset_complete") is True
     expected_case = {"id": case["id"], "sha256": case_digest(case)}
     if manifest.get("case") != expected_case:
         raise EvaluationError("rescore source case does not match the requested case")
@@ -1200,6 +1201,8 @@ def load_rescore_behavior_answers(
         "profile_id": source_profile.get("profile_id"),
         "runtime": source_profile.get("runtime"),
         "contract_status": contract_status,
+        "source_dataset_complete": source_dataset_complete,
+        "producer_answers_complete": True,
     }
 
 

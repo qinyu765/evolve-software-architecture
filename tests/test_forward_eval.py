@@ -142,6 +142,25 @@ class ForwardEvaluationTest(unittest.TestCase):
             self.assertEqual(manifest["planned_calls"], 6)
             self.assertEqual(manifest["rescore_source"]["contract_status"], "legacy-unrecorded")
 
+    def test_rescore_accepts_incomplete_source_with_complete_behavior_answers(self) -> None:
+        case = load_json(MARKTEXT_CASE_PATH)
+        source, rubric, schema = (
+            CLAUDE_MANIFEST_PATH.parent,
+            ROOT / "evals" / "rubrics" / "architecture-review-v2.md",
+            ROOT / "evals" / "rubrics" / "architecture-review-v2.schema.json",
+        )
+        answers, source_info = load_rescore_behavior_answers(
+            source,
+            case,
+            3,
+            "claude-code",
+            rubric,
+            schema,
+        )
+        self.assertEqual(len(answers), 6)
+        self.assertFalse(source_info["source_dataset_complete"])
+        self.assertTrue(source_info["producer_answers_complete"])
+
     def test_invalid_score_persists_failure_diagnostic(self) -> None:
         score = self._score_payload()
         invalid_score = dict(score)

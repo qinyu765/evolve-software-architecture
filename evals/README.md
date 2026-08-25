@@ -11,7 +11,7 @@ python3 -m unittest discover -s tests -v
 python3 scripts/run_forward_eval.py --dry-run
 ```
 
-The runner accepts `--repository-source` for any pinned Git repository; `--airi-source` remains a compatibility alias. Contract files can be selected explicitly with `--rubric PATH --schema PATH`. A score-only run requires `--phases score --rescore-from RESULT_DIR`; it reads the six existing behavior answers, never reruns producers, and writes a separate result directory with source and contract digests.
+The runner accepts `--repository-source` for any pinned Git repository; `--airi-source` remains a compatibility alias. Contract files can be selected explicitly with `--rubric PATH --schema PATH`. A score-only run requires `--phases score --rescore-from RESULT_DIR`; it reads the six existing behavior answers, never reruns producers, and writes a separate result directory with source and contract digests. A source may have `dataset_complete=false` when only its scorer phase failed, provided all six behavior producer answers are successful; missing producer answers remain a hard error.
 
 Rescore an existing complete AIRI profile without changing its original files:
 
