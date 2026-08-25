@@ -14,6 +14,7 @@ from scripts.run_forward_eval import (
     aggregate_results,
     assert_control_uncontaminated,
     build_invocation_matrix,
+    build_score_invocation_matrix,
     case_digest,
     claude_command,
     execute_with_retry,
@@ -28,6 +29,7 @@ from scripts.run_forward_eval import (
     scorer_prompt,
     skill_parent,
     summary_markdown,
+    validate_score,
     write_json,
 )
 
@@ -47,6 +49,232 @@ class ForwardEvaluationTest(unittest.TestCase):
         self.assertEqual(sum(item.phase == "routing" for item in matrix), 18)
         self.assertEqual(sum(item.phase == "behavior" for item in matrix), 6)
         self.assertEqual(sum(item.phase == "score" for item in matrix), 6)
+
+    def test_score_only_matrix_has_exactly_six_scorers(self) -> None:
+        matrix = build_score_invocation_matrix(self.case, 3)
+        self.assertEqual(len(matrix), 6)
+        self.assertTrue(all(item.phase == "score" for item in matrix))
+        self.assertEqual(len({item.id for item in matrix}), 6)
+
+    def test_score_phase_rescores_answers_without_running_producers(self) -> None:
+        score = self._score_payload()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "source-results"
+            output = root / "rescore-results"
+            source.mkdir()
+            source_manifest = {
+                "case": {"id": self.case["id"], "sha256": case_digest(self.case)},
+                "repository": self.case["repository"],
+                "skill": self.case["skill"],
+                "profile": {"runtime": "codex", "repetitions": 3, "profile_id": "fixture"},
+                "results": [],
+            }
+            for invocation in build_invocation_matrix(self.case, 3):
+                if invocation.phase != "behavior":
+                    continue
+                source_manifest["results"].append(
+                    {"id": invocation.id, "success": True, "attempts": 1}
+                )
+                answer_path = source / "answers" / "behavior" / f"{invocation.id}.md"
+                answer_path.parent.mkdir(parents=True, exist_ok=True)
+                answer_path.write_text("fixture producer answer\n", encoding="utf-8")
+            write_json(source / "manifest.json", source_manifest)
+            write_json(source / "summary.json", {"dataset_complete": True})
+            source_manifest_bytes = (source / "manifest.json").read_bytes()
+
+            def scorer(invocation, *_args, **_kwargs):
+                self.assertEqual(invocation.phase, "score")
+                return AttemptResult(0, json.dumps(score))
+
+            with (
+                mock.patch("scripts.run_forward_eval.codex_version", return_value="0.144.4"),
+                mock.patch(
+                    "scripts.run_forward_eval.prepare_checkouts",
+                    return_value={"control": source, "treatment": source},
+                ),
+                mock.patch("scripts.run_forward_eval.assert_clean"),
+                mock.patch("scripts.run_forward_eval.run_codex", side_effect=scorer) as run,
+            ):
+                result = main(
+                    [
+                        "--runtime",
+                        "codex",
+                        "--repository-source",
+                        str(source),
+                        "--phases",
+                        "score",
+                        "--rescore-from",
+                        str(source),
+                        "--rubric",
+                        str(ROOT / "evals" / "rubrics" / "architecture-review-v2.md"),
+                        "--schema",
+                        str(ROOT / "evals" / "rubrics" / "architecture-review-v2.schema.json"),
+                        "--output-dir",
+                        str(output),
+                    ]
+                )
+            self.assertEqual(result, 0)
+            self.assertEqual(run.call_count, 6)
+            self.assertEqual((source / "manifest.json").read_bytes(), source_manifest_bytes)
+            manifest = load_json(output / "manifest.json")
+            self.assertEqual(manifest["planned_calls"], 6)
+            self.assertEqual(manifest["rescore_source"]["contract_status"], "legacy-unrecorded")
+
+    def test_score_phase_requires_rescore_source(self) -> None:
+        with self.assertRaisesRegex(EvaluationError, "requires --rescore-from"):
+            main(["--phases", "score"])
+
+    def test_v2_score_requires_accuracy_and_documentation_drift_fields(self) -> None:
+        score = self._score_payload()
+        validate_score(score, require_accuracy=True)
+        missing = dict(score)
+        missing.pop("accuracy")
+        with self.assertRaisesRegex(EvaluationError, "accuracy"):
+            validate_score(missing, require_accuracy=True)
+
+    def test_material_treatment_error_blocks_accuracy_gate(self) -> None:
+        summary = self._aggregate_with_accuracy(
+            treatment_accuracy={
+                "material_error_count": 1,
+                "minor_error_count": 0,
+                "unresolved_decision_conflict_count": 0,
+                "gate_pass": False,
+            }
+        )
+        self.assertFalse(summary["gates"]["accuracy"])
+        self.assertFalse(summary["gates"]["overall"])
+
+    def test_unresolved_decision_documentation_conflict_blocks_accuracy_gate(self) -> None:
+        summary = self._aggregate_with_accuracy(
+            treatment_accuracy={
+                "material_error_count": 0,
+                "minor_error_count": 0,
+                "unresolved_decision_conflict_count": 1,
+                "gate_pass": False,
+            },
+            documentation_drift=[
+                {
+                    "claim": "sandbox state",
+                    "documentation_evidence": "CLAUDE.md",
+                    "implementation_evidence": "BrowserWindow config",
+                    "state": "conflict",
+                    "decision_relevant": True,
+                }
+            ],
+        )
+        self.assertFalse(summary["gates"]["accuracy"])
+        self.assertFalse(summary["gates"]["overall"])
+
+    def test_minor_treatment_error_does_not_block_accuracy_gate(self) -> None:
+        summary = self._aggregate_with_accuracy(
+            treatment_accuracy={
+                "material_error_count": 0,
+                "minor_error_count": 1,
+                "unresolved_decision_conflict_count": 0,
+                "gate_pass": True,
+            }
+        )
+        self.assertTrue(summary["gates"]["accuracy"])
+
+    def test_control_accuracy_error_is_diagnostic_only(self) -> None:
+        summary = self._aggregate_with_accuracy(
+            treatment_accuracy={
+                "material_error_count": 0,
+                "minor_error_count": 0,
+                "unresolved_decision_conflict_count": 0,
+                "gate_pass": True,
+            },
+            control_accuracy={
+                "material_error_count": 1,
+                "minor_error_count": 0,
+                "unresolved_decision_conflict_count": 0,
+                "gate_pass": False,
+            },
+        )
+        self.assertTrue(summary["gates"]["accuracy"])
+        self.assertEqual(summary["behavior"]["control"]["material_factual_errors"], 3)
+
+    def test_acknowledged_documentation_conflict_does_not_block_accuracy_gate(self) -> None:
+        summary = self._aggregate_with_accuracy(
+            treatment_accuracy={
+                "material_error_count": 0,
+                "minor_error_count": 0,
+                "unresolved_decision_conflict_count": 0,
+                "gate_pass": True,
+            },
+            documentation_drift=[
+                {
+                    "claim": "sandbox state",
+                    "documentation_evidence": "CLAUDE.md",
+                    "implementation_evidence": "BrowserWindow config",
+                    "state": "conflict",
+                    "decision_relevant": True,
+                }
+            ],
+        )
+        self.assertTrue(summary["gates"]["accuracy"])
+        self.assertEqual(summary["behavior"]["treatment"]["documentation_drifts"], 3)
+
+    def _score_payload(self, accuracy=None, documentation_drift=None):
+        dimensions = {name: 2 for name in (
+            "scope_and_classification",
+            "evidence",
+            "current_friction",
+            "quality_attributes",
+            "options",
+            "recommendation",
+            "migration",
+            "verification",
+            "generalization",
+        )}
+        return {
+            "dimensions": dimensions,
+            "total": 18,
+            "acceptance_checks": {
+                "current_desktop_platform": "Electron",
+                "runtime_boundaries_identified": ["main", "preload", "renderer"],
+                "legacy_platform_treated_as_current": False,
+            },
+            "accuracy": accuracy or {
+                "material_error_count": 0,
+                "minor_error_count": 0,
+                "unresolved_decision_conflict_count": 0,
+                "gate_pass": True,
+            },
+            "factual_errors": [],
+            "documentation_drift": documentation_drift or [],
+            "rationale": "fixture",
+        }
+
+    def _aggregate_with_accuracy(
+        self, treatment_accuracy, documentation_drift=None, control_accuracy=None
+    ):
+        marker = self.case["routing"]["marker_token"]
+        routing = []
+        for index in range(9):
+            invocation = Invocation(
+                f"positive-{index}", "routing", f"p-{index}", "positive", 1, "p"
+            )
+            routing.append(type("Result", (), {"invocation": invocation, "success": True, "answer": marker})())
+        for index in range(9):
+            invocation = Invocation(
+                f"negative-{index}", "routing", f"n-{index}", "negative", 1, "p"
+            )
+            routing.append(type("Result", (), {"invocation": invocation, "success": True, "answer": "plain"})())
+        scores = {}
+        for variant in ("control", "treatment"):
+            for repetition in range(1, 4):
+                accuracy = (
+                    treatment_accuracy
+                    if variant == "treatment"
+                    else control_accuracy
+                )
+                scores[f"score-{variant}-r{repetition}"] = self._score_payload(
+                    accuracy=accuracy,
+                    documentation_drift=documentation_drift if variant == "treatment" else [],
+                )
+        return aggregate_results(self.case, routing, scores, [])
 
     def test_marker_injection_preserves_frontmatter_bytes(self) -> None:
         content = b"---\nname: example\ndescription: example\n---\n\n# Body\n"

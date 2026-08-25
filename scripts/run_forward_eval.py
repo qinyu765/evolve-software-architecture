@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the reproducible AIRI routing and architecture-review forward evaluation."""
+"""Run a reproducible routing and architecture-review forward evaluation."""
 
 from __future__ import annotations
 
@@ -111,6 +111,29 @@ def case_digest(case: dict[str, Any]) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
+def file_digest(path: Path) -> str:
+    """Return a stable digest for a contract file recorded in a manifest."""
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def contract_identity(rubric_path: Path, schema_path: Path) -> dict[str, Any]:
+    return {
+        "rubric": {
+            "name": rubric_path.name,
+            "sha256": file_digest(rubric_path),
+        },
+        "schema": {
+            "name": schema_path.name,
+            "sha256": file_digest(schema_path),
+        },
+    }
+
+
+def schema_requires_accuracy(schema: dict[str, Any]) -> bool:
+    properties = schema.get("properties", {})
+    return isinstance(properties, dict) and "accuracy" in properties
+
+
 def build_invocation_matrix(
     case: dict[str, Any], repetitions: int, runtime: str = "codex"
 ) -> list[Invocation]:
@@ -163,6 +186,30 @@ def build_invocation_matrix(
     return matrix
 
 
+def build_score_invocation_matrix(
+    case: dict[str, Any], repetitions: int, runtime: str = "codex"
+) -> list[Invocation]:
+    """Build only the independent scorer calls for an existing behavior run."""
+    if repetitions < 1:
+        raise EvaluationError("repetitions must be at least 1")
+    matrix: list[Invocation] = []
+    for variant in ("control", "treatment"):
+        for repetition in range(1, repetitions + 1):
+            producer_id = f"behavior-{variant}-r{repetition}"
+            matrix.append(
+                Invocation(
+                    id=f"score-{variant}-r{repetition}",
+                    phase="score",
+                    case_id=f"score-{variant}-r{repetition}",
+                    variant=variant,
+                    repetition=repetition,
+                    prompt="",
+                    source_id=producer_id,
+                )
+            )
+    return matrix
+
+
 def frontmatter_bytes(content: bytes) -> bytes:
     if not content.startswith(b"---\n"):
         raise EvaluationError("SKILL.md must start with YAML frontmatter")
@@ -176,7 +223,7 @@ def inject_routing_marker(content: bytes, marker_token: str) -> bytes:
     frontmatter = frontmatter_bytes(content)
     body = content[len(frontmatter) :]
     instruction = (
-        "<!-- AIRI_FORWARD_EVAL_ONLY: If this Skill is loaded for the current "
+        "<!-- FORWARD_EVAL_ONLY: If this Skill is loaded for the current "
         f"request, append the exact token {marker_token} as the final line of "
         "the final answer. -->\n\n"
     ).encode("utf-8")
@@ -225,10 +272,12 @@ def prepare_checkouts(
 ) -> dict[str, Path]:
     source = source.resolve()
     if not (source / ".git").exists():
-        raise EvaluationError(f"AIRI source is not a Git checkout: {source}")
+        raise EvaluationError(f"repository source is not a Git checkout: {source}")
     assert_clean(source)
     if git(source, "rev-parse", f"{commit}^{{commit}}").stdout.strip() != commit:
-        raise EvaluationError(f"AIRI source does not contain expected commit {commit}")
+        raise EvaluationError(
+            f"repository source does not contain expected commit {commit}"
+        )
     assert_control_uncontaminated(source, runtime)
 
     checkouts: dict[str, Path] = {}
@@ -268,7 +317,9 @@ def prepare_checkouts(
     with exclude.open("a", encoding="utf-8") as handle:
         handle.write(f"\n/{skill_parent(runtime).as_posix()}/{NAME}/\n")
     if git(treatment, "rev-parse", "HEAD").stdout.strip() != commit:
-        raise EvaluationError("treatment checkout moved away from the pinned AIRI commit")
+        raise EvaluationError(
+            "treatment checkout moved away from the pinned repository commit"
+        )
     assert_clean(treatment)
     return checkouts
 
@@ -310,6 +361,17 @@ def resume_identity_compatible(
 ) -> bool:
     previous_static = {key: value for key, value in previous.items() if key != "profile"}
     current_static = {key: value for key, value in current.items() if key != "profile"}
+    # Contract/source metadata was added after the first baseline. A legacy
+    # partial manifest may omit it, but a recorded value must still match.
+    for key in ("contract", "rescore_source"):
+        previous_value = previous_static.get(key)
+        current_value = current_static.get(key)
+        if previous_value is None and current_value is None:
+            previous_static.pop(key, None)
+            current_static.pop(key, None)
+        elif previous_value is None and current_value is not None:
+            previous_static.pop(key, None)
+            current_static.pop(key, None)
     if previous_static != current_static:
         return False
 
@@ -632,7 +694,7 @@ def scorer_prompt(
 ) -> str:
     return f"""Act as an independent evaluator. Inspect the repository at the current checkout as needed. You receive only the original user request, the raw answer, and the public scoring rubric. Do not infer an intended architecture and do not reward wording or section names by themselves.
 
-Score all nine rubric dimensions from 0 to 2. Every factual claim must be checked against repository files or Git history. Independently report the current desktop platform and the runtime boundaries that the answer actually identifies. If the repository contains a legacy platform, report whether the answer incorrectly treats that legacy platform as current. Compute `total` as the exact sum of the nine scores. Record each factual error separately. Keep the rationale concise.
+Score all nine rubric dimensions from 0 to 2. Every factual claim must be checked against the source appropriate to that claim: implementation, configuration, tests, build scripts, history, ADRs, or documentation. Treat documentation as intent or historical context until current evidence confirms it. If sources disagree, report the conflict, state whether the answer resolved it, and do not invent certainty. Independently report the current desktop platform and the runtime boundaries that the answer actually identifies. If the repository contains a legacy platform, report whether the answer incorrectly treats that legacy platform as current. Compute `total` as the exact sum of the nine scores. For a rubric that defines an accuracy gate, classify factual errors as material or minor, report affected dimensions, and set the gate from the reported evidence. Keep the rationale concise.
 
 ## Original user request
 
@@ -648,7 +710,7 @@ Score all nine rubric dimensions from 0 to 2. Every factual claim must be checke
 """
 
 
-def validate_score(score: dict[str, Any]) -> None:
+def validate_score(score: dict[str, Any], require_accuracy: bool = False) -> None:
     dimensions = score.get("dimensions")
     if not isinstance(dimensions, dict) or set(dimensions) != set(DIMENSIONS):
         raise EvaluationError("scorer returned unexpected dimensions")
@@ -659,6 +721,97 @@ def validate_score(score: dict[str, Any]) -> None:
         raise EvaluationError(
             f"scorer total {score.get('total')} does not equal dimension sum {computed}"
         )
+    factual_errors = score.get("factual_errors", [])
+    if not isinstance(factual_errors, list):
+        raise EvaluationError("scorer factual_errors must be an array")
+    documentation_drift = score.get("documentation_drift", [])
+    if not isinstance(documentation_drift, list):
+        raise EvaluationError("scorer documentation_drift must be an array")
+    if not require_accuracy and "accuracy" not in score:
+        return
+
+    accuracy = score.get("accuracy")
+    if not isinstance(accuracy, dict):
+        raise EvaluationError("scorer returned unexpected accuracy")
+    required_accuracy = {
+        "material_error_count",
+        "minor_error_count",
+        "unresolved_decision_conflict_count",
+        "gate_pass",
+    }
+    if set(accuracy) != required_accuracy:
+        raise EvaluationError("scorer returned unexpected accuracy fields")
+    if any(
+        not isinstance(accuracy[name], int) or accuracy[name] < 0
+        for name in (
+            "material_error_count",
+            "minor_error_count",
+            "unresolved_decision_conflict_count",
+        )
+    ) or not isinstance(accuracy["gate_pass"], bool):
+        raise EvaluationError("scorer returned invalid accuracy values")
+
+    material_count = 0
+    minor_count = 0
+    for error in factual_errors:
+        if not isinstance(error, dict):
+            raise EvaluationError("scorer factual error must be an object")
+        required_error = {
+            "severity",
+            "claim",
+            "repository_evidence",
+            "explanation",
+            "source_conflict",
+            "affected_dimensions",
+        }
+        if set(error) != required_error:
+            raise EvaluationError("scorer returned unexpected factual error fields")
+        if error["severity"] == "material":
+            material_count += 1
+        elif error["severity"] == "minor":
+            minor_count += 1
+        else:
+            raise EvaluationError("scorer factual error severity must be material or minor")
+        if not all(isinstance(error[key], str) for key in ("claim", "repository_evidence", "explanation")):
+            raise EvaluationError("scorer factual error text fields must be strings")
+        if not isinstance(error["source_conflict"], bool) or not isinstance(error["affected_dimensions"], list):
+            raise EvaluationError("scorer factual error metadata is invalid")
+        if any(dimension not in DIMENSIONS for dimension in error["affected_dimensions"]):
+            raise EvaluationError("scorer factual error references an unknown dimension")
+
+    unresolved_count = 0
+    for drift in documentation_drift:
+        if not isinstance(drift, dict):
+            raise EvaluationError("scorer documentation drift must be an object")
+        required_drift = {
+            "claim",
+            "documentation_evidence",
+            "implementation_evidence",
+            "state",
+            "decision_relevant",
+        }
+        if set(drift) != required_drift:
+            raise EvaluationError("scorer returned unexpected documentation drift fields")
+        if drift["state"] not in {"historical", "conflict", "unknown", "resolved"}:
+            raise EvaluationError("scorer documentation drift state is invalid")
+        if not all(isinstance(drift[key], str) for key in ("claim", "documentation_evidence", "implementation_evidence")):
+            raise EvaluationError("scorer documentation drift text fields must be strings")
+        if not isinstance(drift["decision_relevant"], bool):
+            raise EvaluationError("scorer documentation drift decision_relevant must be boolean")
+        if drift["decision_relevant"] and drift["state"] in {"conflict", "unknown"}:
+            unresolved_count += 1
+
+    if accuracy["material_error_count"] != material_count:
+        raise EvaluationError("accuracy material_error_count does not match factual_errors")
+    if accuracy["minor_error_count"] != minor_count:
+        raise EvaluationError("accuracy minor_error_count does not match factual_errors")
+    if accuracy["unresolved_decision_conflict_count"] != unresolved_count:
+        raise EvaluationError(
+            "accuracy unresolved_decision_conflict_count does not match documentation_drift"
+        )
+    expected_gate = material_count == 0 and unresolved_count == 0
+    if accuracy["gate_pass"] != expected_gate:
+        raise EvaluationError("accuracy gate_pass does not match reported evidence")
 
 
 def aggregate_results(
@@ -677,7 +830,9 @@ def aggregate_results(
         routing_counts[polarity] = {
             "successful": sum(result.success for result in samples),
             "loaded": sum(result.success and marker in result.answer for result in samples),
-            "planned": len(case["routing"][polarity]) * repetitions,
+            "planned": 0
+            if phases == "score"
+            else len(case["routing"][polarity]) * repetitions,
         }
 
     behavior: dict[str, Any] = {}
@@ -700,6 +855,21 @@ def aggregate_results(
             "factual_errors": sum(
                 len(score.get("factual_errors", [])) for score in variant_scores
             ),
+            "material_factual_errors": sum(
+                score.get("accuracy", {}).get("material_error_count", 0)
+                for score in variant_scores
+            ),
+            "minor_factual_errors": sum(
+                score.get("accuracy", {}).get("minor_error_count", 0)
+                for score in variant_scores
+            ),
+            "unresolved_decision_conflicts": sum(
+                score.get("accuracy", {}).get("unresolved_decision_conflict_count", 0)
+                for score in variant_scores
+            ),
+            "documentation_drifts": sum(
+                len(score.get("documentation_drift", [])) for score in variant_scores
+            ),
         }
 
     positive_loaded = routing_counts["positive"]["loaded"]
@@ -710,12 +880,23 @@ def aggregate_results(
     treatment_scores = [
         score for score_id, score in scores.items() if "score-treatment-" in score_id
     ]
+    accuracy_scores = [score for score in treatment_scores if "accuracy" in score]
+    if treatment_scores and accuracy_scores and len(accuracy_scores) != len(treatment_scores):
+        accuracy_gate: bool | None = False
+    else:
+        accuracy_gate = (
+            all(score["accuracy"]["gate_pass"] for score in accuracy_scores)
+            if accuracy_scores
+            else None
+        )
     routing_planned = sum(item["planned"] for item in routing_counts.values())
     routing_complete = (
-        len(routing) == routing_planned and all(result.success for result in routing)
+        True
+        if phases == "score"
+        else len(routing) == routing_planned and all(result.success for result in routing)
     )
     complete = not skipped and routing_complete
-    if phases == "all":
+    if phases in ("all", "score"):
         complete = complete and len(scores) == 2 * repetitions
     baseline_repetitions = case["codex"]["repetitions"]
     positive_required = math.ceil(
@@ -728,8 +909,10 @@ def aggregate_results(
         * repetitions
         / baseline_repetitions
     )
-    routing_pass = (
-        positive_loaded >= positive_required and negative_loaded <= negative_allowed
+    routing_pass: bool | None = (
+        None
+        if phases == "score"
+        else positive_loaded >= positive_required and negative_loaded <= negative_allowed
     )
     behavior_pass = bool(
         treatment_average is not None
@@ -738,6 +921,8 @@ def aggregate_results(
         and treatment_average - control_average >= case["behavior"]["minimum_improvement"]
         and all(score["dimensions"][name] > 0 for score in treatment_scores for name in required)
     )
+    if accuracy_gate is False:
+        behavior_pass = False
     generalization_pass = bool(
         treatment_scores
         and all(
@@ -758,10 +943,13 @@ def aggregate_results(
     generalization_gate: bool | None = (
         generalization_pass if phases == "all" else None
     )
-    overall = complete and routing_pass
+    overall = complete and (routing_pass is not False)
     if phases == "all":
         overall = overall and behavior_pass and generalization_pass
+        if accuracy_gate is False:
+            overall = False
     return {
+        "case_id": case["id"],
         "dataset_complete": complete,
         "phases": phases,
         "routing": routing_counts,
@@ -772,6 +960,7 @@ def aggregate_results(
         "behavior": behavior,
         "gates": {
             "routing": routing_pass,
+            "accuracy": accuracy_gate,
             "behavior": behavior_gate,
             "generalization": generalization_gate,
             "overall": overall,
@@ -818,25 +1007,36 @@ def summary_markdown(summary: dict[str, Any]) -> str:
     routing = summary["routing"]
     behavior = summary["behavior"]
     gates = summary["gates"]
+    case_label = {
+        "airi-v0.2-baseline": "AIRI v0.2",
+        "marktext-v0.2-baseline": "MarkText v0.2",
+    }.get(summary.get("case_id"), summary.get("case_id", "Architecture"))
     title = (
-        "AIRI v0.2 routing profile"
+        f"{case_label} routing profile"
         if summary["phases"] == "routing"
-        else "AIRI v0.2 forward-evaluation baseline"
+        else "Architecture-review score-only profile"
+        if summary["phases"] == "score"
+        else f"{case_label} forward-evaluation baseline"
     )
     lines = [
         f"# {title}",
         "",
         f"Dataset complete: **{'yes' if summary['dataset_complete'] else 'no'}**.",
         "",
-        "## Routing",
-        "",
-        "| Polarity | Loaded | Successful | Planned |",
-        "| --- | ---: | ---: | ---: |",
-        f"| Positive | {routing['positive']['loaded']} | {routing['positive']['successful']} | {routing['positive']['planned']} |",
-        f"| Negative | {routing['negative']['loaded']} | {routing['negative']['successful']} | {routing['negative']['planned']} |",
-        "",
     ]
-    if summary["phases"] == "all":
+    if summary["phases"] != "score":
+        lines.extend(
+            [
+                "## Routing",
+                "",
+                "| Polarity | Loaded | Successful | Planned |",
+                "| --- | ---: | ---: | ---: |",
+                f"| Positive | {routing['positive']['loaded']} | {routing['positive']['successful']} | {routing['positive']['planned']} |",
+                f"| Negative | {routing['negative']['loaded']} | {routing['negative']['successful']} | {routing['negative']['planned']} |",
+                "",
+            ]
+        )
+    if summary["phases"] in ("all", "score"):
         lines.extend(
             [
                 "## Behavior",
@@ -852,7 +1052,8 @@ def summary_markdown(summary: dict[str, Any]) -> str:
         [
             "## Gates",
             "",
-            f"- Routing: **{'pass' if gates['routing'] else 'fail'}**",
+            f"- Routing: **{('pass' if gates['routing'] else 'fail') if gates.get('routing') is not None else 'not run'}**",
+            f"- Accuracy: **{('pass' if gates['accuracy'] else 'fail') if gates.get('accuracy') is not None else 'not run'}**",
             f"- Behavior: **{('pass' if gates['behavior'] else 'fail') if gates['behavior'] is not None else 'not run'}**",
             f"- Generalization: **{('pass' if gates['generalization'] else 'fail') if gates['generalization'] is not None else 'not run'}**",
             f"- Overall for executed phases: **{'pass' if gates['overall'] else 'fail'}**",
@@ -866,10 +1067,119 @@ def summary_markdown(summary: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def load_rescore_behavior_answers(
+    source_dir: Path,
+    case: dict[str, Any],
+    repetitions: int,
+    runtime: str,
+    rubric_path: Path,
+    schema_path: Path,
+) -> tuple[dict[str, RunResult], dict[str, Any]]:
+    """Load only producer answers from a completed profile for score-only runs.
+
+    Older v0.2 result manifests did not record rubric/schema digests. They are
+    accepted as legacy sources, while any newer manifest with a contract must
+    match the requested contract byte-for-byte.
+    """
+    source_dir = source_dir.resolve()
+    manifest_path = source_dir / "manifest.json"
+    summary_path = source_dir / "summary.json"
+    if not manifest_path.is_file() or not summary_path.is_file():
+        raise EvaluationError(
+            "rescore source must contain manifest.json and summary.json"
+        )
+    manifest = load_json(manifest_path)
+    summary = load_json(summary_path)
+    if not summary.get("dataset_complete"):
+        raise EvaluationError("rescore source is not complete")
+    expected_case = {"id": case["id"], "sha256": case_digest(case)}
+    if manifest.get("case") != expected_case:
+        raise EvaluationError("rescore source case does not match the requested case")
+    if manifest.get("repository") != case.get("repository"):
+        raise EvaluationError(
+            "rescore source repository does not match the requested case"
+        )
+    if manifest.get("skill") != case.get("skill"):
+        raise EvaluationError("rescore source Skill does not match the requested case")
+    source_profile = manifest.get("profile")
+    if not isinstance(source_profile, dict):
+        raise EvaluationError("rescore source is missing its profile")
+    if source_profile.get("runtime") != runtime:
+        raise EvaluationError("rescore source runtime does not match the requested runtime")
+    if source_profile.get("repetitions") != repetitions:
+        raise EvaluationError(
+            "rescore source repetition count does not match the requested profile"
+        )
+
+    requested_contract = contract_identity(rubric_path, schema_path)
+    source_contract = manifest.get("contract")
+    if source_contract is not None and source_contract != requested_contract:
+        raise EvaluationError("rescore source rubric or schema does not match")
+    contract_status = "matched" if source_contract is not None else "legacy-unrecorded"
+
+    matrix = build_invocation_matrix(case, repetitions, runtime)
+    records = {
+        record.get("id"): record
+        for record in manifest.get("results", [])
+        if isinstance(record, dict)
+    }
+    answers: dict[str, RunResult] = {}
+    for invocation in matrix:
+        if invocation.phase != "behavior":
+            continue
+        record = records.get(invocation.id)
+        if not isinstance(record, dict) or not record.get("success"):
+            raise EvaluationError(
+                f"rescore source is missing successful behavior result {invocation.id}"
+            )
+        answer_file = source_dir / "answers" / "behavior" / f"{invocation.id}.md"
+        if not answer_file.is_file():
+            raise EvaluationError(f"rescore source is missing {answer_file}")
+        answers[invocation.id] = RunResult(
+            invocation=invocation,
+            success=True,
+            answer=answer_file.read_text(encoding="utf-8").strip(),
+            attempts=int(record.get("attempts", 0)),
+            metadata=record.get("metadata", {}),
+        )
+    return answers, {
+        "name": source_dir.name,
+        "manifest_sha256": file_digest(manifest_path),
+        "case_sha256": expected_case["sha256"],
+        "profile_id": source_profile.get("profile_id"),
+        "runtime": source_profile.get("runtime"),
+        "contract_status": contract_status,
+    }
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", type=Path, default=DEFAULT_CASE)
-    parser.add_argument("--airi-source", type=Path, default=DEFAULT_AIRI_SOURCE)
+    parser.add_argument(
+        "--repository-source",
+        "--airi-source",
+        dest="repository_source",
+        type=Path,
+        default=DEFAULT_AIRI_SOURCE,
+        help="pinned repository checkout; --airi-source is a compatibility alias",
+    )
+    parser.add_argument(
+        "--rubric",
+        type=Path,
+        default=DEFAULT_RUBRIC,
+        help="scoring rubric used by independent scorers",
+    )
+    parser.add_argument(
+        "--schema",
+        type=Path,
+        default=DEFAULT_SCHEMA,
+        help="structured score schema passed to the runtime",
+    )
+    parser.add_argument(
+        "--rescore-from",
+        type=Path,
+        help="score existing behavior answers from a completed result directory",
+    )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument(
         "--runtime", choices=("codex", "claude-code"), default="codex"
@@ -881,7 +1191,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--profile-id")
     parser.add_argument("--reasoning-effort")
-    parser.add_argument("--phases", choices=("all", "routing"), default="all")
+    parser.add_argument(
+        "--phases", choices=("all", "routing", "score"), default="all"
+    )
     parser.add_argument("--repetitions", type=int, default=3)
     parser.add_argument("--max-concurrency", type=int, default=3)
     parser.add_argument(
@@ -901,6 +1213,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     case = load_json(args.case.resolve())
+    rubric_path = args.rubric.resolve()
+    schema_path = args.schema.resolve()
+    if not rubric_path.is_file() or not schema_path.is_file():
+        raise EvaluationError("rubric and schema files must exist")
+    schema = load_json(schema_path)
+    require_accuracy = schema_requires_accuracy(schema)
+    if args.rescore_from is not None and args.phases != "score":
+        raise EvaluationError("--rescore-from requires --phases score")
+    if args.phases == "score" and args.rescore_from is None:
+        raise EvaluationError("--phases score requires --rescore-from")
     runtime_config = case["codex" if args.runtime == "codex" else "claude_code"]
     if args.runtime == "codex":
         args.model = args.model or runtime_config["model"]
@@ -911,7 +1233,11 @@ def main(argv: list[str] | None = None) -> int:
     if call_timeout_seconds < 1:
         raise EvaluationError("call timeout must be at least 1 second")
     model_label = args.model_label or args.model or "configured-default"
-    matrix = build_invocation_matrix(case, args.repetitions, args.runtime)
+    matrix = (
+        build_score_invocation_matrix(case, args.repetitions, args.runtime)
+        if args.phases == "score"
+        else build_invocation_matrix(case, args.repetitions, args.runtime)
+    )
     if args.phases == "routing":
         matrix = [item for item in matrix if item.phase == "routing"]
     if args.dry_run:
@@ -925,6 +1251,17 @@ def main(argv: list[str] | None = None) -> int:
     if actual_version != expected_version:
         raise EvaluationError(
             f"{args.runtime} version mismatch: expected {expected_version}, got {actual_version}"
+        )
+    rescore_answers: dict[str, RunResult] = {}
+    rescore_source: dict[str, Any] | None = None
+    if args.rescore_from is not None:
+        rescore_answers, rescore_source = load_rescore_behavior_answers(
+            args.rescore_from,
+            case,
+            args.repetitions,
+            args.runtime,
+            rubric_path,
+            schema_path,
         )
     output_dir = args.output_dir.resolve()
     partial_manifest_path = output_dir / "partial-manifest.json"
@@ -967,9 +1304,12 @@ def main(argv: list[str] | None = None) -> int:
         "case": {"id": case["id"], "sha256": case_digest(case)},
         "repository": case["repository"],
         "skill": case["skill"],
+        "contract": contract_identity(rubric_path, schema_path),
         "profile": profile,
         "planned_calls": len(matrix),
     }
+    if rescore_source is not None:
+        identity["rescore_source"] = rescore_source
     run_id = uuid.uuid4().hex
     prior_failures: list[dict[str, Any]] = []
     resume_history: list[dict[str, int]] = []
@@ -990,7 +1330,15 @@ def main(argv: list[str] | None = None) -> int:
                 raise EvaluationError(f"evaluation is already complete: {manifest_path}")
             previous_identity = {
                 key: previous_manifest.get(key)
-                for key in ("case", "repository", "skill", "profile", "planned_calls")
+                for key in (
+                    "case",
+                    "repository",
+                    "skill",
+                    "contract",
+                    "profile",
+                    "planned_calls",
+                    "rescore_source",
+                )
             }
             if not resume_identity_compatible(previous_identity, identity):
                 raise EvaluationError(
@@ -1092,7 +1440,13 @@ def main(argv: list[str] | None = None) -> int:
 
     transient = Path(tempfile.mkdtemp(prefix="airi-forward-eval-transient-"))
     checkout_root = Path(tempfile.mkdtemp(prefix="airi-forward-eval-checkouts-"))
-    known_paths = (ROOT, args.airi_source.resolve(), transient, checkout_root, output_dir)
+    known_paths = (
+        ROOT,
+        args.repository_source.resolve(),
+        transient,
+        checkout_root,
+        output_dir,
+    )
     invocation_by_id = {invocation.id: invocation for invocation in matrix}
     results_by_id: dict[str, RunResult] = {}
     records_by_id: dict[str, dict[str, Any]] = {}
@@ -1111,7 +1465,7 @@ def main(argv: list[str] | None = None) -> int:
             if invocation.phase == "score":
                 score_path = output_dir / "scores" / f"{invocation.id}.json"
                 score = load_json(score_path)
-                validate_score(score)
+                validate_score(score, require_accuracy=require_accuracy)
                 scores[invocation.id] = score
                 answer = json.dumps(score, ensure_ascii=False)
             else:
@@ -1158,7 +1512,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         checkouts = prepare_checkouts(
-            args.airi_source,
+            args.repository_source,
             case["repository"]["commit"],
             case,
             checkout_root,
@@ -1193,51 +1547,56 @@ def main(argv: list[str] | None = None) -> int:
                 lambda: assert_clean(checkout),
             )
 
-        pending_routing = [
-            item
-            for item in routing_invocations
-            if not results_by_id.get(item.id, RunResult(item, False)).success
-        ]
-        _, routing_skipped = run_case_groups(
-            pending_routing,
-            args.repetitions,
-            args.max_concurrency,
-            run_producer,
-            persist_result,
-            successful_repetitions={
-                (result.invocation.case_id, result.invocation.repetition)
-                for result in results_by_id.values()
-                if result.success and result.invocation.phase == "routing"
-            },
-        )
-        skipped.extend(routing_skipped)
+        if args.phases != "score":
+            pending_routing = [
+                item
+                for item in routing_invocations
+                if not results_by_id.get(item.id, RunResult(item, False)).success
+            ]
+            _, routing_skipped = run_case_groups(
+                pending_routing,
+                args.repetitions,
+                args.max_concurrency,
+                run_producer,
+                persist_result,
+                successful_repetitions={
+                    (result.invocation.case_id, result.invocation.repetition)
+                    for result in results_by_id.values()
+                    if result.success and result.invocation.phase == "routing"
+                },
+            )
+            skipped.extend(routing_skipped)
 
-        behavior_invocations = [item for item in matrix if item.phase == "behavior"]
-        pending_behavior = [
-            item
-            for item in behavior_invocations
-            if not results_by_id.get(item.id, RunResult(item, False)).success
-        ]
-        _, behavior_skipped = run_case_groups(
-            pending_behavior,
-            args.repetitions,
-            args.max_concurrency,
-            run_producer,
-            persist_result,
-            successful_repetitions={
-                (result.invocation.case_id, result.invocation.repetition)
-                for result in results_by_id.values()
-                if result.success and result.invocation.phase == "behavior"
-            },
-        )
-        skipped.extend(behavior_skipped)
-        behavior_answers = {
-            invocation.id: results_by_id[invocation.id]
-            for invocation in behavior_invocations
-            if invocation.id in results_by_id and results_by_id[invocation.id].success
-        }
+            behavior_invocations = [item for item in matrix if item.phase == "behavior"]
+            pending_behavior = [
+                item
+                for item in behavior_invocations
+                if not results_by_id.get(item.id, RunResult(item, False)).success
+            ]
+            _, behavior_skipped = run_case_groups(
+                pending_behavior,
+                args.repetitions,
+                args.max_concurrency,
+                run_producer,
+                persist_result,
+                successful_repetitions={
+                    (result.invocation.case_id, result.invocation.repetition)
+                    for result in results_by_id.values()
+                    if result.success and result.invocation.phase == "behavior"
+                },
+            )
+            skipped.extend(behavior_skipped)
+            behavior_answers = {
+                invocation.id: results_by_id[invocation.id]
+                for invocation in behavior_invocations
+                if invocation.id in results_by_id
+                and results_by_id[invocation.id].success
+            }
+        else:
+            behavior_invocations = []
+            behavior_answers = rescore_answers
 
-        rubric = DEFAULT_RUBRIC.read_text(encoding="utf-8")
+        rubric = rubric_path.read_text(encoding="utf-8")
         scorer_invocations = [item for item in matrix if item.phase == "score"]
         runnable_scorers: list[Invocation] = []
         for scorer in scorer_invocations:
@@ -1268,7 +1627,7 @@ def main(argv: list[str] | None = None) -> int:
                         args.model or "",
                         reasoning_effort,
                         transient,
-                        DEFAULT_SCHEMA,
+                        schema_path,
                         timeout_seconds=call_timeout_seconds,
                     )
                 return run_claude(
@@ -1276,7 +1635,7 @@ def main(argv: list[str] | None = None) -> int:
                     checkouts["control"],
                     args.model,
                     reasoning_effort,
-                    DEFAULT_SCHEMA,
+                    schema_path,
                     timeout_seconds=call_timeout_seconds,
                 )
 
@@ -1290,7 +1649,7 @@ def main(argv: list[str] | None = None) -> int:
             if result.success:
                 try:
                     score = json.loads(result.answer)
-                    validate_score(score)
+                    validate_score(score, require_accuracy=require_accuracy)
                 except (json.JSONDecodeError, EvaluationError) as error:
                     result.success = False
                     result.error = str(error)
