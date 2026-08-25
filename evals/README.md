@@ -2,11 +2,31 @@
 
 The v0.1 XiLuoLin case remains the first vertical reference. The machine-readable `cases/airi-v0.2.json` definition is the single source of truth for the independent second-desktop routing and behavior baseline.
 
+The v2 rubric keeps the nine dimensions and an 18-point total, then adds an independent accuracy gate. Its scorer records claim-level evidence and documentation drift; documentation is treated as intent or historical context until implementation, configuration, tests, or history confirm it. A material factual error or unresolved decision-relevant documentation conflict blocks a Treatment result. Control errors remain diagnostic.
+
 Run deterministic checks and inspect the 30-call plan without contacting a model:
 
 ```bash
 python3 -m unittest discover -s tests -v
 python3 scripts/run_forward_eval.py --dry-run
+```
+
+The runner accepts `--repository-source` for any pinned Git repository; `--airi-source` remains a compatibility alias. Contract files can be selected explicitly with `--rubric PATH --schema PATH`. A score-only run requires `--phases score --rescore-from RESULT_DIR`; it reads the six existing behavior answers, never reruns producers, and writes a separate result directory with source and contract digests.
+
+Rescore an existing complete AIRI profile without changing its original files:
+
+```bash
+python3 scripts/run_forward_eval.py \
+  --runtime claude-code \
+  --model fable \
+  --model-label deepseek-v4-pro \
+  --reasoning-effort high \
+  --phases score \
+  --rescore-from evals/results/airi-v0.2-claude-code-ccswitch-deepseek-v4-pro-high-full-r3 \
+  --repository-source ../airi \
+  --rubric evals/rubrics/architecture-review-v2.md \
+  --schema evals/rubrics/architecture-review-v2.schema.json \
+  --output-dir evals/results/airi-v0.2-claude-v2-rescore
 ```
 
 Run the pinned baseline from a clean sibling AIRI checkout:
@@ -79,4 +99,4 @@ The committed complete profile passes routing at 9/9 positive and 0/9 negative l
 
 The `--model` value is the configured Claude Code alias used by this environment; replace it for another setup. `--model-label` records the evaluator's declared provider model separately from the runtime alias and the model identifiers reported by Claude Code. Routing invocations use `dontAsk` permission mode with only `Read`, `Glob`, `Grep`, and the read-only `Skill` loader, and disable session persistence. This removes Bash and all editing tools instead of relying on Claude's plan mode, which may create user-level plan files. Omitting `Skill` invalidates routing measurements because the model cannot load a matched Skill. The default Claude profile stops a call after 720 seconds without retrying that timeout; the case-default Codex profile uses 900 seconds. An incomplete manifest preserves prior infrastructure failures and may resume with the same timeout or a larger one. A model argument, alias mapping, runtime, effort, permission mode, tool set, prompt change, or timeout decrease requires a new output directory and profile.
 
-The runner creates temporary control and treatment clones at the pinned AIRI commit, preserves AIRI's repository Skills, installs only the released architecture Skill in treatment, and uses read-only ephemeral Codex executions. It commits no checkpoint directory, partial manifest, session data, JSONL, temporary clones, credentials, provider configuration, or absolute local paths. A failed gate is retained as baseline evidence; remediation belongs in a later change.
+The runner creates temporary control and treatment clones at the pinned repository commit, preserves repository Skills, installs only the released architecture Skill in treatment, and uses read-only ephemeral executions. It commits no checkpoint directory, partial manifest, session data, JSONL, temporary clones, credentials, provider configuration, or absolute local paths. A failed gate is retained as baseline evidence; remediation belongs in a later change.
