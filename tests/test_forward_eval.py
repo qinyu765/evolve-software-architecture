@@ -135,6 +135,86 @@ class ForwardEvaluationTest(unittest.TestCase):
             self.assertEqual(manifest["planned_calls"], 6)
             self.assertEqual(manifest["rescore_source"]["contract_status"], "legacy-unrecorded")
 
+    def test_invalid_score_persists_failure_diagnostic(self) -> None:
+        score = self._score_payload()
+        invalid_score = dict(score)
+        invalid_score["accuracy"] = dict(score["accuracy"])
+        invalid_score["accuracy"]["minor_error_count"] = 1
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "source-results"
+            output = root / "rescore-results"
+            source.mkdir()
+            source_manifest = {
+                "case": {"id": self.case["id"], "sha256": case_digest(self.case)},
+                "repository": self.case["repository"],
+                "skill": self.case["skill"],
+                "profile": {"runtime": "codex", "repetitions": 3, "profile_id": "fixture"},
+                "results": [],
+            }
+            source_answers: list[Path] = []
+            for invocation in build_invocation_matrix(self.case, 3):
+                if invocation.phase != "behavior":
+                    continue
+                source_manifest["results"].append(
+                    {"id": invocation.id, "success": True, "attempts": 1}
+                )
+                answer_path = source / "answers" / "behavior" / f"{invocation.id}.md"
+                answer_path.parent.mkdir(parents=True, exist_ok=True)
+                answer_path.write_text("fixture producer answer\n", encoding="utf-8")
+                source_answers.append(answer_path)
+            write_json(source / "manifest.json", source_manifest)
+            write_json(source / "summary.json", {"dataset_complete": True})
+            source_manifest_bytes = (source / "manifest.json").read_bytes()
+            source_answer_bytes = [path.read_bytes() for path in source_answers]
+
+            def scorer(invocation, *_args, **_kwargs):
+                if invocation.id == "score-treatment-r1":
+                    invalid_score["repository_evidence"] = str(source / "private")
+                    return AttemptResult(0, json.dumps(invalid_score))
+                return AttemptResult(0, json.dumps(score))
+
+            with (
+                mock.patch("scripts.run_forward_eval.codex_version", return_value="0.144.4"),
+                mock.patch(
+                    "scripts.run_forward_eval.prepare_checkouts",
+                    return_value={"control": source, "treatment": source},
+                ),
+                mock.patch("scripts.run_forward_eval.assert_clean"),
+                mock.patch("scripts.run_forward_eval.run_codex", side_effect=scorer),
+            ):
+                result = main(
+                    [
+                        "--runtime",
+                        "codex",
+                        "--repository-source",
+                        str(source),
+                        "--phases",
+                        "score",
+                        "--rescore-from",
+                        str(source),
+                        "--rubric",
+                        str(ROOT / "evals" / "rubrics" / "architecture-review-v2.md"),
+                        "--schema",
+                        str(ROOT / "evals" / "rubrics" / "architecture-review-v2.schema.json"),
+                        "--output-dir",
+                        str(output),
+                    ]
+                )
+            self.assertEqual(result, 2)
+            manifest = load_json(output / "manifest.json")
+            failed = next(
+                record for record in manifest["results"] if record["id"] == "score-treatment-r1"
+            )
+            self.assertFalse(failed["success"])
+            reference = failed["metadata"]["failure_diagnostic"]
+            diagnostic = load_json(output / reference["path"])
+            self.assertEqual(diagnostic["id"], "score-treatment-r1")
+            self.assertNotIn(str(source), json.dumps(diagnostic))
+            self.assertFalse(load_json(output / "summary.json")["dataset_complete"])
+            self.assertEqual((source / "manifest.json").read_bytes(), source_manifest_bytes)
+            self.assertEqual([path.read_bytes() for path in source_answers], source_answer_bytes)
+
     def test_score_phase_requires_rescore_source(self) -> None:
         with self.assertRaisesRegex(EvaluationError, "requires --rescore-from"):
             main(["--phases", "score"])
