@@ -17,10 +17,12 @@ from scripts.run_forward_eval import (
     build_score_invocation_matrix,
     case_digest,
     claude_command,
+    contract_identity,
     execute_with_retry,
     frontmatter_bytes,
     inject_routing_marker,
     load_json,
+    load_rescore_behavior_answers,
     main,
     parse_claude_output,
     redact_text,
@@ -133,6 +135,43 @@ class ForwardEvaluationTest(unittest.TestCase):
     def test_score_phase_requires_rescore_source(self) -> None:
         with self.assertRaisesRegex(EvaluationError, "requires --rescore-from"):
             main(["--phases", "score"])
+
+    def test_rescore_rejects_source_profile_case_and_contract_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary)
+            write_json(source / "summary.json", {"dataset_complete": True})
+            base = {
+                "case": {"id": self.case["id"], "sha256": case_digest(self.case)},
+                "repository": self.case["repository"],
+                "skill": self.case["skill"],
+                "profile": {"runtime": "codex", "repetitions": 3},
+                "contract": contract_identity(
+                    ROOT / "evals" / "rubrics" / "architecture-review-v2.md",
+                    ROOT / "evals" / "rubrics" / "architecture-review-v2.schema.json",
+                ),
+                "results": [],
+            }
+            for key, value, message in (
+                ("profile", {"runtime": "claude-code", "repetitions": 3}, "runtime"),
+                ("case", {"id": "other", "sha256": "other"}, "case"),
+                (
+                    "contract",
+                    {"rubric": {"sha256": "wrong"}, "schema": {"sha256": "wrong"}},
+                    "rubric or schema",
+                ),
+            ):
+                manifest = dict(base)
+                manifest[key] = value
+                write_json(source / "manifest.json", manifest)
+                with self.assertRaisesRegex(EvaluationError, message):
+                    load_rescore_behavior_answers(
+                        source,
+                        self.case,
+                        3,
+                        "codex",
+                        ROOT / "evals" / "rubrics" / "architecture-review-v2.md",
+                        ROOT / "evals" / "rubrics" / "architecture-review-v2.schema.json",
+                    )
 
     def test_v2_score_requires_accuracy_and_documentation_drift_fields(self) -> None:
         score = self._score_payload()
