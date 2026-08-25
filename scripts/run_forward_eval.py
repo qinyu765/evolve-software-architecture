@@ -333,6 +333,17 @@ def redact_text(text: str, paths: Iterable[Path] = ()) -> str:
         for path in paths
         for spelling in (str(path.absolute()), str(path.resolve()))
     }
+    spellings.update(
+        alias
+        for spelling in tuple(spellings)
+        for alias in (
+            spelling.removeprefix("/private")
+            if spelling.startswith("/private/")
+            else "/private" + spelling
+            if spelling.startswith("/")
+            else spelling,
+        )
+    )
     for path in sorted(spellings, key=len, reverse=True):
         redacted = redacted.replace(path, "/evaluation-path")
     redacted = re.sub(
@@ -1693,6 +1704,14 @@ def main(argv: list[str] | None = None) -> int:
                 except (json.JSONDecodeError, EvaluationError) as error:
                     result.success = False
                     result.error = str(error)
+                    result.metadata = dict(result.metadata)
+                    result.metadata["failure_diagnostic"] = write_score_failure_diagnostic(
+                        output_dir,
+                        result,
+                        result.error,
+                        run_id,
+                        known_paths,
+                    )
                 else:
                     score = redact_value(score, known_paths)
                     scores[result.invocation.id] = score
