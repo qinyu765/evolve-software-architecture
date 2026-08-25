@@ -1,0 +1,55 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (apps/stage-tamagotchi; electron-vite main/preload/renderer)",
+    "legacy_platform_treated_as_current": false,
+    "runtime_boundaries_identified": [
+      "Electron main process as the sole runtime host",
+      "Eventa IPC boundary (renderer window <-> main process, global scope)",
+      "plugin-sdk host <-> plugin boundary (in-process loading only; local/remote scopes are stubs)",
+      "server-runtime WebSocket boundary (host <-> remote peer over /ws; auth/handshake/registry-sync/consumer-routing/heartbeat)",
+      "in-process vs out-of-process plugin runtime split (electron/node/web entrypoint resolution)"
+    ]
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 2,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "documentation_drift": [],
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "setupBaseWindowElectronInvokes registers 'six' base services (screen/window/app/powerMonitor/systemPreferences/i18n/serverChannel)",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/windows/shared/window.ts:134-149 registers seven services: createScreenService, createWindowService, createAppService, createPowerMonitorService, createSystemPreferencesService, createI18nService, createServerChannelService.",
+      "explanation": "The sentence enumerates seven services but labels them 'six'; a cosmetic counting slip that does not affect the stable-boundary (B6) recommendation.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The 16 setMaxListeners workarounds are located in main/index.ts, preload/shared.ts, and each window's rpc/index.electron.ts",
+      "repository_evidence": "The total of 16 call sites is exact, but 5 of them are in window index.ts files (onboarding/index.ts:68, widgets/index.ts:325, main/index.ts:214, dashboard/index.ts:165, caption/index.ts:304) and 1 in windows/shared/referenced-window.ts:44, not in rpc/index.electron.ts files.",
+      "explanation": "The count and the Eventa-namespacing rationale are correct; only the file distribution is imprecise. Does not change the P1 recommendation.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    }
+  ],
+  "rationale": "All load-bearing factual claims were checked against implementation and matched: 16 setMaxListeners sites, ExtensionManifestV1/schema and permission area/action model, fs.ts resolution order and dynamic import, empty local/remote plugin scopes and websocket TODOs, 14 window managers and the injeca DI graph, reusable/referenced window contracts, setupBaseWindowElectronInvokes, the Server interface plus bin/run.ts, server-runtime protocol TODOs/legacy routing/missedHeartbeats, the /ws dedup TODO, tool-registry REVIEW, CapabilityDescriptor duplication TODO, ExtensionHostGameletWidgetsManager, WebSocketExtensionPeer, and protocol event names. The review correctly identifies Electron as the current desktop platform and never treats the legacy (crates/Tauri, absent from this checkout) as current. It states repository type and confidence from multiple signals, cites paths/symbols/commands, explains change spread (global Eventa scope, hand-written DI, duplicate /ws literals, dual routing), ranks quality attributes with a trade-off table, gives three viable options including status quo, derives Option B from the verified three-protocol-surface finding, and provides an incremental, observable, reversible P0-P5 route with concrete verification commands and a rollback plan. Two cosmetic inaccuracies (a 'six'-vs-seven service count and imprecise file distribution of setMaxListeners) are minor and non-decision-relevant; no material errors and no unresolved decision-relevant conflicts, so the accuracy gate passes. Total 18/18.",
+  "total": 18
+}

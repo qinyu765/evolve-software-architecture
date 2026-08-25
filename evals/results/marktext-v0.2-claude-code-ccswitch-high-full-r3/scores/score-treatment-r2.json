@@ -1,0 +1,71 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (Desktop) — Electron 42, three-process main/preload/renderer with sandboxed renderer",
+    "runtime_boundaries_identified": [
+      "main/preload/renderer three-process Electron boundary (sandboxed renderer, contextIsolation:true)",
+      "renderer↔main IPC contract (src/shared/types/ipc.ts — typed channel names, permissive payloads)",
+      "preload contextBridge surface (src/preload/index.ts)",
+      "main-process internal event bus (ipcMain.emit + onInternalChannel)",
+      "command system boundary (main CommandManager singleton vs renderer CommandDescriptor[])",
+      "window object model / window identity (BaseWindow/EditorWindow/SettingWindow + WindowType)",
+      "editor engine boundary (@muyajs/core via muya-core.d.ts shim)",
+      "buffered-state persistence boundary (BUFFERED_STATE_VERSION = 1)"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 1,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "menu/actions/file.ts 约 30 处 ipcMain.emit",
+      "repository_evidence": "grep of ipcMain.emit in packages/desktop/src/main shows 20 occurrences in src/main/menu/actions/file.ts (43 total across 13 files)",
+      "explanation": "The count is overstated by ~50% (20, not ~30). The qualitative claim it supports — that file.ts is the largest mechanical fan-out and should migrate per-family — still holds with 20 call sites.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "migration"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "CLAUDE.md architecture section states editor/preferences windows use contextIsolation:false + nodeIntegration:true and points to src/main/config.js",
+      "documentation_evidence": "CLAUDE.md 'Architecture: Three-Process Electron Model' preload note",
+      "implementation_evidence": "src/main/config.ts:12-13 sets contextIsolation:true, sandbox:true, nodeIntegration:false; only config.ts exists (no config.js)",
+      "state": "conflict",
+      "decision_relevant": false
+    },
+    {
+      "claim": "ARCHITECTURE.md describes a pre-monorepo layout with root src/, src/muya/, resources/, and test/",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md:5-18",
+      "implementation_evidence": "pnpm monorepo; code under packages/desktop/src/, engine under packages/muya (@muyajs/core)",
+      "state": "historical",
+      "decision_relevant": false
+    },
+    {
+      "claim": "TYPESCRIPT.md describes a single root tsconfig project with src/muya/ as the legacy JS engine",
+      "documentation_evidence": "packages/website/content/docs/dev/TYPESCRIPT.md:3-12",
+      "implementation_evidence": "monorepo tsconfig.base.json paths plus @muyajs/core + muya-core.d.ts shim in packages/desktop",
+      "state": "historical",
+      "decision_relevant": false
+    }
+  ],
+  "rationale": "The answer is a thorough, evidence-backed architecture review. I independently verified every load-bearing factual claim: the Electron desktop classification; the three coexisting IPC mechanisms (typed handlers in src/main/ipc, inline ipcMain.on/handle in App/WindowManager, and the ipcMain.emit internal bus); the sender-derived vs windowId identity split with the duplicate window-add-file-path channel pair; the restoreBufferId type-assertion on BrowserWindow; the dual command systems; the 2-window WindowType model; the @muyajs/core engine boundary with dead muya alias and legacy @marktext/muyajs dependency; BUFFERED_STATE_VERSION=1; the absence of an ADR directory; and the three documentation-drift findings (CLAUDE.md architecture section vs config.ts, plus ARCHITECTURE.md/TYPESCRIPT.md pre-monorepo layout) — all confirmed against source. Documentation drift is flagged, classified, and not relied upon as current, so it does not block the gate. The one factual error is a minor count overstatement (~30 vs actual 20 ipcMain.emit in file.ts) that does not change the recommendation. Options include status quo, a recommended consolidation (B), and a rejected speculative abstraction (C), each with trade-offs, assumptions, and invalidation conditions; migration steps are incremental, grep/typecheck-observable, and revertible, with concrete exit criteria. All nine dimensions merit full credit; the review is decision-ready at 18/18 with the accuracy gate passing."
+}

@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "id": "marktext-v0.2-baseline",
+  "repository": {
+    "name": "marktext/marktext",
+    "url": "https://github.com/marktext/marktext",
+    "commit": "e52106fd1cdcbd33c1258b7b0cdc7013c4c5d86c",
+    "scope": "packages/desktop"
+  },
+  "skill": {
+    "name": "evolve-software-architecture",
+    "url": "https://github.com/qinyu765/evolve-software-architecture",
+    "version": "v0.1.2",
+    "commit": "12ae54160ece0ee16f837226e1cd936c980b7c46"
+  },
+  "evaluation": {
+    "repetitions": 3,
+    "positive_minimum_loaded": 8,
+    "negative_maximum_loaded": 1
+  },
+  "claude_code": {
+    "runtime": "claude-code",
+    "cli_version": "2.1.233",
+    "configuration_manager": "CCSwitch",
+    "reasoning_effort": "high",
+    "call_timeout_seconds": 900,
+    "max_concurrency": 3
+  },
+  "routing": {
+    "marker_token": "[EVAL:evolve-software-architecture-loaded]",
+    "positive_minimum_loaded": 8,
+    "negative_maximum_loaded": 1,
+    "positive": [
+      {
+        "id": "desktop-boundaries",
+        "prompt": "评估 MarkText 当前 packages/desktop 的 main、preload、renderer 与 shared 边界，结合根 monorepo、CLAUDE.md、实现、配置、测试和 Git 历史判断未来扩展性；只提供建议，不修改代码。"
+      },
+      {
+        "id": "ipc-contract",
+        "prompt": "结合 MarkText 当前仓库，设计 Electron main、preload、renderer 之间可长期演进的 IPC 契约，核对 contextBridge、错误传播、类型约束和测试隔离；只提供建议，不修改代码。"
+      },
+      {
+        "id": "desktop-evolution",
+        "prompt": "评估 MarkText 多窗口、本地文件 IO、编辑器引擎与 Electron shell 的长期演进边界，比较维持现状和结构调整的代价、风险与验证方式；只提供建议，不修改代码。"
+      }
+    ],
+    "negative": [
+      {
+        "id": "local-style-fix",
+        "prompt": "在 `packages/desktop/src/renderer/src/pages/preference.vue` 中把一个局部 CSS 背景颜色调整为更蓝的主题变量。只说明这一局部样式改动，不修改文件。"
+      },
+      {
+        "id": "local-rename",
+        "prompt": "在 `packages/desktop/src/main/ipc/index.ts` 中把一个局部处理函数重命名，并同步该文件内的直接引用。只说明这一局部改动，不修改文件。"
+      },
+      {
+        "id": "routine-dependency-patch",
+        "prompt": "将 `packages/desktop/package.json` 中一个普通 Electron workspace 依赖升级到下一个补丁版本，并说明需要刷新 pnpm-lock.yaml。只说明这一常规依赖升级，不修改文件。"
+      }
+    ]
+  },
+  "behavior": {
+    "id": "electron-desktop-architecture-review",
+    "prompt": "结合 MarkText 当前 monorepo 与 packages/desktop 的真实结构，评估未来增加窗口能力、文件工作流、编辑器引擎演进或 Electron shell 能力时，哪些边界应该稳定，哪些抽象应该延后。请自行核对文档、实现、配置、测试和 Git 历史；比较至少两个可行方案（合理时包括维持现状），说明质量属性权衡、成本、风险、回滚路径、不改变的后果，并给出可验证的渐进迁移路线。只提供架构建议，不修改代码。",
+    "treatment_invocations": {
+      "claude-code": "Use /evolve-software-architecture for this architecture review.\n\n"
+    },
+    "minimum_treatment_average": 14,
+    "minimum_improvement": 2,
+    "required_nonzero_dimensions": [
+      "evidence",
+      "options",
+      "recommendation",
+      "migration"
+    ]
+  }
+}

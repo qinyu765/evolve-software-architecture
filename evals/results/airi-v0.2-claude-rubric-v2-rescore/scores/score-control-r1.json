@@ -1,0 +1,81 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (apps/stage-tamagotchi)",
+    "runtime_boundaries_identified": [
+      "Electron main process (in-process ExtensionHost, runtime 'electron')",
+      "Electron renderer + preload (per-window Eventa IPC contexts, currently worked around with setMaxListeners)",
+      "Plugin-host node/web runtime entrypoints (remote transports websocket/node-worker/web-worker throw 'not implemented')",
+      "Local HTTP/WebSocket service lifecycle (channel-server TLS/pairing, airi-http-server ServerManager ordered start/stop)",
+      "App exit lifecycle (injeca DI stop, bootkit before-quit hooks, plugin-host before-quit dispose)"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 3,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "主进程用 ipcMain.setMaxListeners(100)，其余 11 处 setMaxListeners(0) 都是同一句 TODO 注释的复制粘贴（结论部分又写 '12 处 ipcMain.setMaxListeners(0/100)'）",
+      "repository_evidence": "Grep over apps/stage-tamagotchi finds 14 `ipcMain.setMaxListeners(0)` calls (inlay/settings/dashboard/chat/about/desktop-overlay rpc files, onboarding, caption, dashboard, widgets rpc, main rpc, main/index.ts:214, referenced-window.ts:44, widgets/index.ts:325) plus 1 `ipcRenderer.setMaxListeners(0)` in preload/shared.ts:12 plus 1 `ipcMain.setMaxListeners(100)` in main/index.ts:58 — i.e. 15 setMaxListeners(0) calls, 16 total.",
+      "explanation": "The qualitative claim (many duplicated workarounds all carrying the same TODO) is accurate and the recommendation (stabilize Eventa window namespaces) is unaffected; the specific count is understated by 3-4.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "多窗口已经存在约 13 个窗口管理器",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/windows/ contains 14 window modules: main, widgets, chat, settings, spotlight, caption, about, notice, onboarding, devtools, dashboard, inlay, desktop-overlay, beat-sync (plus shared/).",
+      "explanation": "The '约' hedge makes this a minor undercount (14, not 13); it does not change the multi-window friction analysis.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "http-server/index.ts:22-38 的 servers: []（ServerManager 只有空壳，放着不用）",
+      "repository_evidence": "setupBuiltInServer (with its `servers` param and empty composition) is at http-server/index.ts:22-38, but the literal `servers: []` is passed at src/main/index.ts:160 (`setupBuiltInServer({ servers: [] })`); grep confirms `airiHttpServer.start()`/`.stop()` are never invoked in the main entrypoint.",
+      "explanation": "The citation conflates the composition function with the call site; the substantive claim (the ServerManager is wired empty and unused) is correct.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "AGENTS.md/CLAUDE.md describe `crates/` as the legacy Tauri desktop (current desktop is Electron)",
+      "documentation_evidence": "AGENTS.md: 'Legacy: crates/ (old Tauri desktop; current desktop is Electron).'",
+      "implementation_evidence": "Glob for crates/** and crates/*/Cargo.toml finds no files; the directory is absent from the checkout.",
+      "state": "historical",
+      "decision_relevant": false
+    },
+    {
+      "claim": "Extension manifests are loaded from 'the app config directory under extensions/v1' (JSDoc wording)",
+      "documentation_evidence": "apps/stage-tamagotchi/src/main/services/airi/plugins/index.ts JSDoc says 'app config directory under extensions/v1'.",
+      "implementation_evidence": "host/index.ts:228 uses `join(app.getPath('userData'), 'extensions', 'v1')`; the JSDoc's own per-OS paths are userData paths.",
+      "state": "resolved",
+      "decision_relevant": false
+    }
+  ],
+  "rationale": "The answer is grounded in current implementation and nearly every load-bearing citation checks out. Verified: plugin-sdk is `\"private\": true` (line 5, answer said 6); ExtensionHost in plugin-host/core.ts with session/module/binding lifecycle (binding states announced/active/degraded/withdrawn at shared/bindings.ts:22), two-layer permission ceiling (core.ts:56-59), and `resolvedGrant = await permissionResolver?.(...) ?? manifest.permissions` (core.ts:250-255) with no resolver wired (`new ExtensionHost({ runtime: 'electron' })` at host/index.ts:236; SetupExtensionHostOptions has only widgetsManager); manifest V1 contract at shared/types.ts:233-253; three kits kit.widget/kit.gamelet/kit.tool registered (kits/index.ts:95-116; ids confirmed in plugin-sdk-tamagotchi); KitUnavailableReason includes incompatible-version but resolveKitApi checks only missing-kit/permission-denied (kit/index.ts:44, core.ts:405-433); node/web runtimes throw on websocket/node-worker/web-worker transports; ExposePolicy declared but never enforced outside a test; ModuleContribution.ui is Record<string, unknown> in plugin-protocol; the Eventa TODO + setMaxListeners workaround and the three-part quit lifecycle (emitAppBeforeQuit + injeca.stop + host before-quit dispose) are real; channel-server (TLS/pairing, injeca lifecycle) and ServerManager ordered start/stop are real; renderer capability types carry a TODO to re-export from the SDK. The desktop platform is Electron; the legacy Tauri `crates/` directory is absent from the checkout and the answer never misidentifies it. The only errors are three minor count/citation imprecisions (setMaxListeners undercount, ~13 vs 14 windows, servers:[] call-site conflation), none decision-relevant, so the accuracy gate passes. All nine dimensions earn full credit: the scope is classified from multiple signals, evidence distinguishes current code from intent (stubs/TODO), friction is tied to where each change spreads, quality-attribute trade-offs are explicit per option, three options include the current shape, the recommendation (contract-first, defer out-of-process) follows directly from the verified evidence, migration steps are ordered/reversible/observable with concrete exit criteria, and no project-specific facts are smuggled into general rules."
+}

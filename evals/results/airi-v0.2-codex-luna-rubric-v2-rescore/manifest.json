@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "case": {
+    "id": "airi-v0.2-baseline",
+    "sha256": "fa7140cdc9463c1e429f759c9c657092c85137fba7224645a865bb768d324cf6"
+  },
+  "repository": {
+    "name": "moeru-ai/airi",
+    "url": "https://github.com/moeru-ai/airi",
+    "commit": "5228f94123e42416435e7f7e8215df26f3bb065b"
+  },
+  "skill": {
+    "name": "evolve-software-architecture",
+    "url": "https://github.com/qinyu765/evolve-software-architecture",
+    "version": "v0.1.2",
+    "commit": "12ae54160ece0ee16f837226e1cd936c980b7c46"
+  },
+  "contract": {
+    "rubric": {
+      "name": "architecture-review-v2.md",
+      "sha256": "d0158ae63a0e108206ef1db35b6f73af44fe1ff74c7abc0fc4c57b69e8ec8694"
+    },
+    "schema": {
+      "name": "architecture-review-v2.schema.json",
+      "sha256": "f562409a86ad24c236de1ff0ff615fa1ecd6478904dee6af37535aa198812815"
+    }
+  },
+  "profile": {
+    "profile_id": "codex-gpt-5-6-luna-max",
+    "runtime": "codex",
+    "cli_version": "0.144.4",
+    "model": "gpt-5.6-luna",
+    "model_argument": "gpt-5.6-luna",
+    "configuration_manager": null,
+    "reasoning_effort": "max",
+    "call_timeout_seconds": 1800,
+    "ephemeral": true,
+    "sandbox": "read-only",
+    "max_concurrency": 3,
+    "repetitions": 3,
+    "phases": "score"
+  },
+  "planned_calls": 6,
+  "rescore_source": {
+    "name": "airi-v0.2-codex-gpt-5.6-luna-max-full-r3",
+    "manifest_sha256": "46830db1cd7a92bd0defd1aeb9f5e5aa47da013db769e891bcab92971efe3652",
+    "case_sha256": "fa7140cdc9463c1e429f759c9c657092c85137fba7224645a865bb768d324cf6",
+    "profile_id": "codex-gpt-5-6-luna-max",
+    "runtime": "codex",
+    "contract_status": "legacy-unrecorded"
+  },
+  "run_id": "035687019c0b4fcfa9665b2bfe2184fd",
+  "started_at": "2026-08-25T03:46:52.683644+00:00",
+  "completed_at": "2026-08-25T04:29:39.334848+00:00",
+  "results": [
+    {
+      "id": "score-control-r1",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r1"
+    },
+    {
+      "id": "score-control-r2",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r2"
+    },
+    {
+      "id": "score-control-r3",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r3"
+    },
+    {
+      "id": "score-treatment-r1",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r1"
+    },
+    {
+      "id": "score-treatment-r2",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r2"
+    },
+    {
+      "id": "score-treatment-r3",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r3"
+    }
+  ],
+  "skipped": [],
+  "observed_models": [],
+  "prior_failures": [
+    {
+      "id": "score-control-r3",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 3,
+      "success": false,
+      "attempts": 1,
+      "error": "accuracy unresolved_decision_conflict_count does not match documentation_drift",
+      "source_id": "behavior-control-r3",
+      "run_id": "3483b64f421e4d1684c1e0fb2471a74c",
+      "recorded_at": "2026-08-25T04:20:33.268223+00:00"
+    }
+  ]
+}

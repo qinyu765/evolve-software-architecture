@@ -36,6 +36,7 @@ from scripts.run_forward_eval import (
 
 ROOT = Path(__file__).resolve().parents[1]
 CASE_PATH = ROOT / "evals" / "cases" / "airi-v0.2.json"
+MARKTEXT_CASE_PATH = ROOT / "evals" / "cases" / "marktext-v0.2.json"
 
 
 class ForwardEvaluationTest(unittest.TestCase):
@@ -46,6 +47,14 @@ class ForwardEvaluationTest(unittest.TestCase):
         matrix = build_invocation_matrix(self.case, 3)
         self.assertEqual(len(matrix), 30)
         self.assertEqual(len({item.id for item in matrix}), 30)
+        self.assertEqual(sum(item.phase == "routing" for item in matrix), 18)
+        self.assertEqual(sum(item.phase == "behavior" for item in matrix), 6)
+        self.assertEqual(sum(item.phase == "score" for item in matrix), 6)
+
+    def test_marktext_dry_run_has_exactly_thirty_calls(self) -> None:
+        case = load_json(MARKTEXT_CASE_PATH)
+        matrix = build_invocation_matrix(case, 3, "claude-code")
+        self.assertEqual(len(matrix), 30)
         self.assertEqual(sum(item.phase == "routing" for item in matrix), 18)
         self.assertEqual(sum(item.phase == "behavior" for item in matrix), 6)
         self.assertEqual(sum(item.phase == "score" for item in matrix), 6)

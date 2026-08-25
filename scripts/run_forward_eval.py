@@ -898,7 +898,10 @@ def aggregate_results(
     complete = not skipped and routing_complete
     if phases in ("all", "score"):
         complete = complete and len(scores) == 2 * repetitions
-    baseline_repetitions = case["codex"]["repetitions"]
+    baseline_repetitions = case.get("evaluation", {}).get(
+        "repetitions",
+        case.get("codex", {}).get("repetitions", repetitions),
+    )
     positive_required = math.ceil(
         case["routing"]["positive_minimum_loaded"]
         * repetitions
