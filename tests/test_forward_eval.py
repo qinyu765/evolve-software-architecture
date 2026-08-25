@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import subprocess
 import tempfile
 import unittest
@@ -11,6 +12,7 @@ from scripts.run_forward_eval import (
     AttemptResult,
     EvaluationError,
     Invocation,
+    RunResult,
     aggregate_results,
     assert_control_uncontaminated,
     build_invocation_matrix,
@@ -33,6 +35,7 @@ from scripts.run_forward_eval import (
     summary_markdown,
     validate_score,
     write_json,
+    write_score_failure_diagnostic,
 )
 
 
@@ -172,6 +175,44 @@ class ForwardEvaluationTest(unittest.TestCase):
                         ROOT / "evals" / "rubrics" / "architecture-review-v2.md",
                         ROOT / "evals" / "rubrics" / "architecture-review-v2.schema.json",
                     )
+
+    def test_score_failure_diagnostic_redacts_and_hashes_payload(self) -> None:
+        invocation = Invocation(
+            "score-treatment-r1",
+            "score",
+            "score-treatment-r1",
+            "treatment",
+            1,
+            "",
+            "behavior-treatment-r1",
+        )
+        result = RunResult(
+            invocation=invocation,
+            success=True,
+            answer='{"repository_evidence":"/Users/timekettle/private-repo"}',
+            attempts=1,
+            metadata={"observed_models": ["claude-fable-5[1M]"]},
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)
+            reference = write_score_failure_diagnostic(
+                output,
+                result,
+                "invalid score",
+                "run-123",
+                [Path("/Users/timekettle/private-repo")],
+            )
+            self.assertTrue(reference["path"].startswith("diagnostics/score-failures/"))
+            self.assertFalse(reference["path"].startswith("/"))
+            payload = load_json(output / reference["path"])
+            self.assertEqual(payload["error"], "invalid score")
+            serialized = json.dumps(payload, ensure_ascii=False)
+            self.assertNotIn("/Users/timekettle/", serialized)
+            self.assertNotIn("timekettle", serialized)
+            self.assertEqual(
+                payload["payload_sha256"],
+                hashlib.sha256(payload["payload_text"].encode()).hexdigest(),
+            )
 
     def test_v2_score_requires_accuracy_and_documentation_drift_fields(self) -> None:
         score = self._score_payload()

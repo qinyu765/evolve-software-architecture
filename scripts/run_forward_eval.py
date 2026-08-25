@@ -983,6 +983,43 @@ def write_json(path: Path, value: Any) -> None:
     temporary.replace(path)
 
 
+def write_score_failure_diagnostic(
+    output_dir: Path,
+    result: RunResult,
+    error: str,
+    run_id: str,
+    known_paths: Iterable[Path],
+) -> dict[str, str]:
+    """Persist a redacted structured-scorer payload rejected by validation."""
+    if result.invocation.phase != "score":
+        raise EvaluationError("score failure diagnostics require a score invocation")
+    payload_text = redact_text(result.answer, known_paths)
+    diagnostic = {
+        "schema_version": 1,
+        "id": result.invocation.id,
+        "phase": result.invocation.phase,
+        "variant": result.invocation.variant,
+        "repetition": result.invocation.repetition,
+        "attempts": result.attempts,
+        "error": redact_text(error, known_paths),
+        "payload_sha256": hashlib.sha256(payload_text.encode("utf-8")).hexdigest(),
+        "payload_text": payload_text,
+        "metadata": redact_value(result.metadata, known_paths),
+    }
+    diagnostic_path = (
+        output_dir
+        / "diagnostics"
+        / "score-failures"
+        / f"{result.invocation.id}-{run_id}.json"
+    )
+    write_json(diagnostic_path, diagnostic)
+    return {
+        "path": diagnostic_path.relative_to(output_dir).as_posix(),
+        "sha256": file_digest(diagnostic_path),
+        "payload_sha256": diagnostic["payload_sha256"],
+    }
+
+
 def result_record(result: RunResult, known_paths: Iterable[Path]) -> dict[str, Any]:
     record: dict[str, Any] = {
         "id": result.invocation.id,
