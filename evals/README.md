@@ -4,6 +4,8 @@ The v0.1 XiLuoLin case remains the first vertical reference. The machine-readabl
 
 The v2 rubric keeps the nine dimensions and an 18-point total, then adds an independent accuracy gate. Its scorer records claim-level evidence and documentation drift; documentation is treated as intent or historical context until implementation, configuration, tests, or history confirm it. A material factual error or unresolved decision-relevant documentation conflict blocks a Treatment result. Control errors remain diagnostic.
 
+The v2.1 contract makes the cross-field accuracy rule explicit: `accuracy.unresolved_decision_conflict_count` is the count of `documentation_drift` entries with `decision_relevant == true` and `state` in `{"conflict", "unknown"}`; `accuracy.gate_pass` is true exactly when that count and `material_error_count` are both zero. The runner rejects mismatches instead of normalizing them. v2.1 uses separate rubric and schema files so manifests pin the calibration contract without changing historical v2 results.
+
 Run deterministic checks and inspect the 30-call plan without contacting a model:
 
 ```bash
@@ -11,7 +13,7 @@ python3 -m unittest discover -s tests -v
 python3 scripts/run_forward_eval.py --dry-run
 ```
 
-The runner accepts `--repository-source` for any pinned Git repository; `--airi-source` remains a compatibility alias. Contract files can be selected explicitly with `--rubric PATH --schema PATH`. A score-only run requires `--phases score --rescore-from RESULT_DIR`; it reads the six existing behavior answers, never reruns producers, and writes a separate result directory with source and contract digests. A source may have `dataset_complete=false` when only its scorer phase failed, provided all six behavior producer answers are successful; missing producer answers remain a hard error.
+The runner accepts `--repository-source` for any pinned Git repository; `--airi-source` remains a compatibility alias. Contract files can be selected explicitly with `--rubric PATH --schema PATH`. A score-only run requires `--phases score --rescore-from RESULT_DIR`; it reads the six existing behavior answers, never reruns producers, and writes a separate result directory with source and contract digests. The scorer runtime may differ from the producer runtime: the source manifest records the producer profile, while the new manifest records the scorer profile. A source may have `dataset_complete=false` when only its scorer phase failed, provided all six behavior producer answers are successful; missing producer answers remain a hard error.
 
 Rescore an existing complete AIRI profile without changing its original files:
 
@@ -37,7 +39,7 @@ python3 scripts/run_forward_eval.py \
   --output-dir evals/results/airi-v0.2-baseline
 ```
 
-Each completed sample is atomically checkpointed before the next repetition. If the process is interrupted, resume the same execution profile:
+Each output directory is protected by an advisory process lock, so a second run or resume against the same directory is rejected while the first process is active. Each completed sample is atomically checkpointed before the next repetition. If the process is interrupted, resume the same execution profile:
 
 ```bash
 python3 scripts/run_forward_eval.py \
@@ -79,7 +81,7 @@ python3 scripts/run_forward_eval.py \
   --output-dir evals/results/airi-v0.2-claude-code-deepseek-v4-pro-high-routing-r1
 ```
 
-The manifest keeps the configuration manager, CLI model argument, declared model label, and runtime-reported `observed_models` separate. `deepseek-v4-pro` is the user-declared provider label routed through CCSwitch; the Claude `modelUsage` names are runtime evidence, not a claim that the mapping can be inferred from those names. If the CCSwitch mapping, alias, or observed model set changes, create a new profile rather than resuming or pooling it with this one. This profile is exploratory and is not combined with a Codex profile.
+The manifest keeps the configuration manager, CLI model argument, declared model label, and runtime-reported `observed_models` separate. `deepseek-v4-pro` is the user-declared provider label routed through CCSwitch; the Claude `modelUsage` names are runtime evidence, not a claim that the mapping can be inferred from those names. If the CCSwitch mapping, alias, or observed model set changes, create a new profile rather than resuming or pooling it with this one. This profile is exploratory and is not combined with a Codex profile unless it is explicitly used as one scorer cell in a v2.1 cross-runtime matrix.
 
 Run the complete three-repetition Claude Code profile in a separate directory:
 

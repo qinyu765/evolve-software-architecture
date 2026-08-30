@@ -26,6 +26,16 @@
     "call_timeout_seconds": 900,
     "max_concurrency": 3
   },
+  "codex": {
+    "profile_id": "codex-gpt-5.6-luna-max",
+    "runtime": "codex",
+    "cli_version": "0.144.4",
+    "model": "gpt-5.6-luna",
+    "reasoning_effort": "max",
+    "call_timeout_seconds": 1800,
+    "repetitions": 3,
+    "max_concurrency": 3
+  },
   "routing": {
     "marker_token": "[EVAL:evolve-software-architecture-loaded]",
     "positive_minimum_loaded": 8,
@@ -63,7 +73,8 @@
     "id": "electron-desktop-architecture-review",
     "prompt": "结合 MarkText 当前 monorepo 与 packages/desktop 的真实结构，评估未来增加窗口能力、文件工作流、编辑器引擎演进或 Electron shell 能力时，哪些边界应该稳定，哪些抽象应该延后。请自行核对文档、实现、配置、测试和 Git 历史；比较至少两个可行方案（合理时包括维持现状），说明质量属性权衡、成本、风险、回滚路径、不改变的后果，并给出可验证的渐进迁移路线。只提供架构建议，不修改代码。",
     "treatment_invocations": {
-      "claude-code": "Use /evolve-software-architecture for this architecture review.\n\n"
+      "claude-code": "Use /evolve-software-architecture for this architecture review.\n\n",
+      "codex": "Use $evolve-software-architecture for this architecture review.\n\n"
     },
     "minimum_treatment_average": 14,
     "minimum_improvement": 2,
