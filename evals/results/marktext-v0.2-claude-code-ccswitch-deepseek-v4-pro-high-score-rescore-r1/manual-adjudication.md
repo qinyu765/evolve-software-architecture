@@ -25,4 +25,3 @@ All three rejected payloads contain exactly one decision-relevant documentation 
 This rescore confirms that the failure-diagnostic path works and that the scorer-output problem is reproducible, but it does not produce a complete MarkText Treatment score set. The result must remain incomplete evidence. Do not infer a shared AIRI/MarkText Electron-boundary failure, add an Electron adapter, or publish `v0.2.0` from this rescore.
 
 The next calibration should explicitly address the scorer's reconciliation of `decision_relevant` documentation drift and `unresolved_decision_conflict_count`, while keeping the v2 schema and Accuracy Gate strict. Timeout handling should be treated separately from structured-payload validity.
-
