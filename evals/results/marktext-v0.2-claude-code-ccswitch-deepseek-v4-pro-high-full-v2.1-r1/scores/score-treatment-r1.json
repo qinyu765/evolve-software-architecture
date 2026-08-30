@@ -1,0 +1,54 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron desktop shell (three-process: main / preload / sandboxed renderer); dev host darwin/macOS",
+    "runtime_boundaries_identified": [
+      "Renderer sandbox + preload contextBridge surface (window.electron.* etc.)",
+      "IPC contract in shared/types/ipc.ts (renderer↔main channel names)",
+      "@muyajs/core public API (packages/muya src/index.ts) as the single editor-engine seam",
+      "Document-state ownership split: renderer Pinia+muya edit truth vs main EditorBufferStore crash-recovery snapshot vs filesystem/markdown.ts atomic write",
+      "BaseWindow lifecycle/events + WindowManager id/active tracking",
+      "Dual event addressing: main ipcMain.emit internal bus + renderer mitt bus + ipcRenderer (listeners often registered twice)"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 1,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "迁移进行中，git 是浅克隆 (the checkout is a shallow git clone)",
+      "repository_evidence": "No .git/shallow file exists in the checkout (the standard shallow-clone marker); recent commits are full-hash with no graft indicator.",
+      "explanation": "This is an environmental claim, not an architectural one. The answer's reversibility argument rests on code-level reversibility (pure deletions, file-by-file revert), which is independently supported, so the error does not affect the recommendation or the migration plan.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "quality_attributes"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "Root CLAUDE.md Architecture section: 'editor and preferences windows use contextIsolation: false + nodeIntegration: true (see packages/desktop/src/main/config.js)'",
+      "documentation_evidence": "Root CLAUDE.md 'Architecture: Three-Process Electron Model' preload bullet.",
+      "implementation_evidence": "packages/desktop/src/main/config.ts lines 12-21 and 35-42 set contextIsolation:true, sandbox:true, nodeIntegration:false for both windows; no config.js exists (only config.ts); test/e2e/context-isolation.spec.ts enforces the sandboxed values.",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "The answer is a high-quality architecture review backed by inspectable evidence. I verified ~25 factual claims across implementation, configuration, tests, build config, and documentation, and every decision-relevant claim holds (sandbox/preload, IPC asymmetry, dual buses, window model and casts, file-routing heuristic, atomic save, buffer store, engine migration with exactly 5 @muyajs/core importers and zero runtime legacy imports, legacy remnants, muya-core.d.ts shim and exports map, MuyaInstance=any, command systems, Accessor locator, conformance baseline 87.7%/86.3%, PARITY_QA/PARITY_SCOREBOARD). The one documentation drift (CLAUDE.md sandbox description vs config.ts) was correctly identified and remediated by the answer, so it is resolved. The single factual error — asserting the checkout is a shallow git clone — is false (no .git/shallow) but peripheral and non-decision-affecting. All nine dimensions meet the full-credit signal: repository type and confidence stated from multiple signals; paths/symbols cited with intent vs current evidence distinguished; friction localized to concrete god modules and manual three-place channel alignment; a small ranked quality-attribute set with explicit trade-offs; three options including status quo each with falsification signals; a recommendation that follows from the evidence; incremental, observable, reversible migration steps with exit criteria; a concrete verification net; and project-specific facts kept out of generic rules (the answer explicitly scoped out the Tauri adapter signals). Accuracy gate passes: zero material errors, zero unresolved decision-relevant conflicts."
+}

@@ -1,0 +1,55 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "packages/desktop — Electron 42 + Vue 3 desktop app (\"marktext\") whose renderer consumes @muyajs/core (packages/muya) as the editor engine; legacy @marktext/muyajs (packages/muyajs) is being retired",
+    "runtime_boundaries_identified": [
+      "Electron main/preload/renderer permission boundary (contextIsolation: true, sandbox: true, nodeIntegration: false per config.ts and the context-isolation E2E canary)",
+      "File IO data invariants (encoding/BOM/EOL/trailing-newline handling, atomic fsync-then-rename save, crash-recovery buffer durability, watcher no-double-register and self-write suppression)",
+      "Window identity and lifecycle (window id/kind/active-window semantics owned by the main process, not passed as BrowserWindow across domain logic)",
+      "@muyajs/core as the browser editor-engine package boundary behind a renderer-side adapter (syntheticHistory as the existing anti-corruption seam)"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 0,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [],
+  "documentation_drift": [
+    {
+      "claim": "ARCHITECTURE.md still describes a root src/muya and a legacy JS engine (outdated)",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md:12-15 lists root `src/` with a `muya/` subfolder; line 22 says Muya \"is currently still JavaScript\".",
+      "implementation_evidence": "Monorepo layout (packages/{desktop,muya,muyajs}) per pnpm-workspace.yaml and CLAUDE.md:35-138; @muyajs/core is TypeScript (packages/muya/src/muya.ts) and legacy muyajs is being retired.",
+      "state": "historical",
+      "decision_relevant": false
+    },
+    {
+      "claim": "PARITY_SCOREBOARD.md:69 still marks PG14 as xfail while the test source now encodes the replaceContent fix",
+      "documentation_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md:69 lists PG14 as \"❌ xfail (accept-defer)\".",
+      "implementation_evidence": "packages/desktop/test/e2e/parity-source-undo-saved.spec.ts:73-98 defines PG14 as a passing `test()` (comment \"FIXED: ... via Muya.replaceContent\"), no test.fail().",
+      "state": "resolved",
+      "decision_relevant": false
+    },
+    {
+      "claim": "The renderer sandbox boundary is a real runtime constraint",
+      "documentation_evidence": "CLAUDE.md Architecture section (lines 243-244) claims editor/preferences windows use contextIsolation: false + nodeIntegration: true.",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:12-19 sets contextIsolation: true, sandbox: true, nodeIntegration: false for both windows; test/e2e/context-isolation.spec.ts asserts the sandbox.",
+      "state": "historical",
+      "decision_relevant": false
+    }
+  ],
+  "rationale": "Every material claim in the answer was checked against implementation, configuration, tests, CI, or documentation and verified. Key confirmations: HEAD e52106fd equals origin/develop (packed-refs); desktop declares both @marktext/muyajs (legacy) and @muyajs/core (current) at package.json:62-63; config.ts:12-19 and the context-isolation E2E spec confirm sandbox (contextIsolation/sandbox true, nodeIntegration false); window orchestration is spread across App._createEditorWindow (app/index.ts:477), WindowManager (windowManager.ts:85, which also owns the watcher), and BaseWindow (base.ts:15-20); the save path is raw positional IPC through menu/actions/file.ts:157, filesystem/markdown.ts:69 (encoding/EOL) and filesystem/index.ts:25-48 (write-file-atomic with fsync-then-rename); editor.ts is 2102 lines and editor.vue 2133 lines; muya-core.d.ts:45-51 keeps Muya as `any` and editor.vue:172-175 uses `type MuyaInstance = any`; ipc.ts:10-12 documents permissive `unknown` args while internalIpc.ts:4-12 forwards `ipcMain.emit` payloads (BrowserWindow included, e.g. watcher registration); files.ts:97-103 puts a function inside FileNotification; the update-buffer-state contract declares `ret: void` (ipc.ts:85) but the handler returns boolean (editorBufferStore/index.ts:187-198); fs.ts:40-77 and shell.ts:6-25 accept arbitrary paths/URLs with no main-side policy; test/build/lint/e2e workflows all paths-ignore packages/muya/**; ARCHITECTURE.md:12-15 and PARITY_SCOREBOARD.md:69 are stale in exactly the ways the answer describes; syntheticHistory.ts exists and converts Muya history shape into desktop dirty-tracking. The only claims I could not independently re-derive were five of the six commit subjects (no git CLI available) and the approximate git hit counts (~18/~36); c907b29c matches the visible history as the flush-before-save fix and the substantive invariants those commits supposedly encode are all present in current code, so this is a disclosure caveat, not a factual error. The answer correctly distinguishes the current engine (@muyajs/core) from the legacy platform (@marktext/muyajs) and does not treat the legacy engine as current. The three documentation-vs-implementation drifts it touches are all historical/resolved and none is decision-relevant, so the gate passes. All nine dimensions earn full credit: scope/confidence are stated from multiple signals, evidence is path/symbol-specific and separates current evidence from intent, friction explains spread and why it matters, quality attributes are ranked with trade-offs and verification, three viable options include the current shape, the recommendation follows from the evidence, migration is phased/reversible with exit conditions, verification is concrete (flush/encoding/atomic-write/watcher/contract-drift), and conditional heuristics (wait for a third window/second engine) are not smuggled into universal rules."
+}

@@ -1,0 +1,137 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 1,
+    "generalization": 2
+  },
+  "total": 17,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron desktop: apps/stage-tamagotchi with Electron main/preload/renderer and Vue renderer",
+    "runtime_boundaries_identified": [
+      "Electron main process",
+      "Electron preload/renderer windows",
+      "Eventa IPC contracts and window contexts",
+      "injeca composition root and main-process services",
+      "plugin-sdk ExtensionHost and extension entrypoint loading",
+      "server-runtime WebSocket server embedded through channel-server and independently runnable via bin/run.ts",
+      "server-sdk/server-shared protocol consumers",
+      "HTTP and static-asset server managers"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 1,
+    "minor_error_count": 6,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": false
+  },
+  "factual_errors": [
+    {
+      "severity": "material",
+      "claim": "仓库没有证据表明需要第二个独立客户端。",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/services/airi/channel-server/index.ts:357-405 starts a WebSocket server with QR pairing; plugins/airi-plugin-web-extension/package.json:22 and services/discord-bot/package.json:26-27 consume server-sdk/server-shared.",
+      "explanation": "This directly contradicts the answer's own description of LAN QR pairing and multiple external consumers. It is used to justify deferring an independent backend, so it affects the option and recommendation rationale.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "options",
+        "recommendation"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "services/computer-use-mcp uses the same server packages.",
+      "repository_evidence": "services/computer-use-mcp/package.json:52-57 contains MCP, std, node-pty, ws, and zod, but no @proj-airi/server-sdk, @proj-airi/server-shared, or @proj-airi/server-runtime.",
+      "explanation": "The concrete example is wrong, although other services such as discord-bot do use server packages.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "plugin-sdk-tamagotchi itself provides widget, gamelet, and tool kits.",
+      "repository_evidence": "packages/plugin-sdk-tamagotchi/src/index.ts exports gamelet, tools, and widgets, but widgets/index.ts is an iframe Eventa bridge. The actual kit descriptor is app-local at apps/stage-tamagotchi/src/main/services/airi/plugins/kits/widget/index.ts:18-25.",
+      "explanation": "The widget kit ownership is misattributed; this matters when deciding which public boundary belongs in the shared SDK.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "recommendation"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The settings window has 13 dependencies.",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/index.ts:215-216 lists 11 dependency properties for settingsWindow.",
+      "explanation": "The exact count is wrong, though the broader observation that the composition root has substantial manual wiring remains supported.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "current_friction"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The two cited window abstractions are the only generalizations and there are only two relevant window-namespacing TODOs.",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/windows/shared/referenced-window.ts:31-44 contains another per-id reusable window manager and Eventa namespacing TODO; apps/stage-tamagotchi/src/shared/eventa/index.ts:97-108 contains a generic window-event factory, with additional TODOs across window modules.",
+      "explanation": "The review understates existing shared abstractions and the number of TODO sites. Its core change-spread diagnosis is still substantially valid.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Closing the UI stops the embedded server.",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/index.ts:288-297 keeps the app alive on macOS after all windows close; channel-server/index.ts:371-405 starts and stops server-runtime on app lifecycle hooks, not directly on window closure.",
+      "explanation": "The server is generally app-lifecycle-bound, not universally UI-lifecycle-bound. The distinction affects the urgency argument for a daemon.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "current_friction",
+        "options",
+        "recommendation"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The backend boundary should be frozen as the Eventa protocol.",
+      "repository_evidence": "packages/server-runtime/src/index.ts:1-35 uses better-ws and @proj-airi/server-shared WebSocket event envelopes; it does not directly use @moeru/eventa as its runtime transport. Eventa appears in plugin-protocol type definitions.",
+      "explanation": "The recommendation should name the server-shared WebSocket protocol and lifecycle contract precisely; calling the runtime boundary Eventa is misleading but does not invalidate the broader boundary recommendation.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "recommendation"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "Worker, WebSocket, and Electron plugin transports are intended architecture, not current runtime support.",
+      "documentation_evidence": "packages/plugin-sdk/docs/design/multi-transport.md:150-160 marks the design Planned and lists implementing createPluginContext for websocket, worker, and electron runtimes as future work.",
+      "implementation_evidence": "packages/plugin-sdk/src/plugin-host/runtimes/node/index.ts and runtimes/web/index.ts only create in-memory contexts; other transport kinds throw. The raw answer generally treats these transports as future work.",
+      "state": "historical",
+      "decision_relevant": true
+    },
+    {
+      "claim": "Tauri is the legacy desktop platform and Electron is current.",
+      "documentation_evidence": "docs/content/en/blog/DevLog-2025.10.20/index.md:15-23 describes the migration from Tauri and says the application switched fully to Electron.",
+      "implementation_evidence": "apps/stage-tamagotchi/package.json, Electron Vite configuration, Electron main/preload sources, and current build targets confirm Electron as the current desktop runtime.",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "The repository still contains the documented legacy crates/ Tauri desktop tree.",
+      "documentation_evidence": "AGENTS.md:18 and :53 describes crates/ as the old Tauri desktop surface.",
+      "implementation_evidence": "The current checkout has no top-level crates directory; current desktop implementation is under apps/stage-tamagotchi and is Electron-based. This does not affect the raw answer's platform classification.",
+      "state": "conflict",
+      "decision_relevant": false
+    }
+  ],
+  "rationale": "总体17/18：范围、摩擦、质量属性、方案比较、建议和渐进迁移都很强，且证据引用密集。验证计划有测试、出口标准、失败条件和回滚，但缺少启动时间、内存、崩溃隔离或跨进程延迟等可量化基线，因此 Verification=1。一个影响守护进程决策的“没有第二独立客户端证据”判断被当前 QR 通道和多个 server-sdk 消费者反驳，故 accuracy.gate_pass=false；其余问题是局部事实或边界命名精度问题。"
+}

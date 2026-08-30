@@ -1,0 +1,57 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron 42 desktop application in packages/desktop, packaged for Windows, macOS, and Linux.",
+    "runtime_boundaries_identified": [
+      "main: OS/file I/O, BrowserWindow lifecycle and routing, menus, and watchers",
+      "preload/contextBridge: renderer capability bridge",
+      "renderer: Vue/Pinia UI, tabs, and DOM editors",
+      "@muyajs/core: browser-side editor engine; CodeMirror remains a separate source-mode editor",
+      "main-side markdown persistence and watcher semantics",
+      "IPC/shared types as a permissive transport boundary still under migration"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 0,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [],
+  "documentation_drift": [
+    {
+      "claim": "ARCHITECTURE.md describes the old root layout and JavaScript Muya as current.",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md:5-30",
+      "implementation_evidence": "packages/desktop structure and aliases; packages/muya/src/index.ts; renderer imports from @muyajs/core",
+      "state": "historical",
+      "decision_relevant": true
+    },
+    {
+      "claim": "The parity scoreboard still labels PG14 as xfail.",
+      "documentation_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md:42-52,69",
+      "implementation_evidence": "packages/desktop/test/e2e/parity-source-undo-saved.spec.ts:73-81 and commit 5d3d2819",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "CLAUDE.md contains a stale claim that editor windows use contextIsolation:false and nodeIntegration:true.",
+      "documentation_evidence": "CLAUDE.md:228-260",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:8-41 and packages/desktop/test/e2e/context-isolation.spec.ts:5-38",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "The review is repository-specific, cites implementation, configuration, tests, and history, distinguishes stale documentation from current behavior, compares three viable options, and provides an incremental reversible migration with concrete verification. Current runtime evidence supports Electron main/preload/renderer boundaries and @muyajs/core as the active engine; the legacy muyajs package is not treated as current. No material or minor factual errors were found, and all decision-relevant documentation conflicts are resolved by current evidence."
+}

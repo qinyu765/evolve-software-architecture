@@ -1,0 +1,58 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "packages/desktop Electron app consuming @muyajs/core (packages/muya) as its editor engine; legacy packages/muyajs (@marktext/muyajs) is being retired",
+    "runtime_boundaries_identified": [
+      "main / preload / renderer three-process split",
+      "renderer sandbox boundary (contextIsolation:true, sandbox:true, nodeIntegration:false)",
+      "typed IPC channel contract vs permissive unknown payloads",
+      "WindowManager / EditorWindow / Watcher coupling keyed on BrowserWindow.id",
+      "file load/save path (loadMarkdownFile -> renderer store -> mt::response-file-save -> writeMarkdownFile -> atomic write -> watcher self-ignore)",
+      "editor host boundary between Muya (renderer-local, engine history + synthetic history) and CodeMirror source mode",
+      "preload capability surface (generic ipcRenderer, fileUtils, path, shell, clipboard)"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "gate_pass": true,
+    "material_error_count": 0,
+    "minor_error_count": 0,
+    "unresolved_decision_conflict_count": 0
+  },
+  "dimensions": {
+    "current_friction": 2,
+    "evidence": 2,
+    "generalization": 2,
+    "migration": 2,
+    "options": 2,
+    "quality_attributes": 1,
+    "recommendation": 2,
+    "scope_and_classification": 2,
+    "verification": 2
+  },
+  "documentation_drift": [
+    {
+      "claim": "CLAUDE.md states editor/preferences windows use contextIsolation:false + nodeIntegration:true (via config.js)",
+      "documentation_evidence": "CLAUDE.md preload section: 'editor and preferences windows use contextIsolation: false + nodeIntegration: true (see packages/desktop/src/main/config.js)'",
+      "implementation_evidence": "packages/desktop/src/main/config.ts sets editorWinOptions and preferencesWinOptions webPreferences to contextIsolation:true, sandbox:true, nodeIntegration:false; config file is config.ts not config.js; test/e2e/context-isolation.spec.ts asserts the sandbox canary",
+      "state": "conflict",
+      "decision_relevant": false
+    },
+    {
+      "claim": "ARCHITECTURE.md describes the repository layout",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md lists root-level src/common, src/main, src/muya, src/renderer, static/, test/ and calls Muya 'currently still JavaScript'",
+      "implementation_evidence": "pnpm-workspace.yaml and CLAUDE.md show a monorepo with packages/desktop, packages/muyajs, packages/muya, packages/website; engine is a TypeScript rewrite in packages/muya",
+      "state": "historical",
+      "decision_relevant": false
+    },
+    {
+      "claim": "PARITY_SCOREBOARD.md says PG14 (single-undo-boundary source-mode handoff) remains xfail via test.fail()",
+      "documentation_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md line 69: PG14 'test.fail()' and '❌ xfail (accept-defer)'",
+      "implementation_evidence": "packages/desktop/test/e2e/parity-source-undo-saved.spec.ts has no test.fail(); PG14 tests use plain test() with assertions and a 'FIXED' comment; packages/muya/src/muya.ts implements replaceContent() recording a rebuild boundary",
+      "state": "conflict",
+      "decision_relevant": false
+    }
+  ],
+  "factual_errors": [],
+  "rationale": "The review is grounded in inspectable evidence: I confirmed the monorepo split, the sandbox config (config.ts: contextIsolation/sandbox true, nodeIntegration false), the WindowManager-held Watcher keyed on BrowserWindow.id, the file.ts TODO to move save logic, IFileState mixing renderer state into a shared shape, permissive IPC payloads, the raw preload/fs surface, Muya's replaceContent facade, the hand-written @muyajs/core .d.ts, the split engine/synthetic history in editor.vue, atomic durable write (write-file-atomic + fsync), full-file loadMarkdownFile, the named test definitions (flush-before-save, write-file-atomic, buffer-store-durable, file-change-content-check, context-isolation), and the PG14 scoreboard/test disagreement. The answer correctly labels packages/muyajs as legacy and @muyajs/core as current, and treats the stale CLAUDE.md/ARCHITECTURE.md/scoreboard as documentation drift rather than current fact. Scope, evidence, friction, options (A/B/C including status quo), recommendation (narrow seams over Clean Architecture/VFS), migration (six reversible, observable steps with compatibility adapters), and verification are all strong. Quality attributes earn partial credit because trade-offs and measurements are explicit but not consolidated into a small ranked attribute set. No material or minor factual errors found; the three documentation-drift entries are all non-decision-relevant, so the accuracy gate passes.",
+  "total": 17
+}

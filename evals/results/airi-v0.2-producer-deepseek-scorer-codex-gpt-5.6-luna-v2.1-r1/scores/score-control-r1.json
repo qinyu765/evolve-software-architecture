@@ -1,0 +1,104 @@
+{
+  "dimensions": {
+    "scope_and_classification": 1,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 1,
+    "generalization": 2
+  },
+  "total": 16,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron desktop (apps/stage-tamagotchi; electron-vite/electron-builder; Windows/macOS/Linux targets)",
+    "runtime_boundaries_identified": [
+      "Electron main process and injeca composition root",
+      "BrowserWindow renderer surfaces using shared HTML/hash routes",
+      "Preload bridge and Eventa IPC contexts",
+      "In-process plugin ExtensionHost/plugin-sdk with widgets iframe UI",
+      "Localhost channel/HTTP server services",
+      "MCP stdio and Godot sidecar processes",
+      "Hidden BeatSync BrowserWindow"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 1,
+    "minor_error_count": 4,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": false
+  },
+  "factual_errors": [
+    {
+      "severity": "material",
+      "claim": "“关窗后后台常驻”今天是 macOS-only 行为。",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/index.ts:288-297 only quits in the window-all-closed hook on non-darwin, while src/main/windows/main/index.ts:153-160 prevents the main window's normal close and hides it on every platform; src/main/windows/beat-sync/index.ts:10-25 creates a hidden BrowserWindow.",
+      "explanation": "The cited quit branch is platform-specific, but the answer generalizes it to current user-visible close/background behavior. The main window is hidden rather than closed on all platforms, and a hidden BeatSync window is part of the runtime.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction",
+        "quality_attributes",
+        "recommendation"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "There are three places with “ipcMain.setMaxListeners(0)” TODOs.",
+      "repository_evidence": "The top-level main index uses ipcMain.setMaxListeners(100), preload/shared.ts uses ipcRenderer.setMaxListeners(0), and additional setMaxListeners calls exist across window RPC modules.",
+      "explanation": "The architectural concern about incomplete namespacing is supported, but the API, value, and count are inaccurate.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction",
+        "verification"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "真正的“按 key 多实例”只有 devtools 一处。",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/windows/shared/referenced-window.ts:21-99 implements a Map keyed by window id with open/close lifecycle, and notice/index.ts consumes it; widgets/index.ts also keeps per-widget window contexts.",
+      "explanation": "Devtools is not the only keyed/id-based multi-instance window mechanism, so the answer understates existing reusable multi-window infrastructure.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "6121 端口是固定的。",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/services/airi/channel-server/index.ts:77-79 reads SERVER_CHANNEL_PORT and otherwise defaults to 6121; packages/server-runtime also supports a configurable port.",
+      "explanation": "6121 is the default ownership invariant, not an unconditional fixed port. The environment override should have been stated.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction",
+        "recommendation"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "每个窗口都手写一份 BrowserWindow、bounds、导航保护、Eventa/RPC 装配。",
+      "repository_evidence": "Specialized windows duplicate portions of this setup, but windows/shared/base.ts centralizes base Electron invokes and createServerChannelService, while referenced-window.ts and reusable.ts centralize reusable lifecycle pieces.",
+      "explanation": "The friction diagnosis is directionally valid, but “each window” and “a copy” overstate the duplication already factored into shared helpers.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "插件多 transport/worker/websocket 运行时属于设计方向，而非当前实现。",
+      "documentation_evidence": "packages/plugin-sdk/docs/design/multi-transport.md describes node-worker/websocket transports and marks the work as Planned; architecture.md describes broader embedded, external Node, and remote deployment modes as design.",
+      "implementation_evidence": "packages/plugin-sdk/src/plugin-host/runtimes/node/index.ts implements only in-memory and throws for websocket/node-worker/electron/web-worker; runtimes/node/loaders/fs.ts imports the entrypoint directly for the current filesystem loader.",
+      "state": "historical",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "The review is strong and decision-ready in structure: it offers three viable options, explicit trade-offs/cost/risk/rollback consequences, and a staged verification-oriented route. Evidence, friction, recommendation, and migration are mostly well grounded, but repository classification and verification criteria are not fully explicit, and several current-state claims are overbroad. The main-close/background claim is material because it drives the cross-platform lifecycle conclusion; therefore the v2.1 accuracy gate fails despite zero unresolved decision-relevant documentation conflicts."
+}

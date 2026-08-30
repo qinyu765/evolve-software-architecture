@@ -1,0 +1,68 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron 42 desktop application targeting macOS, Windows, and Linux.",
+    "runtime_boundaries_identified": [
+      "packages/desktop owns Electron main-process window, filesystem, OS, and routing capabilities.",
+      "Each BrowserWindow has a renderer; renderer UI/editor state is separated from main-process native authority.",
+      "Sandboxed preload/contextBridge forms the renderer-to-main capability boundary.",
+      "Public renderer IPC is distinct from main-only ipcMain/internal events.",
+      "packages/muya is current; packages/muyajs is treated as legacy; website is separate."
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 1,
+    "unresolved_decision_conflict_count": 1,
+    "gate_pass": false
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "答案把 sidebar 的删除操作与创建、复制、移动一起归为直接调用宽泛的 window.fileUtils。",
+      "repository_evidence": "packages/desktop/src/renderer/src/store/project.ts:222-231 uses window.electron.ipcRenderer.invoke('mt::fs-trash-item') for deletion; packages/desktop/src/renderer/src/util/fileSystem.ts:7-25 and project.ts:276-316 use window.fileUtils for creation, copying, moving, or renaming.",
+      "explanation": "删除走独立的 trash IPC，不是 window.fileUtils；这只影响局部示例，不改变其关于文件能力跨层分布的主要判断。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "根 CLAUDE.md 后段把 editor/preferences 窗口描述为 contextIsolation:false、nodeIntegration:true，并指向旧的 config.js。",
+      "documentation_evidence": "CLAUDE.md:241-245.",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:8-41 sets contextIsolation:true, sandbox:true, nodeIntegration:false; packages/desktop/test/e2e/context-isolation.spec.ts:5-37 verifies the boundary; fa84fc00 records the sandbox change.",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "开发架构文档仍描述旧的根 src/ 布局和旧 Muya JS 结构。",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md:5-18,22-30,36-69.",
+      "implementation_evidence": "pnpm-workspace.yaml:1-7 and the current packages/desktop and packages/muya trees show the monorepo/package layout; 565bfcdc and 0d866412 document the move to packages/muya and the monorepo structure.",
+      "state": "historical",
+      "decision_relevant": false
+    },
+    {
+      "claim": "PG14 parity 状态仍是 xfail，但测试源码已标为 fixed。",
+      "documentation_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md:44,69 says PG14 remains xfail and carries test.fail.",
+      "implementation_evidence": "packages/desktop/test/e2e/parity-source-undo-saved.spec.ts:73-80 marks PG14 FIXED, contains no test.fail(), and git history 5d3d2819 records the fix.",
+      "state": "conflict",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "原答案对当前 Electron monorepo、运行时边界、跨层摩擦、三种方案及渐进回滚路线均有充分证据，九项维度可给满分。发现一处删除路径的局部归类错误。安全文档漂移已由实现、E2E 与历史明确判定为旧文档；但 PG14 scoreboard 与测试源码的决策相关冲突仍被答案明确保留，因此 v2.1 accuracy gate 为 false。"
+}

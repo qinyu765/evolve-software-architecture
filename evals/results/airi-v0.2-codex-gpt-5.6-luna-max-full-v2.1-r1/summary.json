@@ -1,0 +1,81 @@
+{
+  "case_id": "airi-v0.2-baseline",
+  "dataset_complete": true,
+  "phases": "all",
+  "routing": {
+    "positive": {
+      "successful": 9,
+      "loaded": 9,
+      "planned": 9
+    },
+    "negative": {
+      "successful": 9,
+      "loaded": 0,
+      "planned": 9
+    }
+  },
+  "routing_thresholds": {
+    "positive_minimum_loaded": 8,
+    "negative_maximum_loaded": 1
+  },
+  "behavior": {
+    "control": {
+      "scored": 3,
+      "average": 17.0,
+      "totals": [
+        18,
+        17,
+        16
+      ],
+      "dimension_minimums": {
+        "scope_and_classification": 1,
+        "evidence": 1,
+        "current_friction": 2,
+        "quality_attributes": 2,
+        "options": 2,
+        "recommendation": 2,
+        "migration": 2,
+        "verification": 2,
+        "generalization": 2
+      },
+      "factual_errors": 2,
+      "material_factual_errors": 0,
+      "minor_factual_errors": 2,
+      "unresolved_decision_conflicts": 0,
+      "documentation_drifts": 6
+    },
+    "treatment": {
+      "scored": 3,
+      "average": 17.33,
+      "totals": [
+        18,
+        17,
+        17
+      ],
+      "dimension_minimums": {
+        "scope_and_classification": 1,
+        "evidence": 1,
+        "current_friction": 2,
+        "quality_attributes": 2,
+        "options": 2,
+        "recommendation": 2,
+        "migration": 2,
+        "verification": 2,
+        "generalization": 2
+      },
+      "factual_errors": 5,
+      "material_factual_errors": 1,
+      "minor_factual_errors": 4,
+      "unresolved_decision_conflicts": 1,
+      "documentation_drifts": 6
+    }
+  },
+  "gates": {
+    "routing": true,
+    "accuracy": false,
+    "behavior": false,
+    "generalization": false,
+    "overall": false
+  },
+  "skipped": []
+}

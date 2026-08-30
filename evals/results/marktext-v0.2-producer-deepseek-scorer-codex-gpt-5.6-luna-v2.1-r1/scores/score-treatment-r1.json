@@ -1,0 +1,116 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron 42 desktop app targeting Linux, macOS, and Windows",
+    "runtime_boundaries_identified": [
+      "Electron main process",
+      "Sandboxed preload/contextBridge bridge with window.electron and sibling APIs",
+      "Sandboxed renderer windows with Vue/Pinia editor state",
+      "Shared renderer↔main IPC contract",
+      "Renderer mitt bus and main internal ipcMain event bus",
+      "@muyajs/core editor-engine boundary with legacy residue",
+      "Renderer edit state, main crash-recovery snapshots, and main-process atomic file writes"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 5,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "The answer describes _openPathList itself as a 500-plus-line heuristic.",
+      "repository_evidence": "packages/desktop/src/main/app/index.ts:_openPathList spans approximately lines 519-640; related logic is in WindowManager.findBestWindowToOpenIn and EditorWindow.getCandidateScores.",
+      "explanation": "The broader routing flow is distributed, but the named function is about 122 lines, so the magnitude is overstated.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The answer says route and menu-state derivation have no unit tests and E2E is the only verification net.",
+      "repository_evidence": "packages/desktop/test/unit/specs/application-menu-state.spec.ts, format-menu-state.spec.ts, and selection-menus.spec.ts test menu behavior; direct placement unit coverage was not found.",
+      "explanation": "The placement portion is supported, but the menu-state and 'only E2E' claims are too broad.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction",
+        "verification"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Every new capability must use the window.electron.* namespace and adding a channel requires manual preload alignment.",
+      "repository_evidence": "packages/desktop/src/preload/index.ts:20-68 defines generic typed IPC wrappers once, while lines 286-296 expose separate fileUtils, path, ripgrep, uploader, fonts, commandExists, and i18nUtils surfaces.",
+      "explanation": "The stable boundary is preload/contextBridge; it is not one namespace, and generic channel additions do not necessarily require editing preload code.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "recommendation",
+        "current_friction"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The checkout is shallow, affecting history and rollback cost.",
+      "repository_evidence": "git rev-parse --is-shallow-repository returns false; full migration history is present.",
+      "explanation": "The proposed rollback strategy remains valid, but this stated repository fact is wrong.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "migration"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Electron has a three-process model consisting of main, preload, and sandboxed renderer.",
+      "repository_evidence": "packages/desktop/src/preload/index.ts is a preload script configured in BrowserWindow webPreferences by packages/desktop/src/main/config.ts:20,41.",
+      "explanation": "These are useful runtime boundaries, but preload is not an independent Electron process; it runs within the renderer process context.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "scope_and_classification",
+        "evidence"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "CLAUDE.md presents contextIsolation:false and nodeIntegration:true and refers to config.js for the editor/preferences windows.",
+      "documentation_evidence": "CLAUDE.md:243-244.",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:12-20,35-41 sets contextIsolation:true, sandbox:true, nodeIntegration:false, and webSecurity:false; test/e2e/context-isolation.spec.ts verifies the sandbox boundary.",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "CLAUDE.md's legacy architecture section presents the old Muya alias/source layout as current.",
+      "documentation_evidence": "CLAUDE.md:228-232 describes legacy muya paths and dependency structure.",
+      "implementation_evidence": "Current desktop runtime imports @muyajs/core; legacy references remain only as residue in declarations, aliases, and dependency metadata.",
+      "state": "historical",
+      "decision_relevant": true
+    },
+    {
+      "claim": "Website developer documentation describes the pre-monorepo src/muya layout and legacy JavaScript engine as current.",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md and TYPESCRIPT.md.",
+      "implementation_evidence": "packages/muya is @muyajs/core and git history records the monorepo/core migration in 565bfcdc, efcaf0c2, and 55030df6.",
+      "state": "historical",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "The review fully covers the nine dimensions with concrete repository evidence, ranked trade-offs, three viable options, and reversible verification steps. It contains five minor overstatements but no material errors. Documentation conflicts are either explicitly resolved against current implementation or demonstrably historical, so the v2.1 accuracy gate passes."
+}

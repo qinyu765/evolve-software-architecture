@@ -1,0 +1,81 @@
+{
+  "case_id": "marktext-v0.2-baseline",
+  "dataset_complete": true,
+  "phases": "all",
+  "routing": {
+    "positive": {
+      "successful": 9,
+      "loaded": 8,
+      "planned": 9
+    },
+    "negative": {
+      "successful": 9,
+      "loaded": 0,
+      "planned": 9
+    }
+  },
+  "routing_thresholds": {
+    "positive_minimum_loaded": 8,
+    "negative_maximum_loaded": 1
+  },
+  "behavior": {
+    "control": {
+      "scored": 3,
+      "average": 17.67,
+      "totals": [
+        18,
+        18,
+        17
+      ],
+      "dimension_minimums": {
+        "scope_and_classification": 2,
+        "evidence": 2,
+        "current_friction": 2,
+        "quality_attributes": 2,
+        "options": 2,
+        "recommendation": 2,
+        "migration": 2,
+        "verification": 1,
+        "generalization": 2
+      },
+      "factual_errors": 2,
+      "material_factual_errors": 0,
+      "minor_factual_errors": 2,
+      "unresolved_decision_conflicts": 1,
+      "documentation_drifts": 8
+    },
+    "treatment": {
+      "scored": 3,
+      "average": 17.67,
+      "totals": [
+        18,
+        17,
+        18
+      ],
+      "dimension_minimums": {
+        "scope_and_classification": 2,
+        "evidence": 1,
+        "current_friction": 2,
+        "quality_attributes": 2,
+        "options": 2,
+        "recommendation": 2,
+        "migration": 2,
+        "verification": 2,
+        "generalization": 2
+      },
+      "factual_errors": 1,
+      "material_factual_errors": 1,
+      "minor_factual_errors": 0,
+      "unresolved_decision_conflicts": 1,
+      "documentation_drifts": 11
+    }
+  },
+  "gates": {
+    "routing": true,
+    "accuracy": false,
+    "behavior": false,
+    "generalization": true,
+    "overall": false
+  },
+  "skipped": []
+}

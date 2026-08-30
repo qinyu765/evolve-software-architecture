@@ -1,0 +1,63 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (apps/stage-tamagotchi; electron-vite/electron-builder and Electron main/renderer/preload code)",
+    "runtime_boundaries_identified": [
+      "Electron main composition root and injeca lifecycle",
+      "Per-window BrowserWindow, preload, renderer, navigation/security, and Eventa contexts",
+      "In-process ExtensionHost with manifest/session/permission/binding/asset and iframe-widget boundaries",
+      "Local HTTP and extension-asset server lifecycle",
+      "Godot sidecar process with WebSocket bridge",
+      "MCP stdio child-process sessions",
+      "Proposed external Node plugin host and protocol boundary"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 1,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "历史插件重构 668440a73 触及 66 个文件。",
+      "repository_evidence": "git show --stat --oneline 668440a73 reports 112 files changed; the name-only diff reports 117 paths because renames appear twice.",
+      "explanation": "The exact history count is wrong, but the larger-than-local change hotspot and resulting recommendation remain valid.",
+      "source_conflict": true,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "Tauri is the current desktop platform.",
+      "documentation_evidence": "The 2025-04 Chinese devlog describes the former Tauri implementation; the 2025-10 English devlog and AGENTS.md identify the later migration/current desktop as Electron.",
+      "implementation_evidence": "apps/stage-tamagotchi/package.json uses Electron tooling and apps/stage-tamagotchi/src/main/index.ts imports Electron; no crates/ directory is present in this checkout.",
+      "state": "historical",
+      "decision_relevant": true
+    },
+    {
+      "claim": "The multi-transport and external-host architecture is already implemented.",
+      "documentation_evidence": "packages/plugin-sdk/docs/design/multi-transport.md labels the design Planned and lists implementation next steps; architecture.md presents external Node and remote modes as design targets.",
+      "implementation_evidence": "The current Electron host constructs ExtensionHost with runtime electron and loads entrypoints in-process; plugin-host/runtimes/node/index.ts supports only in-memory and throws for WebSocket, worker, and Electron transports.",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "The answer is unusually complete: it classifies the current Electron desktop correctly, identifies concrete runtime boundaries and friction, compares three viable options, and gives reversible migration gates. One minor history-count error was found; no material errors or unresolved decision-relevant documentation conflicts remain, so the v2.1 accuracy gate passes."
+}

@@ -1,0 +1,106 @@
+{
+  "dimensions": {
+    "scope_and_classification": 1,
+    "evidence": 1,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 1,
+    "generalization": 2
+  },
+  "total": 15,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron desktop app in apps/stage-tamagotchi, using Electron main/preload/renderer entrypoints and electron-builder targets.",
+    "runtime_boundaries_identified": [
+      "Electron main process and renderer BrowserWindows bridged by Eventa IPC.",
+      "In-process ExtensionHost and FileSystemLoader execution inside the Electron main process.",
+      "server-runtime WebSocket channel, defaulting to port 6121, with server-sdk protocol peers and TLS/QR/configuration handling.",
+      "Per-window BrowserWindow managers, including hidden beat-sync and optional desktop-overlay windows, manually composed through injeca.",
+      "External service/plugin package boundaries; the answer identifies these but incorrectly generalizes all six services and five plugins as server-sdk-connected independent processes."
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 1,
+    "minor_error_count": 4,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": false
+  },
+  "factual_errors": [
+    {
+      "severity": "material",
+      "claim": "`services/` 下的 6 个服务和 `plugins/` 下的 5 个插件都是独立进程，并通过 `server-sdk` 连接 server-channel。",
+      "repository_evidence": "Current manifests and sources show only some packages directly use `@proj-airi/server-sdk`; `computer-use-mcp` is an MCP stdio service, `satori-bot` uses a Satori WebSocket, `telegram-bot` uses Telegram APIs, and several packages have no direct server-sdk client usage.",
+      "explanation": "The directory counts are broadly correct, but the common runtime and transport classification is false. It materially distorts the current independent-backend map and supports the recommendation that server-channel is the sole backend boundary.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "scope_and_classification",
+        "evidence",
+        "current_friction",
+        "recommendation"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "组合根中有 14 个窗口模块，并且各自返回一个 manager。",
+      "repository_evidence": "`apps/stage-tamagotchi/src/main/index.ts` explicitly wires a smaller mixed set of window providers; some return BrowserWindow instances, while others return managers, and the tray is not itself a window manager.",
+      "explanation": "The conclusion that window composition is manual remains valid, but the count and uniform return-shape description are inaccurate.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "plugin-sdk 的远程传输层只有脚手架、没有实现。",
+      "repository_evidence": "`packages/plugin-sdk/src/plugin-host/runtimes/node/index.ts` and `web/index.ts` throw for websocket/worker transports, but `packages/plugin-sdk/src/channels/remote/websocket/index.ts` contains a low-level WebSocket adapter that creates an Eventa context.",
+      "explanation": "The host runtime path is not usable, but saying the entire remote layer is unimplemented is too broad.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Phase 0 可用 `pnpm -F @proj-airi/server-runtime test` 验证。",
+      "repository_evidence": "`packages/server-runtime/package.json` defines build, start, dev, and typecheck scripts but no test script, although Vitest test files exist in the package.",
+      "explanation": "The proposed verification command would fail as a missing package script; the tests need to be invoked through the repository's Vitest configuration or an added script.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "migration",
+        "verification"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "未授予 kit 的集成测试应断言抛出 `PermissionDeniedError`。",
+      "repository_evidence": "The public kit-use path in `packages/plugin-sdk/src/plugin-host/core.ts` returns a `KitUnavailableError` with reason `permission-denied`; `PermissionDeniedError` is used by lower-level binding operations rather than this kit-use result.",
+      "explanation": "The denial behavior is correctly identified, but the proposed error type does not match the current public behavior.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "migration",
+        "verification"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "仓库指南把 `crates/` 描述为旧 Tauri 桌面端，并称 Electron 是当前桌面端。",
+      "documentation_evidence": "Root `AGENTS.md` lists `crates/` as legacy Tauri and identifies Electron as current.",
+      "implementation_evidence": "The current checkout has no tracked `crates`, Cargo, or Tauri paths; current desktop packaging is in `apps/stage-tamagotchi` with Electron. Git history records Tauri removal and relocation.",
+      "state": "historical",
+      "decision_relevant": false
+    },
+    {
+      "claim": "plugin-sdk 文档描述本地/远程 transport-agnostic 架构。",
+      "documentation_evidence": "`docs/design/architecture.md` presents the transport-agnostic design, while `docs/design/multi-transport.md` labels remote transport work as planned and lists implementation as future work.",
+      "implementation_evidence": "The current Node and Web plugin-host runtime factories support in-memory transport but throw for websocket and worker transports.",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "答案对 Electron 当前平台、插件宿主的进程内执行风险、手工窗口接线、方案权衡和渐进回滚路线分析较强，因此多数维度得分高。主要问题是把所有 services/plugins 错归为 server-sdk 独立进程，属于影响当前架构地图和推荐依据的 material error；另有窗口数量、远程适配器状态、测试命令和异常类型等 minor errors。无未解决的决策相关文档冲突，但准确性 gate 不通过。"
+}

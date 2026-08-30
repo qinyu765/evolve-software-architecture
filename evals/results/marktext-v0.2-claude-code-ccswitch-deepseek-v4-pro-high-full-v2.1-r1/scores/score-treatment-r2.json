@@ -1,0 +1,80 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "darwin (macOS)",
+    "runtime_boundaries_identified": [
+      "Three-process split: main (Node/Electron) / sandboxed preload (contextBridge facade) / renderer (Vue), with renderer reaching Node only through window.electron/fileUtils/path/… typed in shared/types/ipc.ts.",
+      "Renderer↔main IPC surface: the four typed contract categories (invoke/send/sync/main-event); main-side handlers are still registered via bare ipcMain.on/handle in business classes and are not type-checked against the contract.",
+      "Main-process-internal dispatch: onInternalChannel / ipcMain.emit in utils/internalIpc.ts used as a pseudo-IPC bus between main modules (flagged for collapse into direct typed calls).",
+      "Window lifecycle/routing boundary: WindowManager Map<number, BaseWindow> registry with EDITOR/SETTINGS subclasses; identity mixes event.sender lookup, explicit windowId, and internal emit.",
+      "Editor engine boundary: renderer consumes @muyajs/core at source level (workspace dep, exports '.' → ./src/index.ts) behind a hand-written any shim (types/muya-core.d.ts); legacy @marktext/muyajs retired.",
+      "File write boundary: main-process-owned durable writeFile (write-file-atomic + fsync + rename) in filesystem/index.ts; save/save-as dialogs currently live in menu/actions/file.ts (flagged as a misplaced owner)."
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 2,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "menu/actions/file.ts is 758 lines (evidence for it being a large 'God file').",
+      "repository_evidence": "The file contains ipcMain.emit at line 826 and its final command registrations at lines 848-850, i.e. the file is ~850 lines, not 758.",
+      "explanation": "The precise line count is off by ~90 lines. The qualitative point it supports — save/save-as/export logic is concentrated in one large menu-actions file — remains correct, so the recommendation is unaffected.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "webSecurity:false is a historical exemption to allow local file:// images/fonts/assets to load.",
+      "repository_evidence": "config.ts:19 and :40 set webSecurity:false with no comment; a repo-wide grep for 'webSecurity' finds only those two lines and no justification anywhere.",
+      "explanation": "The rationale is presented as fact but is not evidenced in the repository. It is a plausible inference, and the answer correctly defers changing the setting and recommends recording the trade-off in an ADR, so the recommendation direction is sound.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "recommendation"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "Dev docs describe a pre-monorepo src/ layout and state 'Muya … is currently still JavaScript'.",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md:12-22 (lists root src/common|main|muya|renderer; 'Muya, the editor backend, is currently still JavaScript').",
+      "implementation_evidence": "Monorepo layout under packages/desktop/src/{main,preload,renderer,shared,common}; packages/muya is a TypeScript rewrite published as @muyajs/core (package name and ./src/index.ts entrypoint).",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "IPC.md documents paths as root src/… (src/main/config.ts, src/shared/types/ipc.ts, src/main/ipc/*.ts).",
+      "documentation_evidence": "packages/website/content/docs/dev/IPC.md:4,6,10,24,92.",
+      "implementation_evidence": "Actual paths are packages/desktop/src/… (e.g. packages/desktop/src/main/config.ts, packages/desktop/src/shared/types/ipc.ts, packages/desktop/src/main/ipc/*.ts).",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "Project docs state 'only a handful of legacy muya/ alias call sites remain'.",
+      "documentation_evidence": "Root CLAUDE.md Directory Structure section and packages/muya/CLAUDE.md ('only a handful of call sites still reference it').",
+      "implementation_evidence": "Grep across packages/desktop finds zero `from 'muya/` or `@marktext/muyajs` imports; only types/muya.d.ts, the unused @marktext/muyajs: workspace:* dep (package.json:62), and the muya alias in electron.vite.config.ts remain.",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "The review is unusually well-grounded: every load-bearing claim was checked against implementation, config, tests, and docs and nearly all are precise, with line-level citations that match the checkout. It correctly classifies the repo as an Electron pnpm monorepo, distinguishes current code from stale docs (ARCHITECTURE.md pre-monorepo layout / IPC.md src/ paths / CLAUDE.md 'a handful of muya call sites' — all three resolved in favor of current code), and discloses the real evidence limitation (no incremental git history, no Bash). The friction, quality-attribute ranking, three options (status quo, premature abstraction, selective consolidation), the single recommendation with per-direction stable/defer calls, and the phased reversible migration with named verification (typecheck, architecture-check script, named e2e specs, muya conformance) all satisfy the full-credit signals. The legacy JS engine packages/muyajs is correctly treated as retired, never as current. Two minor errors — an off line count (758 vs ~850) for menu/actions/file.ts and an unverified rationale for webSecurity:false — do not change the recommendation and are not material. Accuracy gate passes: 0 material errors, 0 unresolved decision-relevant conflicts."
+}

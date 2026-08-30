@@ -1,0 +1,57 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron 42 desktop app with Vue 3/Pinia renderer; electron-builder targets Windows, macOS, and Linux.",
+    "runtime_boundaries_identified": [
+      "Electron main process and window/file orchestration",
+      "Sandboxed preload/contextBridge capability bridge",
+      "Renderer Pinia state and renderer-local Muya host",
+      "Separate Muya WYSIWYG and CodeMirror source surfaces",
+      "Shared IPC/state types and persisted buffer state",
+      "Runtime BrowserWindow ID versus persistent restoreBufferId"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 0,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [],
+  "documentation_drift": [
+    {
+      "claim": "CLAUDE.md describes editor/preferences windows as contextIsolation:false with nodeIntegration:true.",
+      "documentation_evidence": "CLAUDE.md:241-245",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:8-20,29-41 and test/e2e/context-isolation.spec.ts:24-37 show contextIsolation:true, sandbox:true, nodeIntegration:false.",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "ARCHITECTURE.md describes the pre-monorepo root src/main/muya layout.",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md:5-18",
+      "implementation_evidence": "Root package.json and pnpm-workspace.yaml make packages/desktop, packages/muya, packages/muyajs, and packages/website the current workspace layout.",
+      "state": "historical",
+      "decision_relevant": true
+    },
+    {
+      "claim": "PARITY_SCOREBOARD.md still marks PG14 as xfail.",
+      "documentation_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md:69,77-90",
+      "implementation_evidence": "packages/desktop/test/e2e/parity-source-undo-saved.spec.ts:73-125 has no test.fail(), and commit 5d3d2819 adds replaceContent and passing PG14 coverage.",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "The review is evidence-backed, compares three viable options, identifies the actual Electron/runtime seams, and provides a reversible seam-first migration with concrete invariants and measurements. Stale documentation conflicts are explicitly identified and resolved using current implementation, tests, and history; the v2.1 accuracy gate therefore passes."
+}

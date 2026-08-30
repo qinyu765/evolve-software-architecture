@@ -1,0 +1,52 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron via apps/stage-tamagotchi, electron-vite, and electron-builder.",
+    "runtime_boundaries_identified": [
+      "Electron main process and injeca composition root",
+      "Per-BrowserWindow renderer/preload Eventa IPC contexts",
+      "In-process filesystem-loaded plugin host",
+      "Sandboxed plugin iframe bridged through renderer Eventa/postMessage",
+      "Cookie-authenticated loopback static asset server",
+      "Godot external child process over loopback WebSocket",
+      "MCP stdio child-process sessions",
+      "Server-runtime WebSocket channel and server-sdk peer"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 0,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [],
+  "documentation_drift": [
+    {
+      "claim": "Plugin design documentation describes runtime-agnostic local/remote plugins, multi-transport contexts, and embedded/external/remote host modes.",
+      "documentation_evidence": "packages/plugin-sdk/README.md and packages/plugin-sdk/docs/design/{architecture,multi-transport}.md",
+      "implementation_evidence": "apps/stage-tamagotchi/src/main/services/airi/plugins/host/index.ts constructs ExtensionHost with runtime electron; packages/plugin-sdk/src/plugin-host/runtimes/node/index.ts and web/index.ts throw for non-memory transports; the filesystem loader directly import()s entrypoints.",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "Repository guidance and historical documentation still mention crates/old Tauri desktop.",
+      "documentation_evidence": "AGENTS.md:18,53 and historical Tauri migration/devlog documents.",
+      "implementation_evidence": "HEAD has no tracked crates directory; current desktop package and build configuration are Electron-based.",
+      "state": "historical",
+      "decision_relevant": false
+    }
+  ],
+  "rationale": "The review is evidence-backed, distinguishes current implementation from design intent, compares three viable options, and provides reversible migration and concrete verification criteria. The identified documentation drift is explicitly handled by the answer rather than treated as current capability."
+}

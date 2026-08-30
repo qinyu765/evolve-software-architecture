@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "case": {
+    "id": "marktext-v0.2-baseline",
+    "sha256": "81419bc64ffde51790b2990e5ec66e49be41e5b9a8dce0609d62d60bec20709f"
+  },
+  "repository": {
+    "name": "marktext/marktext",
+    "url": "https://github.com/marktext/marktext",
+    "commit": "e52106fd1cdcbd33c1258b7b0cdc7013c4c5d86c",
+    "scope": "packages/desktop"
+  },
+  "skill": {
+    "name": "evolve-software-architecture",
+    "url": "https://github.com/qinyu765/evolve-software-architecture",
+    "version": "v0.1.2",
+    "commit": "12ae54160ece0ee16f837226e1cd936c980b7c46"
+  },
+  "contract": {
+    "rubric": {
+      "name": "architecture-review-v2.1.md",
+      "sha256": "64489b2290d24f0ae95fdabe14abcf34a4edbf6f7dcc044a65ed3034ec3c3b4e"
+    },
+    "schema": {
+      "name": "architecture-review-v2.1.schema.json",
+      "sha256": "e5609858147c7005cf786d059abe4d402d48271ed45f6701ee1a9c519bf3c8a6"
+    }
+  },
+  "profile": {
+    "profile_id": "claude-code-ccswitch-deepseek-v4-pro-high",
+    "runtime": "claude-code",
+    "cli_version": "2.1.233",
+    "model": "deepseek-v4-pro",
+    "model_argument": "fable",
+    "configuration_manager": "CCSwitch",
+    "reasoning_effort": "high",
+    "call_timeout_seconds": 1800,
+    "ephemeral": true,
+    "sandbox": "restricted-read-tools",
+    "max_concurrency": 3,
+    "repetitions": 3,
+    "phases": "score"
+  },
+  "planned_calls": 6,
+  "rescore_source": {
+    "name": "marktext-v0.2-codex-gpt-5.6-luna-max-full-v2.1-r1",
+    "manifest_sha256": "934b6201b0c706ce87ab35c87c4195a020616733ba65833ee5b2e85610629de3",
+    "case_sha256": "81419bc64ffde51790b2990e5ec66e49be41e5b9a8dce0609d62d60bec20709f",
+    "profile_id": "codex-gpt-5.6-luna-max",
+    "runtime": "codex",
+    "scorer_runtime": "claude-code",
+    "producer_profile": {
+      "profile_id": "codex-gpt-5.6-luna-max",
+      "runtime": "codex",
+      "cli_version": "0.144.4",
+      "model": "gpt-5.6-luna",
+      "model_argument": "gpt-5.6-luna",
+      "configuration_manager": null,
+      "reasoning_effort": "max",
+      "call_timeout_seconds": 1800,
+      "ephemeral": true,
+      "sandbox": "read-only",
+      "max_concurrency": 3,
+      "repetitions": 3,
+      "phases": "all"
+    },
+    "producer_run_id": "9f49ed05f08b496eabfc4af436d799a5",
+    "contract_status": "matched",
+    "source_dataset_complete": true,
+    "producer_answers_complete": true
+  },
+  "run_id": "4486d4656ee646019b27e06f95d05748",
+  "started_at": "2026-08-26T02:18:58.064095+00:00",
+  "completed_at": "2026-08-26T02:45:56.760717+00:00",
+  "results": [
+    {
+      "id": "score-control-r1",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r1",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 454016,
+        "num_turns": 39
+      }
+    },
+    {
+      "id": "score-control-r2",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r2",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 376796,
+        "num_turns": 44
+      }
+    },
+    {
+      "id": "score-control-r3",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r3",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 333423,
+        "num_turns": 54
+      }
+    },
+    {
+      "id": "score-treatment-r1",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r1",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 282040,
+        "num_turns": 27
+      }
+    },
+    {
+      "id": "score-treatment-r2",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r2",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 323784,
+        "num_turns": 38
+      }
+    },
+    {
+      "id": "score-treatment-r3",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r3",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 311196,
+        "num_turns": 39
+      }
+    }
+  ],
+  "skipped": [],
+  "observed_models": [
+    "claude-fable-5[1M]",
+    "claude-haiku-4-5"
+  ]
+}

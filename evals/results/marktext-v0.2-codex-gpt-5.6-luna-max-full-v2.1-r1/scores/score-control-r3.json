@@ -1,0 +1,60 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 1,
+    "generalization": 2
+  },
+  "total": 17,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron desktop application targeting Windows, macOS, and Linux.",
+    "runtime_boundaries_identified": [
+      "main/preload/renderer security boundary",
+      "window/session/tab/path identity boundary",
+      "main file-workflow/filesystem/watcher boundary",
+      "renderer editor-host/@muyajs-core engine boundary"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 1,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "“路径归一化、编码、BOM、EOL、尾换行……均在 main 侧实现”。",
+      "repository_evidence": "packages/desktop/src/main/filesystem/markdown.ts:90-158 detects trimTrailingNewline; packages/desktop/src/renderer/src/store/editor.ts:1415-1418 and 1796-1850 applies adjustTrailingNewlines.",
+      "explanation": "尾换行元数据由 main 读取，但实际按策略调整文本发生在 renderer store；这是边界归属的轻微过度概括，不改变 façade/adapter 建议。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "旧架构文档把根目录 src/ 和 JavaScript Muya 布局描述为当前结构。",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md:12-30",
+      "implementation_evidence": "package.json、pnpm-workspace.yaml、packages/muya/package.json 及 desktop 对 @muyajs/core 的实际使用确认当前为 packages/* monorepo 和 TypeScript engine。",
+      "state": "historical",
+      "decision_relevant": false
+    },
+    {
+      "claim": "PARITY_SCOREBOARD.md 仍称 PG14 为 xfail/唯一未修复项。",
+      "documentation_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md:3,42-70",
+      "implementation_evidence": "editor.vue 使用 replaceContent；parity-source-undo-saved.spec.ts 不再使用 test.fail；packages/muya 的 replaceContent 测试及 Git 历史 5d3d2819 支持 PG14 已修复。",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "总分 17/18。评审有充分的当前实现、配置、测试、构建和历史证据，选项、推荐及可回滚迁移路线完整。Verification 给 1 分是因为虽列出具体测试场景和失败模式，但缺少可直接执行的命令、量化基线和明确通过阈值。无 material error；文档漂移被识别且不构成 unresolved decision conflict。"
+}

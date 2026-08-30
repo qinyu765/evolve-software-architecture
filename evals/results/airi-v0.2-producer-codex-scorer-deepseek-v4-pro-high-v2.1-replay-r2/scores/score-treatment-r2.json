@@ -1,0 +1,46 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (apps/stage-tamagotchi). The project docs (AGENTS.md) also note a legacy Tauri desktop under crates/, but the answer never refers to it.",
+    "runtime_boundaries_identified": [
+      "Electron main process as the composition root that wires windows, plugin host, HTTP/WebSocket server channel, MCP stdio manager, and Godot stage manager via injeca (main/index.ts)",
+      "In-process plugin host with runtime='electron', loading extension entrypoints via dynamic import in the main process",
+      "server-runtime standalone process entrypoint (packages/server-runtime/src/bin/run.ts, createServer + SIGINT/SIGTERM shutdown)",
+      "MCP stdio child-process manager (mcp-servers, applyAndRestart/stopAll)",
+      "Godot stage child process (spawn from node:child_process)",
+      "Planned-but-unimplemented plugin transports: websocket, node-worker, electron, web-worker (createPluginContext throws for all but in-memory)"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 1,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "documentation_drift": [],
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "Plugins are dynamically imported in the main process under the Electron runtime, cited at plugins/host/index.ts:224 and fs.ts:72.",
+      "repository_evidence": "The dynamic import is actually at fs.ts:74 (`const extensionModule = await import(entrypoint)`); the Electron runtime assignment is at host/index.ts:236 (`new ExtensionHost({ runtime: 'electron' })`), not line 224.",
+      "explanation": "The substantive claim is fully correct; the citations point to the enclosing function declarations (224 and 72) rather than the exact statements (236 and 74). This is a 2-line offset that does not change any conclusion.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    }
+  ],
+  "rationale": "The answer is grounded in verified repository evidence: every load-bearing citation (main/index.ts composition root, in-process plugin host with runtime 'electron', dynamic import in fs.ts, ExtensionHost session/permission/module/resource boundaries with ownerExtensionId, referenced-window TODO on window-namespaced contexts and setMaxListeners(0), server-runtime standalone bin/run.ts, MCP and Godot child-process managers, channel-server config rollback, and the Planned-but-unimplemented transports in runtimes/node/index.ts + multi-transport.md) was checked and confirmed accurate. The lifecycle claim 'setting-up/ready/failed/stopped' matches core.ts:97 exactly. The answer consistently distinguishes facts from inference/constraint/unknown, treats the multi-transport design doc as intent (not current capability), and hedges the test-coverage claim appropriately. The one finding is a minor citation line-offset (2 lines) that does not affect any decision. No documentation/implementation drift exists: the design doc's 'Planned' transport and lifecycle-state-machine items agree with the throwing implementation, so the answer resolved them correctly rather than presenting stale docs as current. The review names Electron as the current desktop platform, never mentions the legacy Tauri crate, and identifies six concrete runtime boundaries. Three options (status quo, hybrid, full external) are compared with quality-attribute trade-offs, a recommendation that follows from the evidence, incremental/reversible migration steps, and concrete verification gates. The evidence-bearing table, migration gates, and deferral list are all repository-specific without smuggling project facts into generic rules."
+}

@@ -1,0 +1,570 @@
+{
+  "schema_version": 1,
+  "case": {
+    "id": "airi-v0.2-baseline",
+    "sha256": "fa7140cdc9463c1e429f759c9c657092c85137fba7224645a865bb768d324cf6"
+  },
+  "repository": {
+    "name": "moeru-ai/airi",
+    "url": "https://github.com/moeru-ai/airi",
+    "commit": "5228f94123e42416435e7f7e8215df26f3bb065b"
+  },
+  "skill": {
+    "name": "evolve-software-architecture",
+    "url": "https://github.com/qinyu765/evolve-software-architecture",
+    "version": "v0.1.2",
+    "commit": "12ae54160ece0ee16f837226e1cd936c980b7c46"
+  },
+  "contract": {
+    "rubric": {
+      "name": "architecture-review-v2.1.md",
+      "sha256": "64489b2290d24f0ae95fdabe14abcf34a4edbf6f7dcc044a65ed3034ec3c3b4e"
+    },
+    "schema": {
+      "name": "architecture-review-v2.1.schema.json",
+      "sha256": "e5609858147c7005cf786d059abe4d402d48271ed45f6701ee1a9c519bf3c8a6"
+    }
+  },
+  "profile": {
+    "profile_id": "claude-code-ccswitch-deepseek-v4-pro-high",
+    "runtime": "claude-code",
+    "cli_version": "2.1.233",
+    "model": "deepseek-v4-pro",
+    "model_argument": "fable",
+    "configuration_manager": "CCSwitch",
+    "reasoning_effort": "high",
+    "call_timeout_seconds": 1800,
+    "ephemeral": true,
+    "sandbox": "restricted-read-tools",
+    "max_concurrency": 3,
+    "repetitions": 3,
+    "phases": "all"
+  },
+  "planned_calls": 30,
+  "run_id": "43ef3304aa644b999acb8bee09fec51c",
+  "started_at": "2026-08-25T08:42:15.187699+00:00",
+  "completed_at": "2026-08-25T09:38:07.047756+00:00",
+  "results": [
+    {
+      "id": "behavior-control-r1",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 266231,
+        "num_turns": 50
+      }
+    },
+    {
+      "id": "behavior-control-r2",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 233781,
+        "num_turns": 55
+      }
+    },
+    {
+      "id": "behavior-control-r3",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 279045,
+        "num_turns": 48
+      }
+    },
+    {
+      "id": "behavior-treatment-r1",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 310395,
+        "num_turns": 53
+      }
+    },
+    {
+      "id": "behavior-treatment-r2",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 415466,
+        "num_turns": 60
+      }
+    },
+    {
+      "id": "behavior-treatment-r3",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 356724,
+        "num_turns": 68
+      }
+    },
+    {
+      "id": "routing-negative-local-style-fix-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 28775,
+        "num_turns": 6
+      }
+    },
+    {
+      "id": "routing-negative-local-style-fix-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 32537,
+        "num_turns": 6
+      }
+    },
+    {
+      "id": "routing-negative-local-style-fix-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 13753,
+        "num_turns": 2
+      }
+    },
+    {
+      "id": "routing-negative-rename-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 14343,
+        "num_turns": 4
+      }
+    },
+    {
+      "id": "routing-negative-rename-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 8836,
+        "num_turns": 2
+      }
+    },
+    {
+      "id": "routing-negative-rename-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 12929,
+        "num_turns": 4
+      }
+    },
+    {
+      "id": "routing-negative-routine-update-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 37511,
+        "num_turns": 6
+      }
+    },
+    {
+      "id": "routing-negative-routine-update-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 37997,
+        "num_turns": 7
+      }
+    },
+    {
+      "id": "routing-negative-routine-update-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 17948,
+        "num_turns": 3
+      }
+    },
+    {
+      "id": "routing-positive-debt-direction-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 387159,
+        "num_turns": 64
+      }
+    },
+    {
+      "id": "routing-positive-debt-direction-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 430116,
+        "num_turns": 57
+      }
+    },
+    {
+      "id": "routing-positive-debt-direction-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 370637,
+        "num_turns": 39
+      }
+    },
+    {
+      "id": "routing-positive-desktop-boundary-review-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 298811,
+        "num_turns": 54
+      }
+    },
+    {
+      "id": "routing-positive-desktop-boundary-review-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 282489,
+        "num_turns": 58
+      }
+    },
+    {
+      "id": "routing-positive-desktop-boundary-review-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 328705,
+        "num_turns": 66
+      }
+    },
+    {
+      "id": "routing-positive-ipc-evolution-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 289032,
+        "num_turns": 38
+      }
+    },
+    {
+      "id": "routing-positive-ipc-evolution-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 248249,
+        "num_turns": 48
+      }
+    },
+    {
+      "id": "routing-positive-ipc-evolution-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 335891,
+        "num_turns": 69
+      }
+    },
+    {
+      "id": "score-control-r1",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r1",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 344538,
+        "num_turns": 43
+      }
+    },
+    {
+      "id": "score-control-r2",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r2",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 310370,
+        "num_turns": 39
+      }
+    },
+    {
+      "id": "score-control-r3",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r3",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 356660,
+        "num_turns": 53
+      }
+    },
+    {
+      "id": "score-treatment-r1",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r1",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 361754,
+        "num_turns": 54
+      }
+    },
+    {
+      "id": "score-treatment-r2",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r2",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 281478,
+        "num_turns": 51
+      }
+    },
+    {
+      "id": "score-treatment-r3",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r3",
+      "metadata": {
+        "observed_models": [
+          "claude-fable-5[1M]",
+          "claude-haiku-4-5"
+        ],
+        "duration_ms": 393997,
+        "num_turns": 62
+      }
+    }
+  ],
+  "skipped": [],
+  "observed_models": [
+    "claude-fable-5[1M]",
+    "claude-haiku-4-5"
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 1,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 1,
+    "migration": 2,
+    "verification": 1,
+    "generalization": 1
+  },
+  "total": 14,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron desktop application in packages/desktop, targeting Linux, macOS, and Windows.",
+    "runtime_boundaries_identified": [
+      "Main process, preload, and sandboxed renderer boundary",
+      "Renderer-to-main IPC registry and typed preload bridge",
+      "Electron shell and Node access through contextBridge APIs",
+      "BaseWindow/WindowManager subclass and lifecycle boundary",
+      "Main filesystem/watcher versus renderer file-workflow boundary",
+      "Renderer access to @muyajs/core through its public package boundary"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 1,
+    "minor_error_count": 8,
+    "unresolved_decision_conflict_count": 1,
+    "gate_pass": false
+  },
+  "factual_errors": [
+    {
+      "severity": "material",
+      "claim": "focusMode is currently a no-op and its render path should be deferred.",
+      "repository_evidence": "packages/muya/src/muya.ts:372-379,1682-1699; packages/muya/src/assets/styles/blockSyntax.css:458-477; packages/muya/src/__tests__/focusMode.spec.ts:53-75; commit a49c7b71.",
+      "explanation": "The current implementation applies and toggles the focus-mode class, CSS dims inactive blocks, and tests cover it. The answer relied on stale backlog text for an engine recommendation.",
+      "source_conflict": true,
+      "affected_dimensions": [
+        "evidence",
+        "recommendation",
+        "verification"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Legacy muyajs cleanup is only dead dependency/alias/type wiring and has very low risk.",
+      "repository_evidence": ".github/workflows/website-deploy.yml:8,14; scripts/thirdPartyChecker.ts:15; eslint.config.js:24-25,127-135,172-185; packages/desktop/vitest.config.ts:18; packages/desktop/tsconfig.json:26.",
+      "explanation": "Runtime imports are absent, but active workflow, tooling, and configuration references make the cleanup scope and risk broader than stated.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "migration",
+        "verification"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Path identity has three same-name implementations.",
+      "repository_evidence": "packages/desktop/src/common/filesystem/paths.ts:135-166 and packages/desktop/src/preload/index.ts:111-156; renderer receives the preload implementation through global.d.ts.",
+      "explanation": "There are two implementations with different fallbacks, not three independent same-name implementations. The underlying semantic-drift concern remains valid.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "main/utils/internalIpc.ts uses ipcMain.emit.",
+      "repository_evidence": "packages/desktop/src/main/utils/internalIpc.ts:8-13 calls ipcMain.on; emitters are in editor.ts, setting.ts, and app/index.ts.",
+      "explanation": "The shared internal ipcMain namespace is real, but the answer attributes the emitter to the wrong file.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The IPC registry has an mt:: prefix invariant and typecheck rejects every unregistered channel.",
+      "repository_evidence": "packages/desktop/src/shared/types/ipc.ts:40-289 contains non-mt internal keys; CLAUDE.md:264 says most channels use mt::; main code also calls raw ipcMain handlers and sends.",
+      "explanation": "The typed preload bridge constrains its own call sites, but the registry does not enforce all main-process registrations or internal channels.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "verification",
+        "generalization"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Desktop only imports @muyajs/core from its root public entry and does not touch internal paths.",
+      "repository_evidence": "packages/desktop/test/unit/specs/format-menu-state.spec.ts:26-27 imports @muyajs/core/ui/inlineFormatToolbar/config.",
+      "explanation": "Renderer production imports mostly use the root entry, but the desktop test surface has an internal subpath import.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "recommendation"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "IFileState is the unique cross-process document contract.",
+      "repository_evidence": "packages/desktop/src/shared/types/files.ts:62-105 defines IFileState, while ipc.ts uses MarkdownDocument, UnsavedFile, FileChangeDetail, and unknown payloads; FileNotification.action is a function.",
+      "explanation": "IFileState is documented as canonical shared state, but it is not the sole serialized IPC shape.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "recommendation",
+        "generalization"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "webSecurity:false is specifically an accepted relaxation for file:// relative-path images.",
+      "repository_evidence": "packages/desktop/src/main/config.ts:11-20,34-41 sets webSecurity:false; base.ts uses file:// and image-relative-path tests exist, but no implementation comment, ADR, or history establishes that causal rationale.",
+      "explanation": "The setting and related file:// behavior are evidenced, but the stated rationale is presented more confidently than the repository supports.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "recommendation"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The grep found only three legacy code comments.",
+      "repository_evidence": "Current legacy comment references include packages/desktop/src/renderer/src/codeMirror/markdownMathMode.ts:19, util/dompurify.ts:31, components/sideBar/icon.vue:10, and multiple desktop test files.",
+      "explanation": "The runtime-import conclusion is supported, but the reported count and scope of remaining references are inaccurate.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "CLAUDE.md:241-245 documents contextIsolation:false and nodeIntegration:true, while the current configuration and e2e security test establish the opposite; the answer explicitly reports and resolves this conflict.",
+      "documentation_evidence": "CLAUDE.md:241-245.",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:11-20,34-41; packages/desktop/test/e2e/context-isolation.spec.ts.",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "The answer repeats the stale focusMode no-op statement and does not resolve the conflict with the implemented and tested focus-mode behavior.",
+      "documentation_evidence": "packages/muya/e2e/BACKLOG.md:123,143.",
+      "implementation_evidence": "packages/muya/src/muya.ts:372-379,1682-1699; blockSyntax.css:458-477; focusMode.spec.ts:53-75; commit a49c7b71.",
+      "state": "conflict",
+      "decision_relevant": true
+    },
+    {
+      "claim": "CLAUDE.md contains stale legacy-engine architecture text conflicting with the current @muyajs/core runtime; the answer’s direct source check resolves the runtime decision, although it does not enumerate all stale passages.",
+      "documentation_evidence": "CLAUDE.md:230-232,253-259,288-293.",
+      "implementation_evidence": "packages/desktop/src production imports @muyajs/core; legacy references remain in declarations, aliases, tests, and tooling.",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "The review is broad, option-rich, and gives concrete reversible migration gates, with strong identification of real window, IPC, filesystem, and engine-boundary friction. It loses evidence and recommendation credit because it treats stale focus-mode documentation as current, overstates several boundaries, and does not substantiate its history/test verification. Accuracy fails because one material error and one unresolved decision-relevant documentation conflict remain."
+}

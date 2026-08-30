@@ -1,0 +1,62 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 1,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 17,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron 42 desktop application targeting Linux, Windows (x64/arm64), and macOS (x64/arm64).",
+    "runtime_boundaries_identified": [
+      "Electron main process",
+      "Sandboxed preload/contextBridge",
+      "Renderer Vue/Pinia state",
+      "Shared IPC types/DTO boundary",
+      "@muyajs/core WYSIWYG engine",
+      "CodeMirror source-mode editor"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 1,
+    "minor_error_count": 0,
+    "unresolved_decision_conflict_count": 1,
+    "gate_pass": false
+  },
+  "factual_errors": [
+    {
+      "severity": "material",
+      "claim": "The review presents PG14 as a current unresolved parity gap because the scoreboard still contains test.fail().",
+      "repository_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md:69 and :77-90 contain the stale xfail entry, but packages/desktop/test/e2e/parity-source-undo-saved.spec.ts:73-134 has no test.fail(); commit 5d3d2819 explicitly records PG14 being changed to passing, and current editor.vue uses replaceContent for the handoff.",
+      "explanation": "The answer treated stale scoreboard documentation as current without reconciling later implementation, tests, and history.",
+      "source_conflict": true,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "CLAUDE.md and the developer ARCHITECTURE.md describe older src/muya, engine, and sandbox structures.",
+      "documentation_evidence": "CLAUDE.md:35-61, :228-260, :288-293; packages/website/content/docs/dev/ARCHITECTURE.md:5-30.",
+      "implementation_evidence": "pnpm-workspace.yaml; packages/desktop/src/main/config.ts:8-20; packages/desktop/test/e2e/context-isolation.spec.ts:24-37; current renderer imports @muyajs/core.",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "The parity scoreboard reports PG14 as still xfail/test.fail().",
+      "documentation_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md:69 and :77-90.",
+      "implementation_evidence": "packages/desktop/test/e2e/parity-source-undo-saved.spec.ts:73-134 passes without test.fail(); commit 5d3d2819 and packages/desktop/src/renderer/src/components/editorWithTabs/editor.vue:1535-1549 show the later fix.",
+      "state": "conflict",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "The review is strong on scope, friction, alternatives, recommendation, migration, and verification. Its accuracy gate fails because it presents a stale PG14 scoreboard entry as current and leaves that decision-relevant documentation conflict unresolved. The requested evolve-software-architecture skill was unavailable."
+}

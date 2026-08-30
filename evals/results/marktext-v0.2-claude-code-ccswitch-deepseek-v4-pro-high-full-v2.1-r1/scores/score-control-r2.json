@@ -1,0 +1,91 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron ~42.1.0 desktop app in packages/desktop with a sandboxed renderer (contextIsolation:true, sandbox:true, nodeIntegration:false, webSecurity:false), three-process main/preload/renderer model, and @muyajs/core (TypeScript rewrite) as the live editor engine",
+    "runtime_boundaries_identified": [
+      "renderer<->main IPC channel contract (mt:: request/response namespaces vs main-internal app-*/window-*/watcher-*/broadcast-* channels)",
+      "preload contextBridge surface (the renderer's only Node/system access; bare window.electron.ipcRenderer send/invoke/on/sendSync)",
+      "window lifecycle/identity/routing model (BaseWindow WindowType/WindowLifecycle + WindowManager + App best-window routing, with sender-reflection identity)",
+      "file/document cross-process contract (shared/types/files.ts IFileState/MarkdownDocument/UnsavedFile/SaveOptions and versioned buffered-state schema)",
+      "editor engine boundary (@muyajs/core root import, opaque block tree, hand-written muya-core.d.ts pure-function seam)",
+      "durable disk-write semantics (write-file-atomic fsync+rename)"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 4,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "documentation_drift": [
+    {
+      "claim": "editor and preferences windows use contextIsolation: false + nodeIntegration: true (see packages/desktop/src/main/config.js)",
+      "documentation_evidence": "root CLAUDE.md, 'Architecture: Three-Process Electron Model' preload note",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:11-21 and :34-42 set contextIsolation:true, sandbox:true, nodeIntegration:false, webSecurity:false; config.js does not exist (Glob only found config.ts)",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "Muya, the editor backend, is currently still JavaScript, with source under a pre-monorepo src/{common,main,muya,renderer} layout",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md:12-22",
+      "implementation_evidence": "packages/muya is the TypeScript rewrite published as @muyajs/core (package.json version 0.2.0); the desktop renderer imports '@muyajs/core' (editorWithTabs/editor.vue:82-140); legacy @marktext/muyajs has no runtime imports",
+      "state": "historical",
+      "decision_relevant": false
+    }
+  ],
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "The internal channels are dispatched via ipcMain.emit inside WindowManager, App and DataCenter (windowManager.ts:369-495, app/index.ts:668-765, dataCenter/index.ts:107/117/136)",
+      "repository_evidence": "packages/desktop/src/main/app/windowManager.ts:367-495 and app/index.ts:658-765 are _listenForIpcMain subscriber bodies (ipcMain.on / onInternalChannel), not emit sites; only dataCenter/index.ts:107/117/136 are ipcMain.emit. Actual emit sites are windows/editor.ts:396-536, menu/actions/*.ts, preferences/index.ts:137, dataCenter/index.ts:107/117/136, app/index.ts:807",
+      "explanation": "Two of the three cited line ranges are subscription code, not dispatch code, so the 'who dispatches' attribution is partly wrong; the underlying fact that ipcMain.emit is used as an in-process bus is correct and the recommendation does not rest on the misattribution",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "IPC handlers are scattered across 'five places', then lists registerSandboxIpcHandlers plus WindowManager, DataCenter, EditorBufferStore, App, and menu/actions/file.ts",
+      "repository_evidence": "_listenForIpcMain exists in app/windowManager.ts:367, app/index.ts:658, dataCenter/index.ts:162, editorBufferStore/index.ts:214, menu/index.ts:472 and preferences/index.ts:176; registerSandboxIpcHandlers is ipc/index.ts:12; menu/actions/file.ts has top-level ipcMain.on at lines 285-677",
+      "explanation": "The count understates the actual scattering (at least 7-8 registration sites), which strengthens rather than undermines the review's point",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The muya conformance baseline (CommonMark 87.7% / GFM 86.3%) is 'locked in expected-failures.json'",
+      "repository_evidence": "packages/muya/test/spec/expected-failures.json is the fail-lock list; the percentages are documented in packages/muya/test/spec/conformance.md per packages/muya/CLAUDE.md",
+      "explanation": "The percentages are conflated with the lock file that enforces them; the baseline figures themselves are correct",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The checkout is 'a clean clone of the develop branch (e52106fd)'",
+      "repository_evidence": "Session git status snapshot shows 'Current branch: HEAD' (detached HEAD) at e52106fd with develop as the main branch; the tree is clean",
+      "explanation": "The checkout is a detached HEAD at e52106fd rather than a branch checkout of develop; low decision relevance since the answer correctly falls back to code comments for migration evidence",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    }
+  ],
+  "rationale": "The answer is a thorough, evidence-backed architecture review. It correctly identifies the current desktop platform (Electron ~42.1.0 sandboxed app in packages/desktop, @muyajs/core as the live engine, legacy @marktext/muyajs retired) and treats legacy platforms and stale docs as historical rather than current. Nearly all claims are verified against implementation, config, tests, and package metadata with accurate paths and line numbers; the review explicitly separates current evidence from documentation intent. It explains where changes spread (scattered IPC handlers, sender-reflection window identity, dual-engine declaration, save/export living in menu actions), gives three option sets each including status quo with explicit quality-attribute trade-offs, cost, risk, rollback, and consequences of inaction, and derives recommendations from verified evidence (the file.ts TODO, existing TypedEmitter, @muyajs/core API churn). The migration plan is incremental, reversible, and gated by named unit/e2e specs. Four minor factual imprecisions (dispatch vs subscribe attribution, scatter undercount, conformance-percentage file attribution, detached-HEAD description) do not affect any recommendation; there are no material errors and no unresolved decision-relevant conflicts, so the accuracy gate passes. All nine dimensions earn full credit; total 18/18.",
+  "total": 18
+}

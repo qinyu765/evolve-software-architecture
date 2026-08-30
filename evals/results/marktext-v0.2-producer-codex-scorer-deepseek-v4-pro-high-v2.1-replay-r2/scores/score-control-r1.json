@@ -1,0 +1,71 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron 42 desktop app in packages/desktop, with @muyajs/core (packages/muya TS rewrite) as the active editor engine",
+    "runtime_boundaries_identified": [
+      "package/process: packages/desktop owns Electron/OS/window/file policy; packages/muya stays a pure editor package without Electron/Node shell; renderer hosts UI, Pinia, and the live editor",
+      "security: main process is the authority for native capabilities; renderer has no direct Node access; preload exposes only explicit capabilities (contextIsolation:true, sandbox:true, nodeIntegration:false)",
+      "window: BrowserWindow creation/close/active-window and OS open-file routing belong to main; each window keeps its own renderer; BrowserWindow.id must not be treated as a persistent identity (restoreBufferId and renderer tab id are distinct)",
+      "file: preserve absolute paths, local file identity, encoding/BOM, LF internal representation, EOL/trailing-newline save semantics, watcher stability window, and atomic durable writes; do not freeze full IFileState, Muya block tree, or history as a cross-layer protocol",
+      "editor: Muya is consumed through its public entrypoint; Electron capabilities are injected via callbacks/options; live engine state stays in the renderer; do not yet define a generic multi-engine EditorEngine",
+      "IPC/shell: new capabilities use domain-scoped, serializable, sender-bound DTOs; main-internal ipcMain.emit events stay separate from renderer IPC; do not unify everything into one bus"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 2,
+    "unresolved_decision_conflict_count": 1,
+    "gate_pass": false
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "The answer cites ipc.ts:183 as the definition site of the window-file-saved contract.",
+      "repository_evidence": "packages/desktop/src/shared/types/ipc.ts:199 defines 'window-file-saved': [windowId: number, tabId: string]; line 183 is 'mt::window-add-file-path'.",
+      "explanation": "Line-number drift only. The underlying claim (contract parameter is tabId, while the internal handler treats it as pathname) is correct and verified at ipc.ts:199 and windowManager.ts:457.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The answer cites packages/desktop/package.json:55 as evidence that root scripts proxy to the desktop package.",
+      "repository_evidence": "packages/desktop/package.json:55 is the dependencies key; the proxy scripts live in the root package.json (e.g. \"dev\": \"pnpm --filter marktext dev\").",
+      "explanation": "Citation target wrong; the underlying claim is correct and verified in the root package.json scripts block.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "Root CLAUDE.md and the dev ARCHITECTURE.md describe contextIsolation: false + nodeIntegration: true and a root src/ directory layout.",
+      "documentation_evidence": "CLAUDE.md:243-244 ('editor and preferences windows use contextIsolation: false + nodeIntegration: true'); packages/website/content/docs/dev/ARCHITECTURE.md:12-18 (root src/ with muya under src/muya).",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:12-19 sets contextIsolation:true, sandbox:true, nodeIntegration:false (with webSecurity:false); packages/desktop/test/e2e/context-isolation.spec.ts:5-38 asserts the sandbox as a canary.",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "The parity scoreboard says PG14 remains an xfail carrying test.fail(), while the corresponding test source says it is fixed and uses plain test().",
+      "documentation_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md:44 ('Gaps remaining: 1 / 15 (PG14, accept-defer)') and :69 (PG14 mechanism test.fail(), status xfail).",
+      "implementation_evidence": "packages/desktop/test/e2e/parity-source-undo-saved.spec.ts:73-133 (PG14 describe marked FIXED, plain test() blocks, no test.fail()).",
+      "state": "conflict",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "All load-bearing claims were checked against current sources. Verified: monorepo layout (pnpm-workspace.yaml lists packages/* plus muya examples/e2e); root scripts proxy to desktop (root package.json); security config contextIsolation:true/sandbox:true/nodeIntegration:false/webSecurity:false (config.ts:12-19) with the E2E canary (context-isolation.spec.ts); stale sandbox/layout statements in CLAUDE.md:243-244 and ARCHITECTURE.md, which the answer correctly treated as non-authoritative; WindowManager responsibilities including findBestWindowToOpenIn scoring (windowManager.ts:256) and EditorWindow file-list/watcher ownership (editor.ts:50-146); sidebar file ops through window.fileUtils and ipcRenderer (project.ts:211-270, preload/index.ts:158-180); the intentionally permissive IPC contract (ipc.ts:1-18) mixing renderer and ipcMain.emit channels, with window-file-saved typed [windowId, tabId] (ipc.ts:199) but handled by pathname (windowManager.ts:457); the editor boundary any/shim/synthetic-history state (editor.vue:172,289; muya-core.d.ts:1-18); and atomic durable writes plus load/save semantics (filesystem/index.ts:25-48, markdown.ts:66-158). The parity scoreboard drift is real: the scoreboard claims PG14 is still xfail while the test source is fixed with no test.fail(). Git-history subjects were only partially verifiable in this shell-less environment: c907b29c matches the provided snapshot ('flush pending edits before saving'); the six earlier hashes could not be independently re-derived, but they are supporting context and consistent with the verified current state, so they are not counted as errors. Two minor citation offsets (ipc.ts:183 should be 199; desktop/package.json:55 should be the root package.json) are recorded. No material factual errors. One unresolved decision-relevant documentation/implementation conflict (the parity scoreboard), so the v2.1 gate is mechanically false even though the answer correctly flagged the drift rather than inventing a resolution. All nine dimensions are fully satisfied: the answer classifies the repo from multiple signals, cites exact symbols/paths and separates current evidence from intent, explains where changes spread and why, gives explicit quality-attribute trade-offs with verification, compares three options including the status quo, derives a clear recommendation from drivers and evidence, lays out six incremental/observable/reversible steps, and specifies concrete tests and completion criteria without smuggling project facts into generic rules. Total: 18/18."
+}

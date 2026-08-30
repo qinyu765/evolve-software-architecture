@@ -1,0 +1,56 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron — apps/stage-tamagotchi (main/preload/renderer)",
+    "legacy_platform_treated_as_current": false,
+    "runtime_boundaries_identified": [
+      "Electron main / preload / renderer process split",
+      "In-process ExtensionHost (plugin-sdk) vs remote WebSocket extension peer (server-sdk + server-runtime) — two coexisting plugin runtimes",
+      "Main-process-embedded server channel vs standalone server-runtime bin (background process boundary)",
+      "Renderer vs main import boundary (type-only imports so Node/Electron runtime is not pulled into renderer)",
+      "Child-process runtimes: MCP stdio subprocess and Godot sidecar subprocess"
+    ]
+  },
+  "accuracy": {
+    "gate_pass": true,
+    "material_error_count": 0,
+    "minor_error_count": 2,
+    "unresolved_decision_conflict_count": 0
+  },
+  "dimensions": {
+    "current_friction": 2,
+    "evidence": 2,
+    "generalization": 2,
+    "migration": 2,
+    "options": 2,
+    "quality_attributes": 2,
+    "recommendation": 2,
+    "scope_and_classification": 2,
+    "verification": 2
+  },
+  "documentation_drift": [],
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "已有 15 个窗口模块（apps/stage-tamagotchi/src/main/windows/**/index.ts）",
+      "repository_evidence": "Glob of apps/stage-tamagotchi/src/main/windows/*/index.ts returns 15 files, but windows/shared/index.ts is shared helper code (display/persistence/window), not a window. The 14 actual windows are about, beat-sync, caption, chat, dashboard, desktop-overlay, devtools, inlay, main, notice, onboarding, settings, spotlight, widgets.",
+      "explanation": "Off-by-one: the shared helper directory is counted as a window. Decision-irrelevant — the 'mature multi-window desktop app' classification holds with 14 windows.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "scope_and_classification"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "组合根手工用 injeca 装配约 20 个 provider（main/index.ts:113-272）",
+      "repository_evidence": "main/index.ts contains 25 injeca.provide calls (lines 132-246), counting configs, services, modules, and window providers.",
+      "explanation": "Hedged with '约' (about) but undercounts by ~20%. Decision-irrelevant; the manual-composition-root friction it supports is fully accurate.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    }
+  ],
+  "rationale": "Verified every load-bearing claim against the checkout. Current desktop is Electron apps/stage-tamagotchi (main/preload/renderer); the legacy Tauri crates/ path is absent from this checkout and the answer never mistakes it for current. Confirmed: 2 renderer HTML entries (electron.vite.config.ts:101-104); manual injeca composition root (main/index.ts:132-246); window-creation abstraction (reusable.ts:5-37, services/electron/window.ts:20-123); generic createRequestWindowEventa (shared/eventa/index.ts:97-105); in-process ExtensionHost with two-layer extension∩module permission model (plugin-sdk core.ts:56-60, 249-327); manifest v1 schema with five permission areas (plugin-sdk shared/types.ts:233-253, 264-300, 322-328); built-in kits widget/gamelet/tool (plugins/kits/index.ts:95-116); discovery at userData/extensions/v1 with symlink support (plugins/host/index.ts:228, registry.ts:62-164); remote WebSocket peer path (server-sdk extension-peer.ts + plugins/airi-plugin-claude-code depending on server-sdk); server-runtime dropping remote permissions/configSchema/dependencies in extension:announce and extension:module:announce (server-runtime index.ts:685-722, 724-775, vs extension-peer.ts:105-121 sending them); embedded channel-server lifecycle (channel-server/index.ts:357-449); standalone bin (server-runtime package.json:29 + src/bin/run.ts); empty setupBuiltInServer({servers:[]}) shell (http-server/index.ts:22-38); contract-type drift between shared/eventa/index.ts:204-247 and shared/eventa/plugin/host.ts:60-187 (autoReload, kits/modules), acknowledged by TODO at plugin/capabilities.ts:42-44; setMaxListeners(100) at main/index.ts:55-58; three /ws literals per TODO at channel-server/index.ts:103-105. Two minor count imprecisions (15 windows vs 14 + shared helper; ~20 providers vs 25) — neither decision-relevant. No stale documentation was presented as current and no documentation-vs-implementation conflict was relied upon. The recommendation (freeze the practiced seams + light registration layer, defer broad generalization) follows from the verified friction; the four migration steps are incremental, reversible, and carry concrete completion criteria.",
+  "total": 18
+}

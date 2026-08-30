@@ -1,0 +1,57 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (apps/stage-tamagotchi)",
+    "legacy_platform_treated_as_current": false,
+    "runtime_boundaries_identified": [
+      "Electron main process DI composition root vs renderer windows",
+      "In-process ExtensionHost (runtime: 'electron') loading plugins via FileSystemLoader import()",
+      "Host-managed iframe UI + cookie/session-validated static asset route",
+      "Embedded server-runtime WebSocket server (main) and server-sdk client",
+      "Node runtime createPluginContext with unimplemented websocket/node-worker/electron/web-worker transports",
+      "McpStdioManager stdio child-process lifecycle",
+      "gameletKit/toolKit expose policies (local-only / remote-observable, no remote-callable)"
+    ]
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 2,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "ExtensionHost({ runtime: 'electron' }) is constructed at apps/stage-tamagotchi/src/main/services/airi/plugins/host/index.ts:224",
+      "repository_evidence": "The cited line 224 is the enclosing function signature setupExtensionHostServiceInternal; the actual `new ExtensionHost({ runtime: 'electron' })` is at line 236 of the same function.",
+      "explanation": "Citation offset only; the substantive claim (desktop constructs an in-process Electron-runtime host) is correct.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Main window sandbox: false at apps/stage-tamagotchi/src/main/windows/main/index.ts:80",
+      "repository_evidence": "Line 80 opens the `new BrowserWindow({...})` object; `sandbox: false` is at line 90 within the same constructor's webPreferences.",
+      "explanation": "Citation offset only; the substantive claim (main window uses sandbox: false) is correct and is independently confirmed for the widgets window at widgets/index.ts:231.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    }
+  ],
+  "documentation_drift": [],
+  "rationale": "The answer directly and comprehensively satisfies the request. It identifies the repository as an Electron desktop app (stage-tamagotchi) with an in-process plugin host, host-managed iframe UI, and an already-embedded server-runtime WebSocket channel, and it grounds every structural claim in verifiable file/line citations. It evaluates three options (A status quo, B hybrid recommended, C full isolation), with explicit quality-attribute trade-offs, cost, risk, rollback paths, and consequences of inaction. The recommendation (stabilize identity/contract/lifecycle boundaries, defer a universal runtime/window registry/marketplace, and externalize only one real background plugin) follows directly from the verified evidence: the node runtime's unimplemented transports, the local-only/remote-observable kit policies, and the permissive iframe sandbox. The six-phase migration route is incremental, reversible (manifest v1 preserved, feature flags, fallback to local/disable), and observable via concrete acceptance criteria (handler counts, subprocess kill survival, duplicate-module prevention, token rejection, orphan-process absence). Project-specific facts (extensionId/sessionId/moduleId, gameletKit/toolKit) are kept in project context rather than generalized into universal rules. All material claims verified; no documentation-vs-implementation conflicts; only two minor line-citation offsets that do not affect any decision. Total 18/18 with the accuracy gate passing."
+}

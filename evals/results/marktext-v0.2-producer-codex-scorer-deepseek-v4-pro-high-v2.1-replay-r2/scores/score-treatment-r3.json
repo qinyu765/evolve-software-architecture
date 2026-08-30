@@ -1,0 +1,50 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron 42 three-process desktop app (main/preload/renderer), sandboxed renderer (contextIsolation:true, nodeIntegration:false, sandbox:true), pnpm monorepo where packages/desktop consumes @muyajs/core (packages/muya TS rewrite) as its editor engine; legacy packages/muyajs (@marktext/muyajs) is being retired.",
+    "legacy_platform_treated_as_current": false,
+    "runtime_boundaries_identified": [
+      "Electron main/preload/renderer process boundary with the sandboxed renderer (contextIsolation, nodeIntegration, sandbox) as the load-bearing security boundary",
+      "File IO data invariants: encoding, BOM, EOL conversion, trailing newline, atomic save, crash-recovery buffer durability, and watcher de-duplication / external-change detection",
+      "Window identity and lifecycle (WindowId, window kind, active-window semantics) owned by main; BrowserWindow not to leak across module/process boundaries",
+      "@muyajs/core (packages/muya) package boundary as the browser editor engine, isolated behind a renderer editor-session adapter",
+      "Preload semantic capability facades (shell/file/window) instead of the generic ipcRenderer surface for new capabilities",
+      "Serializable DTO boundary between renderer store state (IFileState) and cross-process IPC contracts"
+    ]
+  },
+  "accuracy": {
+    "gate_pass": true,
+    "material_error_count": 0,
+    "minor_error_count": 0,
+    "unresolved_decision_conflict_count": 0
+  },
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "documentation_drift": [
+    {
+      "claim": "packages/website/content/docs/dev/ARCHITECTURE.md describes the pre-monorepo root `src/` layout and legacy pure-JS Muya as the current structure (the answer flags it as stale and recommends updating it).",
+      "documentation_evidence": "ARCHITECTURE.md:5-18 lists a root `src/` with `common/`, `main/`, `muya/` (pure JavaScript, no Electron/Node APIs), `renderer/`; ARCHITECTURE.md:22 states 'Muya, the editor backend, is currently still JavaScript'.",
+      "implementation_evidence": "The repo is a pnpm monorepo (packages/desktop, packages/muya, packages/muyajs, packages/website). packages/desktop/package.json:62-63 depends on both legacy @marktext/muyajs and @muyajs/core; editor.vue and muya-core.d.ts consume @muyajs/core, the TypeScript rewrite.",
+      "state": "historical",
+      "decision_relevant": false
+    },
+    {
+      "claim": "packages/desktop/test/PARITY_SCOREBOARD.md:69 still marks PG14 as xfail (`test.fail()`), but the current test source asserts the fixed behavior (the answer checked the test source and concluded the scoreboard is stale).",
+      "documentation_evidence": "PARITY_SCOREBOARD.md:69 PG14 row shows mechanism `test.fail()` and status '❌ xfail (accept-defer)'; PARITY_SCOREBOARD.md:10/44 also state PG14 alone remains xfail.",
+      "implementation_evidence": "packages/desktop/test/e2e/parity-source-undo-saved.spec.ts:73-98 is a plain `test(...)` whose comment says 'FIXED: ... Muya.replaceContent'; `replaceContent` exists in packages/muya/src/muya.ts:296 and returns boolean.",
+      "state": "resolved",
+      "decision_relevant": false
+    }
+  ],
+  "factual_errors": [],
+  "rationale": "The review is grounded in the current checkout and its substantive claims were all verified: monorepo/package boundaries (package.json deps, both engines), the sandboxed renderer (config.ts + context-isolation.spec.ts), window/file-workflow coupling (App/WindowManager/EditorWindow, menu/filesystem/store, watcher owned by WindowManager), positional save IPC and BrowserWindow leakage via ipcMain.emit, loose-`any` @muyajs/core typing (editor.vue, muya-core.d.ts), arbitrary-path fs and direct-URL shell handlers, and the desktop CI workflows (test/build/e2e/lint) that paths-ignore packages/muya. It correctly resolves two doc/implementation drifts (stale ARCHITECTURE.md as historical; stale PARITY_SCOREBOARD PG14 as resolved against the fixed spec) and independently catches the update-buffer-state void-vs-boolean contract drift. It does not treat the legacy muyajs JS engine as current. Only six git-hash/hit-count statistics and the develop==HEAD assertion could not be re-verified with file tools (no Bash), and a few line citations point at adjacent comment lines carrying the same content — neither rises to a factual error. All nine rubric dimensions are fully evidenced (18/18), and the accuracy gate passes with zero material errors and zero unresolved decision-relevant conflicts."
+}
