@@ -7,9 +7,11 @@ import argparse
 import concurrent.futures
 import dataclasses
 import datetime as dt
+import fcntl
 import hashlib
 import json
 import math
+import os
 import re
 import shutil
 import subprocess
@@ -65,6 +67,63 @@ DIMENSIONS = (
 
 class EvaluationError(RuntimeError):
     """Raised when an evaluation invariant is violated."""
+
+
+class OutputDirectoryLock:
+    """Serialize runs that share an evaluation output directory."""
+
+    def __init__(self, output_dir: Path):
+        self.output_dir = output_dir.resolve()
+        self.lock_path = self.output_dir.parent / f".{self.output_dir.name}.lock"
+        self._handle = None
+
+    def acquire(self) -> None:
+        if self._handle is not None:
+            raise EvaluationError("output directory lock is already held")
+        self.lock_path.parent.mkdir(parents=True, exist_ok=True)
+        handle = self.lock_path.open("a+", encoding="utf-8")
+        try:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            handle.close()
+            raise EvaluationError(
+                f"output directory is already locked: {self.output_dir}"
+            ) from error
+        try:
+            handle.seek(0)
+            handle.truncate()
+            handle.write(
+                json.dumps(
+                    {
+                        "pid": os.getpid(),
+                        "started_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+                    }
+                )
+                + "\n"
+            )
+            handle.flush()
+        except BaseException:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+            handle.close()
+            raise
+        self._handle = handle
+
+    def release(self) -> None:
+        handle = self._handle
+        if handle is None:
+            return
+        self._handle = None
+        try:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        finally:
+            handle.close()
+
+    def __enter__(self) -> "OutputDirectoryLock":
+        self.acquire()
+        return self
+
+    def __exit__(self, _exc_type: Any, _exc_value: Any, _traceback: Any) -> None:
+        self.release()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -707,6 +766,8 @@ def scorer_prompt(
 
 Score all nine rubric dimensions from 0 to 2. Every factual claim must be checked against the source appropriate to that claim: implementation, configuration, tests, build scripts, history, ADRs, or documentation. Treat documentation as intent or historical context until current evidence confirms it. If sources disagree, report the conflict, state whether the answer resolved it, and do not invent certainty. Independently report the current desktop platform and the runtime boundaries that the answer actually identifies. If the repository contains a legacy platform, report whether the answer incorrectly treats that legacy platform as current. Compute `total` as the exact sum of the nine scores. For a rubric that defines an accuracy gate, classify factual errors as material or minor, report affected dimensions, and set the gate from the reported evidence. Keep the rationale concise.
 
+When the rubric includes the v2.1 accuracy contract, set `accuracy.unresolved_decision_conflict_count` to the exact number of `documentation_drift` entries where `decision_relevant == true` and `state` is in {{"conflict", "unknown"}}. Do not count `historical`, `resolved`, or non-decision-relevant entries. Set `accuracy.gate_pass` to true exactly when `material_error_count == 0` and `unresolved_decision_conflict_count == 0`; never auto-correct or omit a mismatch.
+
 ## Original user request
 
 {source_prompt}
@@ -719,6 +780,17 @@ Score all nine rubric dimensions from 0 to 2. Every factual claim must be checke
 
 {rubric}
 """
+
+
+def count_unresolved_decision_conflicts(
+    documentation_drift: list[dict[str, Any]],
+) -> int:
+    """Count decision-relevant documentation conflicts still unresolved."""
+    return sum(
+        drift.get("decision_relevant") is True
+        and drift.get("state") in {"conflict", "unknown"}
+        for drift in documentation_drift
+    )
 
 
 def validate_score(score: dict[str, Any], require_accuracy: bool = False) -> None:
@@ -790,7 +862,6 @@ def validate_score(score: dict[str, Any], require_accuracy: bool = False) -> Non
         if any(dimension not in DIMENSIONS for dimension in error["affected_dimensions"]):
             raise EvaluationError("scorer factual error references an unknown dimension")
 
-    unresolved_count = 0
     for drift in documentation_drift:
         if not isinstance(drift, dict):
             raise EvaluationError("scorer documentation drift must be an object")
@@ -809,8 +880,7 @@ def validate_score(score: dict[str, Any], require_accuracy: bool = False) -> Non
             raise EvaluationError("scorer documentation drift text fields must be strings")
         if not isinstance(drift["decision_relevant"], bool):
             raise EvaluationError("scorer documentation drift decision_relevant must be boolean")
-        if drift["decision_relevant"] and drift["state"] in {"conflict", "unknown"}:
-            unresolved_count += 1
+    unresolved_count = count_unresolved_decision_conflicts(documentation_drift)
 
     if accuracy["material_error_count"] != material_count:
         raise EvaluationError("accuracy material_error_count does not match factual_errors")
@@ -994,6 +1064,151 @@ def write_json(path: Path, value: Any) -> None:
     temporary.replace(path)
 
 
+def cleanup_partial_state(partial_manifest_path: Path, checkpoints: Path) -> None:
+    """Remove ephemeral run state; safe when another cleanup already ran."""
+    partial_manifest_path.unlink(missing_ok=True)
+    shutil.rmtree(checkpoints, ignore_errors=True)
+
+
+def prepare_output_state(
+    output_dir: Path,
+    partial_manifest_path: Path,
+    manifest_path: Path,
+    checkpoints: Path,
+    resume: bool,
+    identity: dict[str, Any],
+    call_timeout_seconds: int,
+) -> tuple[str, list[dict[str, Any]], list[dict[str, int]]]:
+    """Load or initialize run state after the output lock is acquired."""
+    prior_failures: list[dict[str, Any]] = []
+    resume_history: list[dict[str, int]] = []
+    if output_dir.exists():
+        if not resume:
+            raise EvaluationError(f"output directory already exists: {output_dir}")
+        if partial_manifest_path.is_file():
+            partial_manifest = load_json(partial_manifest_path)
+        elif manifest_path.exists():
+            previous_manifest = load_json(manifest_path)
+            previous_summary_path = output_dir / "summary.json"
+            if not previous_summary_path.is_file():
+                raise EvaluationError(
+                    f"completed manifest is missing summary: {previous_summary_path}"
+                )
+            previous_summary = load_json(previous_summary_path)
+            if previous_summary.get("dataset_complete"):
+                raise EvaluationError(f"evaluation is already complete: {manifest_path}")
+            previous_identity = {
+                key: previous_manifest.get(key)
+                for key in (
+                    "case",
+                    "repository",
+                    "skill",
+                    "contract",
+                    "profile",
+                    "planned_calls",
+                    "rescore_source",
+                )
+            }
+            if not resume_identity_compatible(previous_identity, identity):
+                raise EvaluationError(
+                    "resume profile does not match the incomplete evaluation"
+                )
+            started = previous_manifest["started_at"]
+            resume_history = list(previous_manifest.get("resume_history", []))
+            previous_timeout = previous_identity["profile"]["call_timeout_seconds"]
+            if previous_timeout != call_timeout_seconds:
+                resume_history.append(
+                    {
+                        "previous_call_timeout_seconds": previous_timeout,
+                        "call_timeout_seconds": call_timeout_seconds,
+                    }
+                )
+            previous_run_id = previous_manifest.get("run_id") or (
+                "legacy:" + previous_manifest.get("completed_at", started)
+            )
+            previous_recorded_at = previous_manifest.get("completed_at", started)
+            prior_failures = [
+                {
+                    **event,
+                    "run_id": event.get("run_id", previous_run_id),
+                    "recorded_at": event.get("recorded_at", previous_recorded_at),
+                }
+                for event in previous_manifest.get("prior_failures", [])
+            ]
+            for record in previous_manifest.get("results", []):
+                if record.get("success"):
+                    continue
+                already_recorded = any(
+                    event.get("run_id") == previous_run_id
+                    and event.get("id") == record.get("id")
+                    and event.get("error") == record.get("error")
+                    and event.get("attempts") == record.get("attempts")
+                    for event in prior_failures
+                )
+                if not already_recorded:
+                    prior_failures.append(
+                        {
+                            **record,
+                            "run_id": previous_run_id,
+                            "recorded_at": previous_recorded_at,
+                        }
+                    )
+            for record in previous_manifest.get("results", []):
+                write_json(checkpoints / f"{record['id']}.json", record)
+            write_json(
+                partial_manifest_path,
+                {
+                    "schema_version": 1,
+                    "identity": identity,
+                    "started_at": started,
+                    "resume_history": resume_history,
+                    "prior_failures": prior_failures,
+                },
+            )
+            partial_manifest = load_json(partial_manifest_path)
+        else:
+            raise EvaluationError(
+                f"cannot resume without {partial_manifest_path.name}: {output_dir}"
+            )
+        partial_identity = partial_manifest.get("identity", {})
+        if not resume_identity_compatible(partial_identity, identity):
+            raise EvaluationError("resume profile does not match the interrupted evaluation")
+        resume_history = list(partial_manifest.get("resume_history", resume_history))
+        prior_failures = list(partial_manifest.get("prior_failures", prior_failures))
+        previous_timeout = partial_identity["profile"]["call_timeout_seconds"]
+        if previous_timeout != call_timeout_seconds:
+            resume_history.append(
+                {
+                    "previous_call_timeout_seconds": previous_timeout,
+                    "call_timeout_seconds": call_timeout_seconds,
+                }
+            )
+            write_json(
+                partial_manifest_path,
+                {
+                    "schema_version": 1,
+                    "identity": identity,
+                    "started_at": partial_manifest["started_at"],
+                    "resume_history": resume_history,
+                    "prior_failures": prior_failures,
+                },
+            )
+        started = partial_manifest["started_at"]
+    else:
+        output_dir.mkdir(parents=True)
+        started = dt.datetime.now(dt.timezone.utc).isoformat()
+        write_json(
+            partial_manifest_path,
+            {
+                "schema_version": 1,
+                "identity": identity,
+                "started_at": started,
+                "prior_failures": prior_failures,
+            },
+        )
+    return started, prior_failures, resume_history
+
+
 def write_score_failure_diagnostic(
     output_dir: Path,
     result: RunResult,
@@ -1122,15 +1337,17 @@ def load_rescore_behavior_answers(
     source_dir: Path,
     case: dict[str, Any],
     repetitions: int,
-    runtime: str,
+    scorer_runtime: str,
     rubric_path: Path,
     schema_path: Path,
 ) -> tuple[dict[str, RunResult], dict[str, Any]]:
-    """Load only producer answers from a completed profile for score-only runs.
+    """Load producer answers for score-only runs.
 
     Older v0.2 result manifests did not record rubric/schema digests. They are
     accepted as legacy sources, while any newer manifest with a contract must
-    match the requested contract byte-for-byte.
+    match the requested contract byte-for-byte. The source dataset may be
+    incomplete when its producer answers are complete but scorer outputs were
+    rejected; score-only runs replace only that scoring phase.
     """
     source_dir = source_dir.resolve()
     manifest_path = source_dir / "manifest.json"
@@ -1138,11 +1355,10 @@ def load_rescore_behavior_answers(
     if not manifest_path.is_file() or not summary_path.is_file():
         raise EvaluationError(
             "rescore source must contain manifest.json and summary.json"
-        )
+    )
     manifest = load_json(manifest_path)
     summary = load_json(summary_path)
-    if not summary.get("dataset_complete"):
-        raise EvaluationError("rescore source is not complete")
+    source_dataset_complete = summary.get("dataset_complete") is True
     expected_case = {"id": case["id"], "sha256": case_digest(case)}
     if manifest.get("case") != expected_case:
         raise EvaluationError("rescore source case does not match the requested case")
@@ -1155,8 +1371,9 @@ def load_rescore_behavior_answers(
     source_profile = manifest.get("profile")
     if not isinstance(source_profile, dict):
         raise EvaluationError("rescore source is missing its profile")
-    if source_profile.get("runtime") != runtime:
-        raise EvaluationError("rescore source runtime does not match the requested runtime")
+    producer_runtime = source_profile.get("runtime")
+    if producer_runtime not in {"codex", "claude-code"}:
+        raise EvaluationError("rescore source runtime is unsupported")
     if source_profile.get("repetitions") != repetitions:
         raise EvaluationError(
             "rescore source repetition count does not match the requested profile"
@@ -1168,7 +1385,7 @@ def load_rescore_behavior_answers(
         raise EvaluationError("rescore source rubric or schema does not match")
     contract_status = "matched" if source_contract is not None else "legacy-unrecorded"
 
-    matrix = build_invocation_matrix(case, repetitions, runtime)
+    matrix = build_invocation_matrix(case, repetitions, producer_runtime)
     records = {
         record.get("id"): record
         for record in manifest.get("results", [])
@@ -1198,8 +1415,13 @@ def load_rescore_behavior_answers(
         "manifest_sha256": file_digest(manifest_path),
         "case_sha256": expected_case["sha256"],
         "profile_id": source_profile.get("profile_id"),
-        "runtime": source_profile.get("runtime"),
+        "runtime": producer_runtime,
+        "scorer_runtime": scorer_runtime,
+        "producer_profile": dict(source_profile),
+        "producer_run_id": manifest.get("run_id"),
         "contract_status": contract_status,
+        "source_dataset_complete": source_dataset_complete,
+        "producer_answers_complete": True,
     }
 
 
@@ -1362,175 +1584,77 @@ def main(argv: list[str] | None = None) -> int:
     if rescore_source is not None:
         identity["rescore_source"] = rescore_source
     run_id = uuid.uuid4().hex
-    prior_failures: list[dict[str, Any]] = []
-    resume_history: list[dict[str, int]] = []
-    if output_dir.exists():
-        if not args.resume:
-            raise EvaluationError(f"output directory already exists: {output_dir}")
-        if partial_manifest_path.is_file():
-            partial_manifest = load_json(partial_manifest_path)
-        elif manifest_path.exists():
-            previous_manifest = load_json(manifest_path)
-            previous_summary_path = output_dir / "summary.json"
-            if not previous_summary_path.is_file():
-                raise EvaluationError(
-                    f"completed manifest is missing summary: {previous_summary_path}"
-                )
-            previous_summary = load_json(previous_summary_path)
-            if previous_summary.get("dataset_complete"):
-                raise EvaluationError(f"evaluation is already complete: {manifest_path}")
-            previous_identity = {
-                key: previous_manifest.get(key)
-                for key in (
-                    "case",
-                    "repository",
-                    "skill",
-                    "contract",
-                    "profile",
-                    "planned_calls",
-                    "rescore_source",
-                )
-            }
-            if not resume_identity_compatible(previous_identity, identity):
-                raise EvaluationError(
-                    "resume profile does not match the incomplete evaluation"
-                )
-            started = previous_manifest["started_at"]
-            resume_history = list(previous_manifest.get("resume_history", []))
-            previous_timeout = previous_identity["profile"]["call_timeout_seconds"]
-            if previous_timeout != call_timeout_seconds:
-                resume_history.append(
-                    {
-                        "previous_call_timeout_seconds": previous_timeout,
-                        "call_timeout_seconds": call_timeout_seconds,
-                    }
-                )
-            previous_run_id = previous_manifest.get("run_id") or (
-                "legacy:" + previous_manifest.get("completed_at", started)
-            )
-            previous_recorded_at = previous_manifest.get("completed_at", started)
-            prior_failures = [
-                {
-                    **event,
-                    "run_id": event.get("run_id", previous_run_id),
-                    "recorded_at": event.get("recorded_at", previous_recorded_at),
-                }
-                for event in previous_manifest.get("prior_failures", [])
-            ]
-            for record in previous_manifest.get("results", []):
-                if record.get("success"):
-                    continue
-                already_recorded = any(
-                    event.get("run_id") == previous_run_id
-                    and event.get("id") == record.get("id")
-                    and event.get("error") == record.get("error")
-                    and event.get("attempts") == record.get("attempts")
-                    for event in prior_failures
-                )
-                if not already_recorded:
-                    prior_failures.append(
-                        {
-                            **record,
-                            "run_id": previous_run_id,
-                            "recorded_at": previous_recorded_at,
-                        }
-                    )
-            for record in previous_manifest.get("results", []):
-                write_json(checkpoints / f"{record['id']}.json", record)
-            write_json(
-                partial_manifest_path,
-                {
-                    "schema_version": 1,
-                    "identity": identity,
-                    "started_at": started,
-                    "resume_history": resume_history,
-                    "prior_failures": prior_failures,
-                },
-            )
-            partial_manifest = load_json(partial_manifest_path)
-        else:
-            raise EvaluationError(
-                f"cannot resume without {partial_manifest_path.name}: {output_dir}"
-            )
-        partial_identity = partial_manifest.get("identity", {})
-        if not resume_identity_compatible(partial_identity, identity):
-            raise EvaluationError("resume profile does not match the interrupted evaluation")
-        resume_history = list(partial_manifest.get("resume_history", resume_history))
-        prior_failures = list(partial_manifest.get("prior_failures", prior_failures))
-        previous_timeout = partial_identity["profile"]["call_timeout_seconds"]
-        if previous_timeout != call_timeout_seconds:
-            resume_history.append(
-                {
-                    "previous_call_timeout_seconds": previous_timeout,
-                    "call_timeout_seconds": call_timeout_seconds,
-                }
-            )
-            write_json(
-                partial_manifest_path,
-                {
-                    "schema_version": 1,
-                    "identity": identity,
-                    "started_at": partial_manifest["started_at"],
-                    "resume_history": resume_history,
-                    "prior_failures": prior_failures,
-                },
-            )
-        started = partial_manifest["started_at"]
-    else:
-        output_dir.mkdir(parents=True)
-        started = dt.datetime.now(dt.timezone.utc).isoformat()
-        write_json(
+    output_lock = OutputDirectoryLock(output_dir)
+    output_lock.acquire()
+    try:
+        started, prior_failures, resume_history = prepare_output_state(
+            output_dir,
             partial_manifest_path,
-            {
-                "schema_version": 1,
-                "identity": identity,
-                "started_at": started,
-                "prior_failures": prior_failures,
-            },
+            manifest_path,
+            checkpoints,
+            args.resume,
+            identity,
+            call_timeout_seconds,
         )
+    except BaseException:
+        output_lock.release()
+        raise
 
-    transient = Path(tempfile.mkdtemp(prefix="airi-forward-eval-transient-"))
-    checkout_root = Path(tempfile.mkdtemp(prefix="airi-forward-eval-checkouts-"))
-    known_paths = (
-        ROOT,
-        args.repository_source.resolve(),
-        transient,
-        checkout_root,
-        output_dir,
-    )
-    invocation_by_id = {invocation.id: invocation for invocation in matrix}
-    results_by_id: dict[str, RunResult] = {}
-    records_by_id: dict[str, dict[str, Any]] = {}
-    skipped: list[str] = []
-    scores: dict[str, dict[str, Any]] = {}
+    transient: Path | None = None
+    checkout_root: Path | None = None
+    try:
+        transient = Path(tempfile.mkdtemp(prefix="airi-forward-eval-transient-"))
+        checkout_root = Path(tempfile.mkdtemp(prefix="airi-forward-eval-checkouts-"))
+        known_paths = (
+            ROOT,
+            args.repository_source.resolve(),
+            transient,
+            checkout_root,
+            output_dir,
+        )
+        invocation_by_id = {invocation.id: invocation for invocation in matrix}
+        results_by_id: dict[str, RunResult] = {}
+        records_by_id: dict[str, dict[str, Any]] = {}
+        skipped: list[str] = []
+        scores: dict[str, dict[str, Any]] = {}
 
-    if checkpoints.is_dir():
-        for path in sorted(checkpoints.glob("*.json")):
-            record = load_json(path)
-            invocation = invocation_by_id.get(record.get("id", ""))
-            if invocation is None:
-                raise EvaluationError(f"checkpoint is not part of this profile: {path}")
-            records_by_id[invocation.id] = record
-            if not record.get("success"):
-                continue
-            if invocation.phase == "score":
-                score_path = output_dir / "scores" / f"{invocation.id}.json"
-                score = load_json(score_path)
-                validate_score(score, require_accuracy=require_accuracy)
-                scores[invocation.id] = score
-                answer = json.dumps(score, ensure_ascii=False)
-            else:
-                path = answer_path(output_dir, invocation)
-                if not path.is_file():
-                    raise EvaluationError(f"successful checkpoint is missing {path}")
-                answer = path.read_text(encoding="utf-8").strip()
-            results_by_id[invocation.id] = RunResult(
-                invocation=invocation,
-                success=True,
-                answer=answer,
-                attempts=int(record.get("attempts", 0)),
-                metadata=record.get("metadata", {}),
-            )
+        if checkpoints.is_dir():
+            for path in sorted(checkpoints.glob("*.json")):
+                record = load_json(path)
+                invocation = invocation_by_id.get(record.get("id", ""))
+                if invocation is None:
+                    raise EvaluationError(f"checkpoint is not part of this profile: {path}")
+                records_by_id[invocation.id] = record
+                if not record.get("success"):
+                    continue
+                if invocation.phase == "score":
+                    score_path = output_dir / "scores" / f"{invocation.id}.json"
+                    score = load_json(score_path)
+                    validate_score(score, require_accuracy=require_accuracy)
+                    scores[invocation.id] = score
+                    answer = json.dumps(score, ensure_ascii=False)
+                else:
+                    path = answer_path(output_dir, invocation)
+                    if not path.is_file():
+                        raise EvaluationError(f"successful checkpoint is missing {path}")
+                    answer = path.read_text(encoding="utf-8").strip()
+                results_by_id[invocation.id] = RunResult(
+                    invocation=invocation,
+                    success=True,
+                    answer=answer,
+                    attempts=int(record.get("attempts", 0)),
+                    metadata=record.get("metadata", {}),
+                )
+    except BaseException:
+        if transient is not None:
+            shutil.rmtree(transient, ignore_errors=True)
+        if checkout_root is not None:
+            shutil.rmtree(checkout_root, ignore_errors=True)
+        output_lock.release()
+        raise
+
+    assert transient is not None
+    assert checkout_root is not None
 
     def persist_result(result: RunResult) -> None:
         if result.success and result.invocation.phase in ("routing", "behavior"):
@@ -1770,13 +1894,13 @@ def main(argv: list[str] | None = None) -> int:
         if resume_history:
             manifest["resume_history"] = resume_history
         write_json(manifest_path, manifest)
-        partial_manifest_path.unlink()
-        shutil.rmtree(checkpoints, ignore_errors=True)
+        cleanup_partial_state(partial_manifest_path, checkpoints)
         print(summary_markdown(summary))
         return 0 if summary["dataset_complete"] else 2
     finally:
         shutil.rmtree(transient, ignore_errors=True)
         shutil.rmtree(checkout_root, ignore_errors=True)
+        output_lock.release()
 
 
 if __name__ == "__main__":

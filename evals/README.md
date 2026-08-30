@@ -4,6 +4,8 @@ The v0.1 XiLuoLin case remains the first vertical reference. The machine-readabl
 
 The v2 rubric keeps the nine dimensions and an 18-point total, then adds an independent accuracy gate. Its scorer records claim-level evidence and documentation drift; documentation is treated as intent or historical context until implementation, configuration, tests, or history confirm it. A material factual error or unresolved decision-relevant documentation conflict blocks a Treatment result. Control errors remain diagnostic.
 
+The v2.1 contract makes the cross-field accuracy rule explicit: `accuracy.unresolved_decision_conflict_count` is the count of `documentation_drift` entries with `decision_relevant == true` and `state` in `{"conflict", "unknown"}`; `accuracy.gate_pass` is true exactly when that count and `material_error_count` are both zero. The runner rejects mismatches instead of normalizing them. v2.1 uses separate rubric and schema files so manifests pin the calibration contract without changing historical v2 results.
+
 Run deterministic checks and inspect the 30-call plan without contacting a model:
 
 ```bash
@@ -11,7 +13,7 @@ python3 -m unittest discover -s tests -v
 python3 scripts/run_forward_eval.py --dry-run
 ```
 
-The runner accepts `--repository-source` for any pinned Git repository; `--airi-source` remains a compatibility alias. Contract files can be selected explicitly with `--rubric PATH --schema PATH`. A score-only run requires `--phases score --rescore-from RESULT_DIR`; it reads the six existing behavior answers, never reruns producers, and writes a separate result directory with source and contract digests.
+The runner accepts `--repository-source` for any pinned Git repository; `--airi-source` remains a compatibility alias. Contract files can be selected explicitly with `--rubric PATH --schema PATH`. A score-only run requires `--phases score --rescore-from RESULT_DIR`; it reads the six existing behavior answers, never reruns producers, and writes a separate result directory with source and contract digests. The scorer runtime may differ from the producer runtime: the source manifest records the producer profile, while the new manifest records the scorer profile. A source may have `dataset_complete=false` when only its scorer phase failed, provided all six behavior producer answers are successful; missing producer answers remain a hard error.
 
 Rescore an existing complete AIRI profile without changing its original files:
 
@@ -37,7 +39,7 @@ python3 scripts/run_forward_eval.py \
   --output-dir evals/results/airi-v0.2-baseline
 ```
 
-Each completed sample is atomically checkpointed before the next repetition. If the process is interrupted, resume the same execution profile:
+Each output directory is protected by an advisory process lock, so a second run or resume against the same directory is rejected while the first process is active. Each completed sample is atomically checkpointed before the next repetition. If the process is interrupted, resume the same execution profile:
 
 ```bash
 python3 scripts/run_forward_eval.py \
@@ -79,7 +81,7 @@ python3 scripts/run_forward_eval.py \
   --output-dir evals/results/airi-v0.2-claude-code-deepseek-v4-pro-high-routing-r1
 ```
 
-The manifest keeps the configuration manager, CLI model argument, declared model label, and runtime-reported `observed_models` separate. `deepseek-v4-pro` is the user-declared provider label routed through CCSwitch; the Claude `modelUsage` names are runtime evidence, not a claim that the mapping can be inferred from those names. If the CCSwitch mapping, alias, or observed model set changes, create a new profile rather than resuming or pooling it with this one. This profile is exploratory and is not combined with a Codex profile.
+The manifest keeps the configuration manager, CLI model argument, declared model label, and runtime-reported `observed_models` separate. `deepseek-v4-pro` is the user-declared provider label routed through CCSwitch; the Claude `modelUsage` names are runtime evidence, not a claim that the mapping can be inferred from those names. If the CCSwitch mapping, alias, or observed model set changes, create a new profile rather than resuming or pooling it with this one. This profile is exploratory and is not combined with a Codex profile unless it is explicitly used as one scorer cell in a v2.1 cross-runtime matrix.
 
 Run the complete three-repetition Claude Code profile in a separate directory:
 
@@ -100,5 +102,7 @@ The committed complete profile passes routing at 9/9 positive and 0/9 negative l
 The `--model` value is the configured Claude Code alias used by this environment; replace it for another setup. `--model-label` records the evaluator's declared provider model separately from the runtime alias and the model identifiers reported by Claude Code. Routing invocations use `dontAsk` permission mode with only `Read`, `Glob`, `Grep`, and the read-only `Skill` loader, and disable session persistence. This removes Bash and all editing tools instead of relying on Claude's plan mode, which may create user-level plan files. Omitting `Skill` invalidates routing measurements because the model cannot load a matched Skill. The default Claude profile stops a call after 720 seconds without retrying that timeout; the case-default Codex profile uses 900 seconds. An incomplete manifest preserves prior infrastructure failures and may resume with the same timeout or a larger one. A model argument, alias mapping, runtime, effort, permission mode, tool set, prompt change, or timeout decrease requires a new output directory and profile.
 
 The MarkText Electron case is fixed at `cases/marktext-v0.2.json` and `marktext/marktext@e52106fd1cdcbd33c1258b7b0cdc7013c4c5d86c`, scoped to `packages/desktop`. Its initial Claude baseline achieved routing 9/9 positive and 0/9 negative loads, but the v2 scorer rejected two Treatment payloads and one Control payload for internally inconsistent structured fields. The committed result is therefore deliberately incomplete; it is evidence for scorer calibration, not evidence to add an Electron adapter or release v0.2.0.
+
+The first score-only rescore reusing those six behavior answers is also incomplete: one of six scorer payloads was valid, three repeated the `unresolved_decision_conflict_count` versus `documentation_drift` mismatch, and two timed out at 900 seconds. Its redacted diagnostics and adjudication are stored in `results/marktext-v0.2-claude-code-ccswitch-deepseek-v4-pro-high-score-rescore-r1`; the result remains calibration evidence only.
 
 The runner creates temporary control and treatment clones at the pinned repository commit, preserves repository Skills, installs only the released architecture Skill in treatment, and uses read-only ephemeral executions. It commits no checkpoint directory, partial manifest, session data, JSONL, temporary clones, credentials, provider configuration, or absolute local paths. A failed gate is retained as baseline evidence; remediation belongs in a later change.

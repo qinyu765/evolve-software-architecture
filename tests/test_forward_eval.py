@@ -12,6 +12,7 @@ from scripts.run_forward_eval import (
     AttemptResult,
     EvaluationError,
     Invocation,
+    OutputDirectoryLock,
     RunResult,
     aggregate_results,
     assert_control_uncontaminated,
@@ -19,6 +20,8 @@ from scripts.run_forward_eval import (
     build_score_invocation_matrix,
     case_digest,
     claude_command,
+    cleanup_partial_state,
+    count_unresolved_decision_conflicts,
     contract_identity,
     execute_with_retry,
     frontmatter_bytes,
@@ -70,6 +73,14 @@ class ForwardEvaluationTest(unittest.TestCase):
         self.assertEqual(sum(item.phase == "routing" for item in matrix), 18)
         self.assertEqual(sum(item.phase == "behavior" for item in matrix), 6)
         self.assertEqual(sum(item.phase == "score" for item in matrix), 6)
+
+    def test_marktext_case_declares_codex_calibration_profile(self) -> None:
+        case = load_json(MARKTEXT_CASE_PATH)
+        self.assertEqual(case["codex"]["profile_id"], "codex-gpt-5.6-luna-max")
+        self.assertEqual(case["codex"]["model"], "gpt-5.6-luna")
+        self.assertEqual(case["codex"]["reasoning_effort"], "max")
+        self.assertEqual(case["codex"]["call_timeout_seconds"], 1800)
+        self.assertIn("codex", case["behavior"]["treatment_invocations"])
 
     def test_score_only_matrix_has_exactly_six_scorers(self) -> None:
         matrix = build_score_invocation_matrix(self.case, 3)
@@ -141,6 +152,156 @@ class ForwardEvaluationTest(unittest.TestCase):
             manifest = load_json(output / "manifest.json")
             self.assertEqual(manifest["planned_calls"], 6)
             self.assertEqual(manifest["rescore_source"]["contract_status"], "legacy-unrecorded")
+
+    def test_rescore_allows_scorer_runtime_to_differ_from_producer_runtime(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "source-results"
+            source.mkdir()
+            source_manifest = {
+                "case": {"id": self.case["id"], "sha256": case_digest(self.case)},
+                "repository": self.case["repository"],
+                "skill": self.case["skill"],
+                "profile": {
+                    "runtime": "codex",
+                    "repetitions": 3,
+                    "profile_id": "codex-producer",
+                    "model": "gpt-5.6-luna",
+                },
+                "contract": contract_identity(
+                    ROOT / "evals" / "rubrics" / "architecture-review-v2.1.md",
+                    ROOT / "evals" / "rubrics" / "architecture-review-v2.1.schema.json",
+                ),
+                "results": [],
+            }
+            for invocation in build_invocation_matrix(self.case, 3, "codex"):
+                if invocation.phase != "behavior":
+                    continue
+                source_manifest["results"].append(
+                    {"id": invocation.id, "success": True, "attempts": 1}
+                )
+                answer_path = source / "answers" / "behavior" / f"{invocation.id}.md"
+                answer_path.parent.mkdir(parents=True, exist_ok=True)
+                answer_path.write_text("fixture producer answer\n", encoding="utf-8")
+            write_json(source / "manifest.json", source_manifest)
+            write_json(source / "summary.json", {"dataset_complete": True})
+
+            answers, source_info = load_rescore_behavior_answers(
+                source,
+                self.case,
+                3,
+                "claude-code",
+                ROOT / "evals" / "rubrics" / "architecture-review-v2.1.md",
+                ROOT / "evals" / "rubrics" / "architecture-review-v2.1.schema.json",
+            )
+
+            self.assertEqual(len(answers), 6)
+            self.assertEqual(source_info["runtime"], "codex")
+            self.assertEqual(source_info["producer_profile"]["model"], "gpt-5.6-luna")
+
+    def test_cross_runtime_rescore_records_producer_and_scorer_profiles(self) -> None:
+        score = self._score_payload()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "source-results"
+            output = root / "rescore-results"
+            source.mkdir()
+            source_manifest = {
+                "case": {"id": self.case["id"], "sha256": case_digest(self.case)},
+                "repository": self.case["repository"],
+                "skill": self.case["skill"],
+                "profile": {
+                    "runtime": "codex",
+                    "repetitions": 3,
+                    "profile_id": "codex-producer",
+                    "model": "gpt-5.6-luna",
+                },
+                "contract": contract_identity(
+                    ROOT / "evals" / "rubrics" / "architecture-review-v2.1.md",
+                    ROOT / "evals" / "rubrics" / "architecture-review-v2.1.schema.json",
+                ),
+                "results": [],
+            }
+            for invocation in build_invocation_matrix(self.case, 3, "codex"):
+                if invocation.phase != "behavior":
+                    continue
+                source_manifest["results"].append(
+                    {"id": invocation.id, "success": True, "attempts": 1}
+                )
+                answer_path = source / "answers" / "behavior" / f"{invocation.id}.md"
+                answer_path.parent.mkdir(parents=True, exist_ok=True)
+                answer_path.write_text("fixture producer answer\n", encoding="utf-8")
+            write_json(source / "manifest.json", source_manifest)
+            write_json(source / "summary.json", {"dataset_complete": True})
+
+            def scorer(*_args, **_kwargs):
+                return AttemptResult(0, json.dumps(score))
+
+            with (
+                mock.patch("scripts.run_forward_eval.claude_version", return_value="2.1.233"),
+                mock.patch(
+                    "scripts.run_forward_eval.prepare_checkouts",
+                    return_value={"control": source, "treatment": source},
+                ),
+                mock.patch("scripts.run_forward_eval.assert_clean"),
+                mock.patch("scripts.run_forward_eval.run_claude", side_effect=scorer),
+            ):
+                result = main(
+                    [
+                        "--runtime",
+                        "claude-code",
+                        "--model",
+                        "fable",
+                        "--model-label",
+                        "deepseek-v4-pro",
+                        "--reasoning-effort",
+                        "high",
+                        "--call-timeout-seconds",
+                        "1800",
+                        "--repository-source",
+                        str(source),
+                        "--phases",
+                        "score",
+                        "--rescore-from",
+                        str(source),
+                        "--rubric",
+                        str(ROOT / "evals" / "rubrics" / "architecture-review-v2.1.md"),
+                        "--schema",
+                        str(ROOT / "evals" / "rubrics" / "architecture-review-v2.1.schema.json"),
+                        "--output-dir",
+                        str(output),
+                    ]
+                )
+
+            self.assertEqual(result, 0)
+            manifest = load_json(output / "manifest.json")
+            self.assertEqual(manifest["profile"]["model"], "deepseek-v4-pro")
+            self.assertEqual(
+                manifest["rescore_source"]["producer_profile"]["model"],
+                "gpt-5.6-luna",
+            )
+
+    def test_rescore_accepts_incomplete_source_with_complete_behavior_answers(self) -> None:
+        case = load_json(MARKTEXT_CASE_PATH)
+        # The committed source predates the v2.1-only Codex profile fields.
+        case.pop("codex")
+        case["behavior"]["treatment_invocations"].pop("codex")
+        source, rubric, schema = (
+            CLAUDE_MANIFEST_PATH.parent,
+            ROOT / "evals" / "rubrics" / "architecture-review-v2.md",
+            ROOT / "evals" / "rubrics" / "architecture-review-v2.schema.json",
+        )
+        answers, source_info = load_rescore_behavior_answers(
+            source,
+            case,
+            3,
+            "claude-code",
+            rubric,
+            schema,
+        )
+        self.assertEqual(len(answers), 6)
+        self.assertFalse(source_info["source_dataset_complete"])
+        self.assertTrue(source_info["producer_answers_complete"])
 
     def test_invalid_score_persists_failure_diagnostic(self) -> None:
         score = self._score_payload()
@@ -254,7 +415,7 @@ class ForwardEvaluationTest(unittest.TestCase):
                 "results": [],
             }
             for key, value, message in (
-                ("profile", {"runtime": "claude-code", "repetitions": 3}, "runtime"),
+                ("profile", {"runtime": "unsupported", "repetitions": 3}, "runtime"),
                 ("case", {"id": "other", "sha256": "other"}, "case"),
                 (
                     "contract",
@@ -320,6 +481,74 @@ class ForwardEvaluationTest(unittest.TestCase):
         missing.pop("accuracy")
         with self.assertRaisesRegex(EvaluationError, "accuracy"):
             validate_score(missing, require_accuracy=True)
+
+    def test_v21_count_only_includes_unresolved_decision_relevant_drift(self) -> None:
+        documentation_drift = [
+            {
+                "claim": "unresolved conflict",
+                "documentation_evidence": "docs",
+                "implementation_evidence": "code",
+                "state": "conflict",
+                "decision_relevant": True,
+            },
+            {
+                "claim": "unknown decision",
+                "documentation_evidence": "docs",
+                "implementation_evidence": "code",
+                "state": "unknown",
+                "decision_relevant": False,
+            },
+            {
+                "claim": "historical note",
+                "documentation_evidence": "docs",
+                "implementation_evidence": "code",
+                "state": "historical",
+                "decision_relevant": True,
+            },
+            {
+                "claim": "resolved conflict",
+                "documentation_evidence": "docs",
+                "implementation_evidence": "code",
+                "state": "resolved",
+                "decision_relevant": True,
+            },
+        ]
+        self.assertEqual(
+            count_unresolved_decision_conflicts(documentation_drift),
+            1,
+        )
+
+    def test_v21_accuracy_contract_rejects_count_mismatch(self) -> None:
+        drift = [
+            {
+                "claim": "sandbox state",
+                "documentation_evidence": "CLAUDE.md",
+                "implementation_evidence": "BrowserWindow config",
+                "state": "conflict",
+                "decision_relevant": True,
+            }
+        ]
+        score = self._score_payload(
+            accuracy={
+                "material_error_count": 0,
+                "minor_error_count": 0,
+                "unresolved_decision_conflict_count": 0,
+                "gate_pass": True,
+            },
+            documentation_drift=drift,
+        )
+        with self.assertRaisesRegex(
+            EvaluationError,
+            "unresolved_decision_conflict_count does not match",
+        ):
+            validate_score(score, require_accuracy=True)
+
+    def test_v21_scorer_prompt_states_cross_field_accuracy_contract(self) -> None:
+        prompt = scorer_prompt("request", "answer", "v2.1 rubric")
+        self.assertIn("unresolved_decision_conflict_count", prompt)
+        self.assertIn("decision_relevant == true", prompt)
+        self.assertIn('{"conflict", "unknown"}', prompt)
+        self.assertIn("gate_pass", prompt)
 
     def test_material_treatment_error_blocks_accuracy_gate(self) -> None:
         summary = self._aggregate_with_accuracy(
@@ -838,6 +1067,74 @@ class ForwardEvaluationTest(unittest.TestCase):
             self.assertTrue(manifest_path.is_file())
             self.assertFalse((output / "partial-manifest.json").exists())
             self.assertFalse((output / ".checkpoints").exists())
+
+    def test_output_directory_lock_rejects_concurrent_owner(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "results"
+            owner = OutputDirectoryLock(output)
+            owner.acquire()
+            try:
+                contender = OutputDirectoryLock(output)
+                with self.assertRaisesRegex(
+                    EvaluationError, "output directory is already locked"
+                ):
+                    contender.acquire()
+            finally:
+                owner.release()
+
+            self.assertTrue(owner.lock_path.exists())
+            replacement = OutputDirectoryLock(output)
+            replacement.acquire()
+            replacement.release()
+
+    def test_main_rejects_concurrent_output_owner_before_model_calls(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            output = root / "results"
+            source = root / "airi"
+            source.mkdir()
+            owner = OutputDirectoryLock(output)
+            owner.acquire()
+            try:
+                with (
+                    mock.patch(
+                        "scripts.run_forward_eval.codex_version",
+                        return_value="0.144.4",
+                    ),
+                    mock.patch("scripts.run_forward_eval.prepare_checkouts") as prepare,
+                    mock.patch("scripts.run_forward_eval.run_codex") as run,
+                ):
+                    with self.assertRaisesRegex(
+                        EvaluationError, "output directory is already locked"
+                    ):
+                        main(
+                            [
+                                "--airi-source",
+                                str(source),
+                                "--output-dir",
+                                str(output),
+                            ]
+                        )
+                prepare.assert_not_called()
+                run.assert_not_called()
+            finally:
+                owner.release()
+
+    def test_partial_state_cleanup_is_idempotent(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "results"
+            partial = output / "partial-manifest.json"
+            checkpoints = output / ".checkpoints"
+            partial.parent.mkdir(parents=True)
+            partial.write_text("{}\n", encoding="utf-8")
+            checkpoints.mkdir()
+            (checkpoints / "sample.json").write_text("{}\n", encoding="utf-8")
+
+            cleanup_partial_state(partial, checkpoints)
+            cleanup_partial_state(partial, checkpoints)
+
+            self.assertFalse(partial.exists())
+            self.assertFalse(checkpoints.exists())
 
     def test_incomplete_manifest_resumes_only_failed_scorers(self) -> None:
         marker = self.case["routing"]["marker_token"]

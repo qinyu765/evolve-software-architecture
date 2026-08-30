@@ -1,0 +1,81 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron 42 (electron-vite 5, electron-builder 26) — MarkText desktop app; not Tauri",
+    "legacy_platform_treated_as_current": false,
+    "runtime_boundaries_identified": [
+      "main/preload/renderer three-process boundary",
+      "renderer sandbox boundary (contextIsolation:true, sandbox:true, nodeIntegration:false)",
+      "IPC contract in shared/types/ipc.ts as single source of truth (channel names typed, payloads permissive/unknown)",
+      "main-process internal event seam (ipcMain.emit + onInternalChannel string channels)",
+      "window identity seam (sender-derived vs explicit windowId; restoreBufferId assertion on BrowserWindow)",
+      "command dispatch dual-track (main CommandManager Map<string,CommandCallback> vs renderer CommandDescriptor[])",
+      "editor engine boundary (@muyajs/core via muya-core.d.ts any shim; legacy @marktext/muyajs retired)",
+      "session/buffer persistence seam (BUFFERED_STATE_VERSION=1, update-buffer-state unknown payload)"
+    ]
+  },
+  "accuracy": {
+    "gate_pass": true,
+    "material_error_count": 0,
+    "minor_error_count": 2,
+    "unresolved_decision_conflict_count": 0
+  },
+  "dimensions": {
+    "current_friction": 2,
+    "evidence": 2,
+    "generalization": 2,
+    "migration": 2,
+    "options": 2,
+    "quality_attributes": 2,
+    "recommendation": 2,
+    "scope_and_classification": 2,
+    "verification": 2
+  },
+  "documentation_drift": [
+    {
+      "claim": "CLAUDE.md architecture section: editor/preferences windows use contextIsolation:false + nodeIntegration:true, pointing at src/main/config.js",
+      "documentation_evidence": "CLAUDE.md preload section: 'editor and preferences windows use contextIsolation: false + nodeIntegration: true (see packages/desktop/src/main/config.js)'",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:11-20 uses contextIsolation:true, sandbox:true, nodeIntegration:false; file is config.ts",
+      "state": "conflict",
+      "decision_relevant": false
+    },
+    {
+      "claim": "ARCHITECTURE.md describes monorepo-before layout (src/, src/muya/, resources/, static/, test/)",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md:5-18 lists resources/, src/, src/common/, src/main/, src/muya/, src/renderer, static/, test/",
+      "implementation_evidence": "Current repo has packages/desktop/src/{common,main,preload,renderer}, packages/muya, packages/muyajs",
+      "state": "historical",
+      "decision_relevant": false
+    },
+    {
+      "claim": "TYPESCRIPT.md describes single root project with src/muya/ as the only JS",
+      "documentation_evidence": "packages/website/content/docs/dev/TYPESCRIPT.md:3-12 'Every file under src/ (except src/muya/)'; 'single root project'",
+      "implementation_evidence": "pnpm workspace with packages/desktop tsconfig and packages/muya TS rewrite",
+      "state": "historical",
+      "decision_relevant": false
+    }
+  ],
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "menu/actions/file.ts has ~30 ipcMain.emit call sites",
+      "repository_evidence": "Grep of packages/desktop/src/main shows 20 ipcMain.emit occurrences in file.ts (43 total across 13 files)",
+      "explanation": "file.ts is correctly identified as the largest internal-bus fan-out, but the magnitude is overstated ~50%; does not change the recommendation or per-family migration approach.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "migration"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Unify commands via a shared @shared CommandId type (implying it does not yet exist in a shared location)",
+      "repository_evidence": "packages/desktop/src/main/commands/index.ts:1 already imports type CommandId from common/commands/constants; renderer/src/commands/index.ts:61 uses string ids in CommandDescriptor[]",
+      "explanation": "The dual-track diagnosis is correct, but a shared typed CommandId already exists in common/commands/constants rather than needing to be introduced via @shared; only the location/placement differs. Recommendation direction is unchanged.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "recommendation"
+      ]
+    }
+  ],
+  "rationale": "The review is thorough, correctly classifies the repository (Desktop/Electron, not Tauri), and grounds every material claim in inspectable paths/symbols/line numbers. It distinguishes current implementation from stale documentation (ARCHITECTURE.md/TYPESCRIPT.md historical layout; CLAUDE.md contextIsolation/sandbox conflict; IPC.md accurate) and relies on code, not intent, for decisions. Friction is concrete (5-6 hop file-workflow chain, three window-identity forms, dual command system, any-shimmed engine), quality attributes are ranked with trade-offs and verification, three options are compared including current shape, the recommendation (consolidate existing seams rather than add speculative abstractions) follows from the evidence, and the migration is incremental, observable, and reversible with grep/typecheck-verifiable exit criteria. Two minor factual inaccuracies (ipcMain.emit count in file.ts: 20 vs ~30; CommandId already existing in common/commands/constants) do not alter the recommendation and do not block the accuracy gate. All nine dimensions earn full credit: total 18/18.",
+  "total": 18
+}
