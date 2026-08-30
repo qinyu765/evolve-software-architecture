@@ -1,0 +1,62 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "packages/desktop (Electron app, package name 'marktext'); current editor engine is @muyajs/core (packages/muya), with legacy packages/muyajs being retired",
+    "legacy_platform_treated_as_current": false,
+    "runtime_boundaries_identified": [
+      "Process: main/preload/renderer three-process Electron model",
+      "Package: packages/desktop owns Electron/OS/window/file policy; packages/muya is pure editor without Electron/Node shell; legacy muyajs retiring",
+      "Security: contextIsolation:true + sandbox:true + nodeIntegration:false; preload exposes only explicit capabilities; webSecurity:false as an audited exception",
+      "Window: BrowserWindow lifecycle and open-file routing in main; one renderer per window; BrowserWindow.id vs restoreBufferId vs renderer tab id kept distinct",
+      "File: absolute path identity + encoding/BOM + LF internal + EOL/trailing-newline save + atomic durable write + watcher self-ignore",
+      "Editor: muya consumed via public entrypoint with Electron capabilities injected via callbacks/options; live engine state stays in renderer",
+      "IPC/shell: domain DTOs with sender binding; internal ipcMain.emit channels separated from renderer IPC; no unified bus"
+    ]
+  },
+  "accuracy": {
+    "gate_pass": true,
+    "material_error_count": 0,
+    "minor_error_count": 1,
+    "unresolved_decision_conflict_count": 0
+  },
+  "dimensions": {
+    "current_friction": 2,
+    "evidence": 2,
+    "generalization": 2,
+    "migration": 2,
+    "options": 2,
+    "quality_attributes": 2,
+    "recommendation": 2,
+    "scope_and_classification": 2,
+    "verification": 2
+  },
+  "documentation_drift": [
+    {
+      "claim": "Docs state editor/preferences windows use contextIsolation:false + nodeIntegration:true and describe a root src/ layout.",
+      "decision_relevant": true,
+      "documentation_evidence": "CLAUDE.md:243-244 (preload note: contextIsolation:false + nodeIntegration:true) and packages/website/content/docs/dev/ARCHITECTURE.md:5-16 (root src/, resources/, muya/ layout).",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:11-20,29-42 (contextIsolation:true, sandbox:true, nodeIntegration:false) and packages/desktop/test/e2e/context-isolation.spec.ts:24-38 (sandbox canary).",
+      "state": "resolved"
+    },
+    {
+      "claim": "PARITY_SCOREBOARD.md reports PG14 as the remaining xfail via test.fail(), while the test source is marked FIXED and uses plain test().",
+      "decision_relevant": true,
+      "documentation_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md:44 ('Gaps remaining: 1 / 15 (PG14)') and :69 (row shows test.fail() / xfail).",
+      "implementation_evidence": "packages/desktop/test/e2e/parity-source-undo-saved.spec.ts:73-98 (FIXED comment, plain test() blocks; grep finds no test.fail()/it.fails()).",
+      "state": "resolved"
+    }
+  ],
+  "factual_errors": [
+    {
+      "affected_dimensions": [
+        "current_friction"
+      ],
+      "claim": "文件工作流中 main 负责 Markdown 解析、保存和 watcher（main is responsible for markdown parsing, saving, and the watcher）",
+      "explanation": "Main owns file IO (load/save, encoding/BOM/EOL normalization) and the watcher, but markdown parsing/serialization to the block tree happens in the renderer-hosted muya engine (packages/muya/src/state/markdownToState.ts and stateToMarkdown.ts; legacy packages/muyajs/lib/parser). This misattribution does not change the review's friction analysis (the file workflow still spans main/preload/renderer) or its recommendation.",
+      "repository_evidence": "packages/desktop/src/main/filesystem/markdown.ts:69-104 (loadMarkdownFile/writeMarkdownFile do read/decode/encoding/EOL and write); packages/muya/src/state/ (markdown parsing and serialization) consumed from the renderer.",
+      "severity": "minor",
+      "source_conflict": false
+    }
+  ],
+  "rationale": "The answer is an evidence-backed architecture review and scores full marks on all nine dimensions. Scope/classification: it states the pnpm monorepo and desktop-package structure from multiple signals (pnpm-workspace.yaml, desktop/package.json, config, tests, history). Evidence: nearly every claim cites a path with a line number, and the answer explicitly distinguishes current evidence (implementation/config/tests) from stale intent (CLAUDE.md/ARCHITECTURE.md). I verified the security config, the E2E canary, WindowManager responsibilities (including findBestWindowToOpenIn), EditorWindow file-list/watcher ownership, the file-workflow split (project.ts sidebar ops via fileUtils/ipcRenderer), the permissive IPC contract and internal-channel mixing (window-file-saved typed tabId but handled as pathname), the editor-boundary any/shim/synthetic-history, files.ts open migration state, commands/index.ts any callback, internalIpc.ts helper, markdown.ts/filesystem/index.ts load/save semantics, the flush-on-save and content-identical-watcher tests, and the three-window-identity split. The options table covers status quo vs capability facade vs domain core with trade-offs, cost, risk, and rollback, and the six-step migration has observable acceptance criteria and reversibility. Generalization holds: MarkText specifics are kept project-local and not promoted to universal rules. Accuracy gate: no material errors; one minor misattribution (main 'parsing' markdown rather than file IO). Both documentation-vs-implementation disagreements the answer surfaced (stale sandbox docs; PARITY_SCOREBOARD PG14 xfail vs fixed test) are decision-relevant but were resolved by the answer in favor of current evidence, so unresolved_decision_conflict_count is 0 and the gate passes. Caveat: most of the cited git hashes could not be independently re-walked (no git tooling in this session), but the historical narrative is corroborated by in-repo PR references and code comments, and the one hash visible in the environment (c907b29c) matches the answer's description.",
+  "total": 18
+}

@@ -1,0 +1,413 @@
+{
+  "schema_version": 1,
+  "contract": {
+    "rubric_sha256": "64489b2290d24f0ae95fdabe14abcf34a4edbf6f7dcc044a65ed3034ec3c3b4e",
+    "schema_sha256": "e5609858147c7005cf786d059abe4d402d48271ed45f6701ee1a9c519bf3c8a6"
+  },
+  "cases": [
+    {
+      "id": "airi-worker-thread-is-not-process-isolation",
+      "repository_evidence": "AIRI's node-worker direction is not implemented; worker_threads would share the host process privileges and is neither an OS process nor a sandbox.",
+      "gold_reason": "Treating node-worker as an out-of-process restricted security boundary changes the recommended isolation design and is material.",
+      "expected": {
+        "valid": true,
+        "material_error_count": 1,
+        "minor_error_count": 0,
+        "unresolved_decision_conflict_count": 0,
+        "gate_pass": false
+      },
+      "payload": {
+        "dimensions": {
+          "scope_and_classification": 2,
+          "evidence": 2,
+          "current_friction": 2,
+          "quality_attributes": 2,
+          "options": 2,
+          "recommendation": 1,
+          "migration": 2,
+          "verification": 2,
+          "generalization": 2
+        },
+        "total": 17,
+        "acceptance_checks": {
+          "current_desktop_platform": "Electron",
+          "runtime_boundaries_identified": ["main", "preload", "renderer"],
+          "legacy_platform_treated_as_current": false
+        },
+        "accuracy": {
+          "material_error_count": 1,
+          "minor_error_count": 0,
+          "unresolved_decision_conflict_count": 0,
+          "gate_pass": false
+        },
+        "factual_errors": [
+          {
+            "severity": "material",
+            "claim": "node-worker provides out-of-process restricted security isolation",
+            "repository_evidence": "The transport is unimplemented and worker_threads would remain in-process with host privileges.",
+            "explanation": "The proposed boundary does not provide the claimed fault or privilege isolation.",
+            "source_conflict": false,
+            "affected_dimensions": ["recommendation", "verification"]
+          }
+        ],
+        "documentation_drift": [],
+        "rationale": "The isolation claim is material and blocks the gate."
+      }
+    },
+    {
+      "id": "display-label-is-not-schema-identifier",
+      "repository_evidence": "The v2.1 schema defines evidence, not the display label Evidence, as an affected_dimensions identifier.",
+      "gold_reason": "A human-readable rubric label is not accepted in a machine-readable schema field.",
+      "expected": {
+        "valid": false,
+        "validation_error": "scorer factual error references an unknown dimension"
+      },
+      "payload": {
+        "dimensions": {
+          "scope_and_classification": 2,
+          "evidence": 1,
+          "current_friction": 2,
+          "quality_attributes": 2,
+          "options": 2,
+          "recommendation": 2,
+          "migration": 2,
+          "verification": 2,
+          "generalization": 2
+        },
+        "total": 17,
+        "acceptance_checks": {
+          "current_desktop_platform": "Electron",
+          "runtime_boundaries_identified": ["main", "preload", "renderer"],
+          "legacy_platform_treated_as_current": false
+        },
+        "accuracy": {
+          "material_error_count": 1,
+          "minor_error_count": 0,
+          "unresolved_decision_conflict_count": 0,
+          "gate_pass": false
+        },
+        "factual_errors": [
+          {
+            "severity": "material",
+            "claim": "fixture with a display label",
+            "repository_evidence": "fixture",
+            "explanation": "The affected dimension intentionally uses an invalid display label.",
+            "source_conflict": false,
+            "affected_dimensions": ["Evidence"]
+          }
+        ],
+        "documentation_drift": [],
+        "rationale": "The payload must remain rejected instead of normalized."
+      }
+    },
+    {
+      "id": "marktext-focus-mode-stale-documentation",
+      "repository_evidence": "packages/muya/src/muya.ts toggles focus mode and applies its class in the render path.",
+      "gold_reason": "Calling focus mode a no-op relies on stale framing and changes whether the behavior is included in migration scope.",
+      "expected": {
+        "valid": true,
+        "material_error_count": 1,
+        "minor_error_count": 0,
+        "unresolved_decision_conflict_count": 1,
+        "gate_pass": false
+      },
+      "payload": {
+        "dimensions": {
+          "scope_and_classification": 2,
+          "evidence": 1,
+          "current_friction": 2,
+          "quality_attributes": 2,
+          "options": 2,
+          "recommendation": 2,
+          "migration": 2,
+          "verification": 2,
+          "generalization": 2
+        },
+        "total": 17,
+        "acceptance_checks": {
+          "current_desktop_platform": "Electron",
+          "runtime_boundaries_identified": ["main", "preload", "renderer"],
+          "legacy_platform_treated_as_current": false
+        },
+        "accuracy": {
+          "material_error_count": 1,
+          "minor_error_count": 0,
+          "unresolved_decision_conflict_count": 1,
+          "gate_pass": false
+        },
+        "factual_errors": [
+          {
+            "severity": "material",
+            "claim": "Focus mode is a no-op and can be deferred.",
+            "repository_evidence": "muya.ts toggles the focus option/class and consumes it during rendering.",
+            "explanation": "The answer presents stale behavior as current and changes migration scope.",
+            "source_conflict": true,
+            "affected_dimensions": ["evidence", "recommendation"]
+          }
+        ],
+        "documentation_drift": [
+          {
+            "claim": "Focus mode has no current behavior.",
+            "documentation_evidence": "Stale no-op framing.",
+            "implementation_evidence": "Current Muya code toggles and renders the focus class.",
+            "state": "conflict",
+            "decision_relevant": true
+          }
+        ],
+        "rationale": "The unresolved decision-relevant conflict and material error block the gate."
+      }
+    },
+    {
+      "id": "marktext-git-history-is-inspectable",
+      "repository_evidence": "The pinned MarkText checkout has 2143 reachable commits available to the evaluation.",
+      "gold_reason": "Claiming that no usable history exists avoids a requested verification source and changes the evidence base.",
+      "expected": {
+        "valid": true,
+        "material_error_count": 1,
+        "minor_error_count": 0,
+        "unresolved_decision_conflict_count": 0,
+        "gate_pass": false
+      },
+      "payload": {
+        "dimensions": {
+          "scope_and_classification": 2,
+          "evidence": 1,
+          "current_friction": 2,
+          "quality_attributes": 2,
+          "options": 2,
+          "recommendation": 2,
+          "migration": 2,
+          "verification": 2,
+          "generalization": 2
+        },
+        "total": 17,
+        "acceptance_checks": {
+          "current_desktop_platform": "Electron",
+          "runtime_boundaries_identified": ["main", "preload", "renderer"],
+          "legacy_platform_treated_as_current": false
+        },
+        "accuracy": {
+          "material_error_count": 1,
+          "minor_error_count": 0,
+          "unresolved_decision_conflict_count": 0,
+          "gate_pass": false
+        },
+        "factual_errors": [
+          {
+            "severity": "material",
+            "claim": "The checkout contains only a clone record and no usable Git history.",
+            "repository_evidence": "The pinned checkout exposes 2143 reachable commits.",
+            "explanation": "The answer did not perform the requested historical verification even though the evidence was available.",
+            "source_conflict": false,
+            "affected_dimensions": ["evidence", "verification"]
+          }
+        ],
+        "documentation_drift": [],
+        "rationale": "The missing history verification is material for this task."
+      }
+    },
+    {
+      "id": "marktext-main-renderer-alias-is-live",
+      "repository_evidence": "packages/desktop/vitest.config.ts actively maps main_renderer for unit tests.",
+      "gold_reason": "Calling the alias unused and safe to delete would break a current test/configuration boundary.",
+      "expected": {
+        "valid": true,
+        "material_error_count": 1,
+        "minor_error_count": 0,
+        "unresolved_decision_conflict_count": 0,
+        "gate_pass": false
+      },
+      "payload": {
+        "dimensions": {
+          "scope_and_classification": 2,
+          "evidence": 1,
+          "current_friction": 2,
+          "quality_attributes": 2,
+          "options": 2,
+          "recommendation": 2,
+          "migration": 1,
+          "verification": 2,
+          "generalization": 2
+        },
+        "total": 16,
+        "acceptance_checks": {
+          "current_desktop_platform": "Electron",
+          "runtime_boundaries_identified": ["main", "preload", "renderer"],
+          "legacy_platform_treated_as_current": false
+        },
+        "accuracy": {
+          "material_error_count": 1,
+          "minor_error_count": 0,
+          "unresolved_decision_conflict_count": 0,
+          "gate_pass": false
+        },
+        "factual_errors": [
+          {
+            "severity": "material",
+            "claim": "main_renderer is unused dead code and safe to delete.",
+            "repository_evidence": "The Vitest configuration actively resolves the alias for unit tests.",
+            "explanation": "Deletion requires coordinated test and configuration migration.",
+            "source_conflict": false,
+            "affected_dimensions": ["evidence", "migration"]
+          }
+        ],
+        "documentation_drift": [],
+        "rationale": "The live alias makes the deletion recommendation materially unsafe."
+      }
+    },
+    {
+      "id": "marktext-pg14-stale-scoreboard",
+      "repository_evidence": "PARITY_SCOREBOARD.md says PG14 remains test.fail while the current E2E spec is marked fixed and uses a normal test.",
+      "gold_reason": "The stale scoreboard is used to choose migration scope and test gates, so the unresolved conflict is decision-relevant.",
+      "expected": {
+        "valid": true,
+        "material_error_count": 1,
+        "minor_error_count": 0,
+        "unresolved_decision_conflict_count": 1,
+        "gate_pass": false
+      },
+      "payload": {
+        "dimensions": {
+          "scope_and_classification": 2,
+          "evidence": 1,
+          "current_friction": 2,
+          "quality_attributes": 2,
+          "options": 2,
+          "recommendation": 2,
+          "migration": 2,
+          "verification": 2,
+          "generalization": 2
+        },
+        "total": 17,
+        "acceptance_checks": {
+          "current_desktop_platform": "Electron",
+          "runtime_boundaries_identified": ["main", "preload", "renderer"],
+          "legacy_platform_treated_as_current": false
+        },
+        "accuracy": {
+          "material_error_count": 1,
+          "minor_error_count": 0,
+          "unresolved_decision_conflict_count": 1,
+          "gate_pass": false
+        },
+        "factual_errors": [
+          {
+            "severity": "material",
+            "claim": "PG14 is the only remaining test.fail parity gap.",
+            "repository_evidence": "The current parity E2E test is marked FIXED and is a normal test.",
+            "explanation": "The answer relies only on the stale scoreboard to set migration and verification scope.",
+            "source_conflict": true,
+            "affected_dimensions": ["evidence", "verification"]
+          }
+        ],
+        "documentation_drift": [
+          {
+            "claim": "PG14 remains an expected failure.",
+            "documentation_evidence": "PARITY_SCOREBOARD.md reports PG14 as the last test.fail gap.",
+            "implementation_evidence": "The current E2E spec marks PG14 fixed and runs a normal test.",
+            "state": "conflict",
+            "decision_relevant": true
+          }
+        ],
+        "rationale": "The material stale-documentation error and unresolved conflict block the gate."
+      }
+    },
+    {
+      "id": "minor-only-error-does-not-block",
+      "repository_evidence": "A citation can point to the wrong nearby line while the underlying implementation claim and recommendation remain correct.",
+      "gold_reason": "A bounded citation imprecision remains visible as minor but does not block the accuracy gate.",
+      "expected": {
+        "valid": true,
+        "material_error_count": 0,
+        "minor_error_count": 1,
+        "unresolved_decision_conflict_count": 0,
+        "gate_pass": true
+      },
+      "payload": {
+        "dimensions": {
+          "scope_and_classification": 2,
+          "evidence": 2,
+          "current_friction": 2,
+          "quality_attributes": 2,
+          "options": 2,
+          "recommendation": 2,
+          "migration": 2,
+          "verification": 2,
+          "generalization": 2
+        },
+        "total": 18,
+        "acceptance_checks": {
+          "current_desktop_platform": "Electron",
+          "runtime_boundaries_identified": ["main", "preload", "renderer"],
+          "legacy_platform_treated_as_current": false
+        },
+        "accuracy": {
+          "material_error_count": 0,
+          "minor_error_count": 1,
+          "unresolved_decision_conflict_count": 0,
+          "gate_pass": true
+        },
+        "factual_errors": [
+          {
+            "severity": "minor",
+            "claim": "A supporting citation points one line away from the relevant declaration.",
+            "repository_evidence": "The declaration exists in the same cited file and the underlying claim remains correct.",
+            "explanation": "The citation should be corrected but does not change the architecture decision.",
+            "source_conflict": false,
+            "affected_dimensions": ["evidence"]
+          }
+        ],
+        "documentation_drift": [],
+        "rationale": "The minor error remains reported while the gate passes."
+      }
+    },
+    {
+      "id": "non-decision-relevant-drift-does-not-block",
+      "repository_evidence": "Historical documentation can disagree with current layout without affecting the recommendation when the answer resolves the current boundary independently.",
+      "gold_reason": "A conflict marked non-decision-relevant is recorded but excluded from unresolved_decision_conflict_count.",
+      "expected": {
+        "valid": true,
+        "material_error_count": 0,
+        "minor_error_count": 0,
+        "unresolved_decision_conflict_count": 0,
+        "gate_pass": true
+      },
+      "payload": {
+        "dimensions": {
+          "scope_and_classification": 2,
+          "evidence": 2,
+          "current_friction": 2,
+          "quality_attributes": 2,
+          "options": 2,
+          "recommendation": 2,
+          "migration": 2,
+          "verification": 2,
+          "generalization": 2
+        },
+        "total": 18,
+        "acceptance_checks": {
+          "current_desktop_platform": "Electron",
+          "runtime_boundaries_identified": ["main", "preload", "renderer"],
+          "legacy_platform_treated_as_current": false
+        },
+        "accuracy": {
+          "material_error_count": 0,
+          "minor_error_count": 0,
+          "unresolved_decision_conflict_count": 0,
+          "gate_pass": true
+        },
+        "factual_errors": [],
+        "documentation_drift": [
+          {
+            "claim": "An old directory layout remains current.",
+            "documentation_evidence": "Historical architecture documentation.",
+            "implementation_evidence": "The repository now uses a different package layout.",
+            "state": "conflict",
+            "decision_relevant": false
+          }
+        ],
+        "rationale": "The drift is recorded but does not affect the decision or block the gate."
+      }
+    }
+  ]
+}

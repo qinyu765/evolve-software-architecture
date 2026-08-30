@@ -1,0 +1,99 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 1,
+    "current_friction": 1,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 16,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron（apps/stage-tamagotchi）；crates/ 下的 Tauri 是遗留平台。",
+    "runtime_boundaries_identified": [
+      "Electron 主进程：ExtensionHost、插件逻辑动态加载、IPC/Eventa 与后台服务",
+      "Electron 渲染进程：单一 Vue/Vite SPA、hash 路由、共享 preload",
+      "插件 UI：loopback HTTP、cookie 会话与 iframe",
+      "应用内后台服务：server-channel、HTTP/H3/static-assets 服务",
+      "外部子进程：MCP stdio 服务与 Godot 侧车"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 2,
+    "minor_error_count": 2,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": false
+  },
+  "factual_errors": [
+    {
+      "severity": "material",
+      "claim": "窗口当前没有窗口管理器抽象，唯一复用基元是 createReusableWindow。",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/windows/shared/referenced-window.ts 导出 ReferencedWindowManager，并由 createReferencedWindowManager 维护按 ID 打开、复用和关闭窗口的 Map。",
+      "explanation": "仓库确实没有统一的全窗口注册表，但存在窄范围的按 ID 窗口管理器；原答的绝对表述错误，并使 D2 的现状摩擦分析过度简化。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction",
+        "recommendation"
+      ]
+    },
+    {
+      "severity": "material",
+      "claim": "server-channel、http-server、MCP 和 Godot 等后台能力都遵循同一个 injeca lifecycle.appHooks.onStart/onStop + mutex 生命周期模式。",
+      "repository_evidence": "channel-server 使用 lifecycle.appHooks 与 Mutex；http-server/server-manager 使用自身的 Mutex、顺序启动和逆序停止；mcp-servers/index.ts 与 godot-stage/index.ts 主要通过 onAppBeforeQuit 清理。",
+      "explanation": "后台边界实际存在多种生命周期接入方式，不能概括为已经统一且干净的契约；这直接影响 S4/D3 的现状判断。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction",
+        "recommendation",
+        "migration"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "M0 还需要新增缺失 entrypoint、重复 ID、非法 kind/apiVersion 等基础契约测试。",
+      "repository_evidence": "packages/plugin-sdk/src/plugin-host/core.test.ts 已覆盖 v1/旧 manifest 拒绝；apps/stage-tamagotchi/src/main/services/airi/plugins/index.test.ts 已覆盖重复插件 ID；ExtensionManifestV1 的 entrypoints 字段在 shared/types.ts 中是可选的，缺失 entrypoint 由 loader 在运行时处理而非 schema 拒绝。",
+      "explanation": "该迁移阶段重复描述了已有测试，并误把缺失 entrypoint 当作 schema 校验缺口。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "migration",
+        "verification"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Eventa 的 setMaxListeners workaround 只有三处 TODO。",
+      "repository_evidence": "除 main/index.ts 外，preload/shared.ts、windows/shared/referenced-window.ts 以及多个窗口 RPC 文件仍有相关 setMaxListeners/TODO 代码。",
+      "explanation": "核心问题确实存在，但数量和扩散范围被低估。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction",
+        "verification"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "较早桌面文档或 DevLog 将 Tauri 描述为桌面实现。",
+      "documentation_evidence": "docs/content/zh-Hans/blog/DevLog-2025.04.06/index.md 等历史文章描述 Tauri。",
+      "implementation_evidence": "当前 AGENTS.md 明确 Electron 为当前桌面；apps/stage-tamagotchi/package.json 与 electron.vite.config.ts 使用 Electron/Electron Vite。",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "plugin-sdk 设计文档描述了 remote/worker/multi-transport 方向。",
+      "documentation_evidence": "packages/plugin-sdk/docs/design/architecture.md 描述多种部署形态；multi-transport.md 标注 Planned，并将 node/web transport 与安全加固列为后续步骤。",
+      "implementation_evidence": "packages/plugin-sdk/src/plugin-host/runtimes/node/index.ts 与 runtimes/web/index.ts 对 websocket、worker 等传输仍抛出未实现或不可用错误。",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "原答对 Electron 当前平台、插件主进程信任模型、方案比较和渐进迁移覆盖较强；但对现有窗口管理器及后台生命周期统一程度有两处决策相关的当前结构误判，且 M0 重复/误判了已有测试，因此证据与当前摩擦项扣分，准确性门禁不通过。"
+}

@@ -1,0 +1,51 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "macOS (darwin)",
+    "legacy_platform_treated_as_current": false,
+    "runtime_boundaries_identified": [
+      "main/preload/renderer (main owns OS, files, watcher, BrowserWindow, native menu; renderer owns UI/tabs/DOM editor; preload is a typed, sender-scoped capability bridge)",
+      "window identity and open-path routing (main authoritative; BrowserWindow.id treated as short-term transport; WindowSessionId to be separated from buffer UUID and TabId)",
+      "file persistence (canonical path, encoding/BOM, newline handling, atomic+fsync save, external-change/conflict semantics centralized in main)",
+      "document state (file content/metadata separated from view state, cursor, undo stack; IFileState not promoted as a cross-process model)",
+      "editor engine boundary (@muyajs/core stays DOM/browser-side and Electron-free with src/index.ts as public entry; OT/block tree/DOM nodes/history do not cross IPC)",
+      "test boundary (muya package tests engine; desktop unit/E2E tests host wiring; cross-boundary behavior tested on both sides)",
+      "Electron shell capability grouping (window, shell, file-dialog, filesystem/document, clipboard; legacy mt::fs::* kept only as a compatibility surface)"
+    ]
+  },
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 0,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [],
+  "documentation_drift": [
+    {
+      "claim": "ARCHITECTURE.md describes Muya as still being JavaScript and requiring a core refactoring (pre-monorepo / pre-TS-rewrite state).",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md:22 ('Muya, the editor backend, is currently still JavaScript'); :28 ('Muya requires a core refactoring...'); :15 (old 'muya/' folder layout).",
+      "implementation_evidence": "packages/muya is the TypeScript rewrite (@muyajs/core) and packages/desktop/package.json depends on both @marktext/muyajs and @muyajs/core; desktop parity specs (packages/desktop/test/PARITY_SCOREBOARD.md and parity-*.spec.ts) describe the migration as landed except PG14.",
+      "state": "historical",
+      "decision_relevant": true
+    },
+    {
+      "claim": "PARITY_SCOREBOARD.md states PG14 remains xfail (test.fail, accept-defer).",
+      "documentation_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md:10 ('PG14 alone remains xfail'); :69 ('test.fail() ... ❌ xfail').",
+      "implementation_evidence": "packages/desktop/test/e2e/parity-source-undo-saved.spec.ts:73-134 uses plain test() blocks for PG14 with a 'FIXED' comment and no test.fail() marker.",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "All nine dimensions score 2. The answer names the repository type (pnpm monorepo as physical organization boundary, desktop as the real app) from multiple signals, cites load-bearing files with line numbers, and explicitly separates documentation-as-intent from implementation/tests/history. Friction is concrete (editor.ts as coupling hub, WindowManager breadth, IFileState mixing concerns, permissive preload/IPC). Options A/B/C include the current shape, each with quality-attribute trade-offs, cost, risk, rollback, and consequences of non-adoption; the recommendation (A discipline + B incremental façade in three hotspots, C only if needed) follows from the verified evidence. The six-phase roadmap is incremental, observable, and reversible, and verification names real specs (context-isolation, external-reload-undo), atomic-write and parity suites, plus concrete encoding/newline/symlink/conflict failure modes. No project facts are smuggled into general rules. Verified claims match the checkout: dual engine deps and muya alias, sandbox config (contextIsolation/sandbox/nodeIntegration with webSecurity:false), permissive IPC contract, WindowManager responsibilities, buffer UUID, main-side file semantics, IFileState shape, editor.vue `any`/SyntheticHistory/replaceContent, sourceCode.vue manual handoff, and the two documentation-drift cases. The only unverified item is the specific git commit 565bfcdc (shared object store in an external alternates directory; no reachable ref/loose object in this checkout), which is not decision-load-bearing because the same point is independently established by current files. Documentation drift was correctly identified and not relied upon, so no material errors and no unresolved decision-relevant conflicts; gate passes."
+}

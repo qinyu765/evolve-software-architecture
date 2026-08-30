@@ -1,0 +1,102 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron desktop app (pnpm monorepo, packages/desktop + packages/muya); runtime host is macOS/darwin",
+    "runtime_boundaries_identified": [
+      "preload/contextBridge surface (window.electron.* / window.fileUtils.*) as the sole renderer<->main seam under sandbox",
+      "IPC channel contract in packages/desktop/src/shared/types/ipc.ts (currently one-way typed, unknown[] args)",
+      "renderer<->engine document content contract (markdown string + sanitized selection/history/TOC shapes) currently scattered in editor.vue",
+      "engine type boundary @muyajs/core (permissive any via types/muya-core.d.ts shim)",
+      "buffer-store session persistence format (BUFFERED_STATE_VERSION=1, writeFileAtomic, per-window {uuid}_editor_buffer_store.json)",
+      "window lifecycle ownership (BaseWindow/WindowManager)",
+      "json-change (engine->store snapshot) and file-changed (store->setContent/replaceContent) sync protocol"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 5,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "bufferedState.ts:7 BUFFERED_STATE_VERSION = 1 (cited as the session-persistence version anchor)",
+      "repository_evidence": "The constant lives in packages/desktop/src/renderer/src/store/bufferedState.ts:7; packages/desktop/src/shared/types/bufferedState.ts only declares BufferedState interfaces and has no such constant.",
+      "explanation": "Path misattribution; the substantive claim (persistence is versioned, version=1) is correct.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "WindowType has only two closed members (editor/settings)",
+      "repository_evidence": "packages/desktop/src/main/windows/base.ts:16-20 defines BASE/EDITOR/SETTINGS; BASE is a never-instantiate placeholder.",
+      "explanation": "Omits the BASE placeholder member; the substantive point (only two real window types) holds.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Playwright E2E 60+ and Vitest unit 112",
+      "repository_evidence": "packages/desktop/test/e2e contains 59 *.spec.ts files; packages/desktop/test/unit/specs contains 51 *.spec.ts files. 112 could be a test-case count but is not verifiable as a file count.",
+      "explanation": "E2E count slightly overstated (59 files, not 60+); unit number unverifiable as stated. Directional claim (regression-heavy E2E, no main-side contract reconciliation test) is correct.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "verification"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "本仓库不是 Tauri，Tauri 适配器只借用了 IPC/生命周期/桌面测试这几条通用关注点",
+      "repository_evidence": "No Tauri adapter exists in the repository; a case-insensitive grep for 'tauri' matches only 'dataUri' substrings in packages/muya.",
+      "explanation": "Unsupported aside; the load-bearing classification (Electron, not Tauri) is correct and multiply confirmed.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "scope_and_classification"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "editorBufferStore.ts:handleClose hardcodes the editor/settings distinction",
+      "repository_evidence": "handleClose takes an editorWindows argument and contains no editor/settings branch; the distinction is made by its caller (windowManager passes getWindowsByType('editor')). windowManager.getActiveEditor and app/index.ts:_openPathList do contain the editor/settings branches.",
+      "explanation": "The hardcoding is at the call site and adjacent code, not inside handleClose; the overall friction point stands.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "Root CLAUDE.md states editor/preferences windows use contextIsolation:false + nodeIntegration:true (see config.js)",
+      "documentation_evidence": "Root CLAUDE.md architecture section: 'editor and preferences windows use contextIsolation: false + nodeIntegration: true (see packages/desktop/src/main/config.js)'.",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:11-21 and 34-42 set contextIsolation:true, sandbox:true, nodeIntegration:false, webSecurity:false for both windows; glob finds no config.js (only config.ts).",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "ARCHITECTURE.md describes the pre-monorepo layout (root src/muya/, root out/) and 'Muya is currently still JavaScript'",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md lines 7 (out/), 15 (muya/ under src), 22 ('Muya, the editor backend, is currently still JavaScript').",
+      "implementation_evidence": "Monorepo layout under packages/desktop; the renderer consumes the TypeScript @muyajs/core engine; grep for active 'muya/lib' imports returns only comments and the types/muya.d.ts ambient shim.",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "The answer is a strong, evidence-grounded architecture review. It classifies the repo from multiple independent signals (Electron deps, BrowserWindow/ipcMain usage, sandbox config, electron-vite) and correctly identifies macOS/darwin as the host while treating the legacy muyajs engine as retired, not current. Its ~12 core evidentiary claims were verified: sandbox settings and webSecurity:false in config.ts; one-way-typed IPC contract with 108 bare ipcMain.on/handle across 23 main-process files and zero contract-type imports; dual channel families plus the ipcMain.emit internal-event hack (internalIpc.ts and ~40 emit call sites); closed WindowType; engine any-boundary via muya-core.d.ts; editor.vue adapter layer (adaptSelectionChange/CONTAINER_FUNCTION_TYPE/SyntheticHistory/ag-vs-mu DOM); dual document truths reconciled via json-change/file-changed; versioned atomic buffer-store; scattered file-workflow responsibilities; and a disconnected legacy engine. It explicitly resolves the two documentation-vs-implementation drifts (CLAUDE.md sandbox claim and ARCHITECTURE.md pre-monorepo layout) by relying on implementation evidence and flagging the docs as stale, so both drift entries are decision-relevant but resolved. All nine dimensions are met at full credit: ranked quality attributes with explicit trade-offs and verification; three viable options including the status-quo hardening; a recommendation that follows from the stated drivers (one active engine, two window types, one local file backend); and an incremental, individually-revertible migration with per-step exit criteria and concrete tests. Five minor factual imprecisions remain (bufferedState.ts path, WindowType member count, E2E/unit test counts, an unsupported 'Tauri adapter' aside, and the handleClose hardcoding attribution) but none is material and none relies on stale documentation for a decision, so the accuracy gate passes."
+}

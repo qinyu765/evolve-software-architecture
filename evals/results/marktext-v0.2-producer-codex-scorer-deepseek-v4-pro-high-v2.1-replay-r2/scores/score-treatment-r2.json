@@ -1,0 +1,60 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (desktop shell; Electron ~42 per packages/desktop/package.json)",
+    "runtime_boundaries_identified": [
+      "main process (Electron lifecycle, IO, atomic write, watcher, persistence/recovery)",
+      "preload (contextBridge + typed capability facades: shell, windowControl, fileUtils, path, ripgrep, uploader)",
+      "renderer (Vue 3 + Pinia stores, tabs, editor projection)",
+      "Muya engine boundary (@muyajs/core TS rewrite in packages/muya vs legacy @marktext/muyajs JS in packages/muyajs)"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 1,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "The IPC surface has \"动态 response channel\" (dynamic response channels).",
+      "repository_evidence": "packages/desktop/src/shared/types/ipc.ts lines 136-163: 'mt::response-export', 'mt::response-file-move-to', 'mt::response-file-save', 'mt::response-file-save-as', 'mt::response-print' are statically enumerated entries in IpcSendChannels; no template-literal or per-request dynamically constructed channel names were found in the IPC contract or main/preload sources.",
+      "explanation": "The response channels exist and do reflect a compat-layer handshake pattern, but they are statically typed names, not dynamically generated. The imprecision does not change the recommendation (IPC is still messy with unknowns, legacy un-prefixed channels, and ipcMain.emit forwarding, all of which are verified).",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "Editor and preferences windows use contextIsolation: false + nodeIntegration: true (root CLAUDE.md preload note, referencing config.js).",
+      "documentation_evidence": "Root CLAUDE.md, 'Architecture: Three-Process Electron Model' preload bullet; references packages/desktop/src/main/config.js.",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:12-19 and 34-42 set contextIsolation: true, sandbox: true, nodeIntegration: false for both editorWinOptions and preferencesWinOptions; test/e2e/context-isolation.spec.ts is the explicit 'canary' asserting this.",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "MarkText source is a flat src/ tree with src/muya as the JavaScript editor backend (pre-monorepo layout).",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md lines 12-16 (src/common, src/main, src/muya, src/renderer), line 22 ('Muya ... is currently still JavaScript'), line 28 (core refactoring note); packages/website/content/docs/dev/TYPESCRIPT.md references src/muya/.",
+      "implementation_evidence": "pnpm workspace with packages/desktop (Electron app), packages/muya (@muyajs/core TS rewrite), packages/muyajs (legacy JS); packages/desktop/package.json depends on both @marktext/muyajs and @muyajs/core (workspace:*).",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "The answer is highly accurate and evidence-backed. I verified the load-bearing claims against the current checkout: config.ts:8-21 has contextIsolation:true/sandbox:true/nodeIntegration:false (so the CLAUDE.md contradiction it flags is real, and it correctly resolves it to implementation + E2E canary); package.json lines 62-63 show the dual @marktext/muyajs + @muyajs/core dependency; IFileState (files.ts:68-91) indeed mixes cursor/muyaIndexCursor/blocks/history and a function-bearing notification action; WindowManager holds the watcher (windowManager.ts:91,113) and EditorWindow carries _openedRootDirectory/_openedFiles and emits watcher-* via ipcMain.emit (editor.ts:396-536, plus many other ipcMain.emit call sites); ipc.ts has pervasive unknown, legacy un-prefixed channels, and response channels; muya-core.d.ts is a permissive hand-written declaration; line counts match exactly (App 853, EditorWindow 645, store/editor.ts 2102, editor.vue 2133); PARITY_SCOREBOARD.md:69 shows PG14 as the sole remaining test.fail(); desktop CI workflows (build/test/e2e/lint) all paths-ignore packages/muya; the E2E spec list has no multi-window routing spec; tabs.spec.ts reaches into the Pinia store via __vue_app__; writeFile uses write-file-atomic (durable/atomic save); bufferedState.ts exists as the crash-recovery buffer; c907b29c is confirmed as the flush-pending-edits (dropped last keystroke) fix from the git-status snapshot. The remaining git hashes (fa84fc00, b9409bc9, ab88a70a, efcaf0c2, d2f0028e, 6c23b1ba, ac273f46) could not be independently replayed from the shallow reflog, but the substantive claims they support are all corroborated by current code/docs, so I do not treat them as errors. One minor imprecision: it calls the mt::response-* channels 'dynamic', but they are statically enumerated; this does not affect the recommendation. The two documentation/implementation conflicts it surfaced (CLAUDE.md sandbox note; ARCHITECTURE.md/TYPESCRIPT.md legacy src/ layout) are explicitly flagged and resolved in the answer, so unresolved_decision_conflict_count is 0 and the accuracy gate passes. All nine rubric dimensions meet the full-credit signal: scope/confidence are explicit, evidence is cited and distinguished by strength, friction explains spread, quality attributes are ranked with constraints and downstream verification, three options include the status quo with cost/risk/rollback/consequences, recommendation follows from evidence, migration is incremental and reversible, verification names concrete commands/failure modes, and no project facts are smuggled into universal rules."
+}

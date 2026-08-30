@@ -1,0 +1,111 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 1,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 17,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron 桌面应用；packages/desktop 使用 Electron/electron-builder，目标为 Windows、macOS 和 Linux。",
+    "runtime_boundaries_identified": [
+      "Electron main 进程负责窗口、文件系统、watcher、shell 生命周期和 buffer 持久化。",
+      "preload/contextBridge 是 sandboxed renderer 与 main 之间的 IPC 边界，暴露 window.electron/window.fileUtils。",
+      "renderer 内部包含 Pinia 文件状态、@muyajs/core Muya 编辑器和 CodeMirror 源码模式，并通过适配层协调内容、selection、history。"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 5,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "仓库存在一个可引用的 Tauri 适配器。",
+      "repository_evidence": "packages/desktop/package.json、electron.vite.config.ts 和 main 源码均显示 Electron；当前树中没有可核验的 Tauri 依赖、源码或配置。",
+      "explanation": "Electron 的当前平台判断正确，但 Tauri 适配器这一旁支声明缺乏仓库证据。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "scope_and_classification",
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "main 侧有 23 个文件、108 处裸 ipcMain.on/handle 注册。",
+      "repository_evidence": "对当前 packages/desktop/src/main 的同类检索得到 23 个文件、111 处注册。",
+      "explanation": "数量有小幅偏差，不影响其关于 main 侧未绑定契约类型的结论。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "verification"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Vitest unit 数为 112。",
+      "repository_evidence": "当前 packages/desktop/test/unit/specs 有 50 个 spec 文件；检索得到 280 个 it 和 7 个 test 语句，无法复现 112。",
+      "explanation": "测试存在且覆盖面判断基本成立，但精确数量不受当前树支持。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "verification"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "当前只有一个活动编辑器引擎。",
+      "repository_evidence": "components/editorWithTabs/index.vue 同时挂载 editor.vue 和 sourceCode.vue；sourceCode.vue 使用 CodeMirror，Muya 是另一编辑表面。",
+      "explanation": "更准确的说法应是只有一个可替换的富文本引擎；将 CodeMirror 源码模式排除在“引擎”之外需要明确限定。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "options",
+        "recommendation",
+        "generalization"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Electron 是三进程模型中的 main、preload、renderer 三个进程。",
+      "repository_evidence": "electron.vite.config.ts 分别构建 main、preload、renderer，但 Electron preload 脚本运行在 renderer 进程的隔离上下文中，并非独立进程。",
+      "explanation": "运行时边界识别基本正确，但“进程”术语不精确。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "scope_and_classification",
+        "evidence"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "根 CLAUDE.md 将 editor/preferences 窗口描述为 contextIsolation:false、nodeIntegration:true，并引用 config.js。",
+      "documentation_evidence": "CLAUDE.md 架构段的旧配置描述。",
+      "implementation_evidence": "packages/desktop/src/main/config.ts 为两个窗口设置 contextIsolation:true、sandbox:true、nodeIntegration:false；使用的是 config.ts。",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "website ARCHITECTURE.md/TYPESCRIPT.md 描述旧的根 src、根 out、src/muya 和 JavaScript Muya 布局。",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md 和 TYPESCRIPT.md 使用旧目录及旧引擎描述。",
+      "implementation_evidence": "当前 pnpm monorepo 使用 packages/desktop、packages/muya，桌面源码导入 @muyajs/core，且无活跃 muya/lib 导入。",
+      "state": "historical",
+      "decision_relevant": true
+    },
+    {
+      "claim": "IPC 文档暗示 renderer↔main 契约已在两侧获得编译期保护。",
+      "documentation_evidence": "packages/website/content/docs/dev/IPC.md 将 typed bridge 描述为可阻止错误 channel/arity/return。",
+      "implementation_evidence": "shared/types/ipc.ts 提供 channel maps，但 main 侧 23 个文件仍直接注册裸 ipcMain.on/handle，未绑定这些 maps。",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "评审对现状摩擦、质量属性、三种方案、推荐方向和可回滚迁移路线覆盖完整，故除 Evidence 外各维度满分。Evidence 扣分源于原请求明确要求核对 Git 历史，而答案说明未能运行 git log。列出的事实偏差均为 minor；实现证据已用于裁决文档漂移，且答案没有把 legacy 引擎或不存在的 Tauri 平台当作当前平台，因此 accuracy gate 通过。"
+}

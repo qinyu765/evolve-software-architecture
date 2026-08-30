@@ -1,0 +1,93 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 1,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 1,
+    "migration": 1,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 15,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron desktop application (Electron ~42.1.0) targeting Windows, macOS, and Linux",
+    "runtime_boundaries_identified": [
+      "Electron main process for filesystem, windows, dialogs, and shell capabilities",
+      "Sandboxed preload/contextBridge boundary",
+      "Renderer process hosting Vue/Pinia, Muya, and CodeMirror",
+      "Renderer↔main IPC contract and internal ipcMain event seam",
+      "@muyajs/core engine versus desktop adapter",
+      "Legacy @marktext/muyajs package and aliases as non-current residue"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 1,
+    "minor_error_count": 2,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": false
+  },
+  "factual_errors": [
+    {
+      "severity": "material",
+      "claim": "The main_renderer/* alias in packages/desktop/tsconfig.base.json is unused and can be deleted as dead code.",
+      "repository_evidence": "packages/desktop/vitest.config.ts:15-21 maps main_renderer; packages/desktop/test/unit/specs/keybinding-reload.spec.ts:28,33 and write-file-atomic.spec.ts:14 import it, with many additional unit specs using the alias.",
+      "explanation": "Deleting the alias as proposed would break the unit-test/typecheck surface unless tests and config are migrated first; this invalidates the pure-deletion rationale and the first migration step.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "recommendation",
+        "migration",
+        "verification"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Closing the preload bridge is approximately a 50-call-site migration.",
+      "repository_evidence": "A repository search finds 136 window.electron.ipcRenderer occurrences across 25 renderer files, or 159 including tests.",
+      "explanation": "The estimate undercounts the mechanically affected call sites, understating cost and migration risk, although the facade recommendation remains viable.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "quality_attributes",
+        "migration"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The listed buffer-store-durable, flush-before-save, and dangerous-executable-file specs are part of the desktop e2e suite.",
+      "repository_evidence": "Those files are under packages/desktop/test/unit/specs/; only context-isolation.spec.ts and xss.spec.ts among the listed examples are under packages/desktop/test/e2e/.",
+      "explanation": "The tests exist, but their suite classification is inaccurate and makes the coverage description imprecise.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "verification"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "CLAUDE.md says editor and preferences windows use contextIsolation:false and nodeIntegration:true, referring to config.js.",
+      "documentation_evidence": "CLAUDE.md:241-245.",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:8-20 and :29-41 set contextIsolation:true, sandbox:true, and nodeIntegration:false; config.js is absent.",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "The website ARCHITECTURE document describes the pre-monorepo src layout, a JavaScript Muya engine, and a pending core refactor.",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md:5-18 and :22-28.",
+      "implementation_evidence": "Root package.json and pnpm-workspace.yaml define the monorepo; packages/muya/package.json is @muyajs/core; desktop imports @muyajs/core in editor.vue and utility modules.",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "The TypeScript developer document still describes src/muya and muya/* as the current legacy engine boundary.",
+      "documentation_evidence": "packages/website/content/docs/dev/TYPESCRIPT.md:3-12 and :43-56, last updated before the current engine migration.",
+      "implementation_evidence": "Desktop renderer and utility modules import @muyajs/core; the old runtime import search is empty, while the old package remains only as a dependency, alias, and declaration.",
+      "state": "historical",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "The review is evidence-rich, compares viable options, explains friction and quality trade-offs, and gives a staged rollback-oriented plan. However, it materially misidentifies main_renderer/* as unused even though unit tests depend on it, making the proposed dead-code deletion unsafe as written. It also understates bridge call sites and misclassifies several unit tests. Documentation conflicts are identified and resolved against current implementation, so unresolved_decision_conflict_count is 0; the accuracy gate fails because of the material error."
+}

@@ -1,0 +1,58 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (apps/stage-tamagotchi: electron-vite, electron-builder, BrowserWindow/main-process code)",
+    "runtime_boundaries_identified": [
+      "Electron main process vs renderer + shared preload (BrowserWindow + sandbox:false + hash route)",
+      "Plugin logic executes in the Electron main process via dynamic import() with full Node/Electron privilege",
+      "Plugin UI isolated in renderer via loopback HTTP + cookie session + iframe origin isolation",
+      "Unimplemented plugin runtime transports (websocket / node-worker / web-worker / electron) as the deferred isolation boundary",
+      "In-process lifecycle services (channel-server, http-server) vs subprocess sidecars (MCP stdio, Godot stage)",
+      "PluginRuntime literals electron/node/web with entrypoints.{electron,node,web,default}"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 2,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "代码里三处 TODO 明说\"等 eventa 真正支持 window-namespaced 分发后移除\"",
+      "repository_evidence": "grep over apps/stage-tamagotchi/src/main finds ~15 sites with the same TODO + ipcMain.setMaxListeners(0/100) workaround: main/index.ts:55-58, windows/{onboarding,about,widgets,caption,inlay,dashboard,settings,chat,main}/..., desktop-overlay/rpc/index.electron.ts, shared/referenced-window.ts.",
+      "explanation": "The workaround and TODO are real and correctly described, but the count \"three\" is wrong by about 5x; the debt is larger than stated. It does not change the recommendation (fix eventa namespacing or remove patches).",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "server-channel 和 http-server 都通过 injeca lifecycle.appHooks.onStart/onStop + mutex 管理，且 S4 称 server-channel / http-server / mcp 已经一致遵循同一生命周期契约",
+      "repository_evidence": "channel-server uses lifecycle.appHooks.onStart/onStop + Mutex (channel-server/index.ts:369-405); http-server uses createHttpServerManager with its own Mutex and ordered/reversed start-stop, no appHooks (http-server/index.ts:22-38, server-manager/index.ts:19-51); mcp-servers uses onAppBeforeQuit + applyAndRestart, no appHooks/mutex (mcp-servers/index.ts:441-459).",
+      "explanation": "The lifecycle mechanism is not uniform across the three services; the answer over-generalizes a single hook pattern. Directionally the services each have a clear lifecycle, so the recommendation (document/lock the lifecycle contract) is unaffected.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "quality_attributes"
+      ]
+    }
+  ],
+  "documentation_drift": [],
+  "rationale": "The answer is exceptionally well-grounded: I verified the central security claim (permissionResolver defined at plugin-sdk/src/plugin-host/shared/types.ts:365, consumed with a ?? manifest.permissions fallback at core.ts:250-255, but the app constructs new ExtensionHost({ runtime: 'electron' }) without a resolver at apps/stage-tamagotchi/src/main/services/airi/plugins/host/index.ts:236), the same-process load path (await import(entrypoint) in runtimes/node/loaders/fs.ts:72-76), the stubbed node/web transports, the two renderer inputs (electron.vite.config.ts:100-105), the per-window injeca wiring (main/index.ts:171-258), the ~3009-line hardcoded providerMetadata dict (providers.ts:352), and the hand-duplicated eventa plugin types (shared/eventa/index.ts:204-247). The three-option comparison includes the status quo, the recommendation (progressive contract lock before isolation) follows directly from the evidence, and the M0-M4 migration is incremental, reversible, and gated by concrete commands. Two minor inaccuracies (setMaxListeners TODO count ≈15 not 3; lifecycle hooks are not uniform across channel-server/http-server/mcp) do not alter the recommendation. Current desktop platform is Electron (stage-tamagotchi); the legacy Tauri crates/ directory is absent from this checkout and the answer correctly treats Electron as current, never mislabeling the legacy platform. Score 18/18; accuracy gate passes (0 material errors, 0 unresolved decision-relevant conflicts)."
+}

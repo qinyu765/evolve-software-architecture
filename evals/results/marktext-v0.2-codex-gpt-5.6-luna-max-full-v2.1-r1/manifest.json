@@ -1,0 +1,328 @@
+{
+  "schema_version": 1,
+  "case": {
+    "id": "marktext-v0.2-baseline",
+    "sha256": "81419bc64ffde51790b2990e5ec66e49be41e5b9a8dce0609d62d60bec20709f"
+  },
+  "repository": {
+    "name": "marktext/marktext",
+    "url": "https://github.com/marktext/marktext",
+    "commit": "e52106fd1cdcbd33c1258b7b0cdc7013c4c5d86c",
+    "scope": "packages/desktop"
+  },
+  "skill": {
+    "name": "evolve-software-architecture",
+    "url": "https://github.com/qinyu765/evolve-software-architecture",
+    "version": "v0.1.2",
+    "commit": "12ae54160ece0ee16f837226e1cd936c980b7c46"
+  },
+  "contract": {
+    "rubric": {
+      "name": "architecture-review-v2.1.md",
+      "sha256": "64489b2290d24f0ae95fdabe14abcf34a4edbf6f7dcc044a65ed3034ec3c3b4e"
+    },
+    "schema": {
+      "name": "architecture-review-v2.1.schema.json",
+      "sha256": "e5609858147c7005cf786d059abe4d402d48271ed45f6701ee1a9c519bf3c8a6"
+    }
+  },
+  "profile": {
+    "profile_id": "codex-gpt-5.6-luna-max",
+    "runtime": "codex",
+    "cli_version": "0.144.4",
+    "model": "gpt-5.6-luna",
+    "model_argument": "gpt-5.6-luna",
+    "configuration_manager": null,
+    "reasoning_effort": "max",
+    "call_timeout_seconds": 1800,
+    "ephemeral": true,
+    "sandbox": "read-only",
+    "max_concurrency": 3,
+    "repetitions": 3,
+    "phases": "all"
+  },
+  "planned_calls": 30,
+  "run_id": "9f49ed05f08b496eabfc4af436d799a5",
+  "started_at": "2026-08-25T08:42:14.510619+00:00",
+  "completed_at": "2026-08-25T11:21:54.277040+00:00",
+  "results": [
+    {
+      "id": "behavior-control-r1",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "behavior-control-r2",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "behavior-control-r3",
+      "phase": "behavior",
+      "variant": "control",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "behavior-treatment-r1",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "behavior-treatment-r2",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "behavior-treatment-r3",
+      "phase": "behavior",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-local-rename-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-local-rename-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-local-rename-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-local-style-fix-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-local-style-fix-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-local-style-fix-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-routine-dependency-patch-r1",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-routine-dependency-patch-r2",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-negative-routine-dependency-patch-r3",
+      "phase": "routing",
+      "variant": "negative",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-desktop-boundaries-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-desktop-boundaries-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-desktop-boundaries-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-desktop-evolution-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-desktop-evolution-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-desktop-evolution-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-ipc-contract-r1",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-ipc-contract-r2",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "routing-positive-ipc-contract-r3",
+      "phase": "routing",
+      "variant": "positive",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": ""
+    },
+    {
+      "id": "score-control-r1",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r1"
+    },
+    {
+      "id": "score-control-r2",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r2"
+    },
+    {
+      "id": "score-control-r3",
+      "phase": "score",
+      "variant": "control",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-control-r3"
+    },
+    {
+      "id": "score-treatment-r1",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 1,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r1"
+    },
+    {
+      "id": "score-treatment-r2",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 2,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r2"
+    },
+    {
+      "id": "score-treatment-r3",
+      "phase": "score",
+      "variant": "treatment",
+      "repetition": 3,
+      "success": true,
+      "attempts": 1,
+      "error": "",
+      "source_id": "behavior-treatment-r3"
+    }
+  ],
+  "skipped": [],
+  "observed_models": []
+}

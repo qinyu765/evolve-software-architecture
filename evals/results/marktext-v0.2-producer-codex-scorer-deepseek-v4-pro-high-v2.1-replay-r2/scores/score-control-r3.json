@@ -1,0 +1,55 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "packages/desktop (Electron 42 app) whose renderer consumes @muyajs/core from packages/muya (TypeScript rewrite) as its editor engine; legacy packages/muyajs (@marktext/muyajs, JavaScript) survives only as a transitional shim via the muya alias and ambient declarations",
+    "runtime_boundaries_identified": [
+      "main/preload/renderer security boundary (sandbox, contextBridge, sender-derived window routing)",
+      "window/session/tab/path identity separation",
+      "file-workflow semantics (open/save/saveAs/rename/move/reload/close invariants)",
+      "editor host boundary (markdown/cursor/capability inputs; content/selection/history/saved-state outputs)"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "gate_pass": true,
+    "material_error_count": 0,
+    "minor_error_count": 0,
+    "unresolved_decision_conflict_count": 0
+  },
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "factual_errors": [],
+  "documentation_drift": [
+    {
+      "claim": "PG14 remains an xfail parity gap",
+      "documentation_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md:10 and :69 state 'PG14 alone remains xfail' with a test.fail() mechanism",
+      "implementation_evidence": "packages/desktop/test/e2e/parity-source-undo-saved.spec.ts:73-98 declares PG14 'FIXED' and asserts it with plain passing test() blocks",
+      "state": "resolved",
+      "decision_relevant": false
+    },
+    {
+      "claim": "Architecture docs describe a root src/ tree and a JavaScript Muya backend",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md:12-16 lists src/{common,main,muya,renderer} and :22 says Muya is 'currently still JavaScript'",
+      "implementation_evidence": "root has no src/ (code lives under packages/desktop/src); editor.vue:113 imports from @muyajs/core and packages/muya is the TypeScript engine",
+      "state": "historical",
+      "decision_relevant": false
+    },
+    {
+      "claim": "Editor and preferences windows use contextIsolation:false + nodeIntegration:true",
+      "documentation_evidence": "CLAUDE.md architecture section states the preload bridge note with contextIsolation:false / nodeIntegration:true",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:12-19 sets contextIsolation:true, sandbox:true, nodeIntegration:false (webSecurity:false), and context-isolation.spec.ts asserts those values",
+      "state": "resolved",
+      "decision_relevant": false
+    }
+  ],
+  "rationale": "The answer is a well-evidenced, decision-ready review. I spot-checked every load-bearing claim against the cited sources: pnpm monorepo layout (package.json, pnpm-workspace.yaml), dual editor-engine dependencies and legacy shims (desktop package.json, muya-core.d.ts, muya.d.ts, electron.vite.config.ts), the sandboxed security boundary (config.ts, preload/index.ts, app/index.ts webview/navigation policy, context-isolation.spec.ts), WindowManager's coupled responsibilities, the BrowserWindow.id vs durable buffer id split (editor.ts:139-145), the cross-layer file workflow and the save/save-as TODO (file.ts:36, editor store FILE_SAVE), the main-side file semantics (filesystem/index.ts, markdown.ts, watcher.ts), editor.vue adapter logic (dual history, adaptSelectionChange, json-change), the permissive IPC contract and void-vs-boolean mismatch (ipc.ts:85 vs editorBufferStore/index.ts:187-198), and IFileState mixing UI/engine/document state (files.ts:62-91). All verified. The answer also correctly flagged three documentation/implementation disagreements (ARCHITECTURE.md describing the old root-src/JS-Muya layout; CLAUDE.md's stale security-note; PARITY_SCOREBOARD.md claiming PG14 is xfail while the spec is fixed) and resolved each in favor of current implementation/tests rather than relying on stale docs. The only unverifiable specifics are exact git commit messages/line counts for 565bfcdc, efcaf0c2, d2f0028e, 6c23b1ba, ac273f46 (git is not runnable in this session and objects live outside the checkout); c907b29c is independently confirmed as the flush-before-save fix, and the structural narrative those hashes support is confirmed by current code and PARITY_SCOREBOARD.md provenance. None of this changes the recommendation. Options include status quo, the recommended incremental facade/adapter, and a main-owned Workspace Kernel; the recommendation follows from the verified evidence, and the five-step migration is incremental, observable, and reversible with concrete verification per step. No material or minor factual errors found; gate passes."
+}

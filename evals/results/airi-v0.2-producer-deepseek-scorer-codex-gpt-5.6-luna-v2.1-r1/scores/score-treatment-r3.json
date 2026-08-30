@@ -1,0 +1,103 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 1,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 17,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron-based Stage Tamagotchi desktop app in apps/stage-tamagotchi, packaged for Windows/macOS/Linux.",
+    "runtime_boundaries_identified": [
+      "Electron main process",
+      "preload bridge",
+      "renderer and hash-routed windows",
+      "in-process ExtensionHost plugin runtime",
+      "embedded server-runtime WebSocket service",
+      "standalone server-runtime process entrypoint",
+      "remote WebSocket extension peers",
+      "MCP stdio child processes",
+      "Godot sidecar process"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 1,
+    "minor_error_count": 4,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": false
+  },
+  "factual_errors": [
+    {
+      "severity": "material",
+      "claim": "The answer treats duplicated shared/eventa and stage-ui snapshot/debug types as the public third-party plugin contract and recommends re-exporting them from plugin-protocol or plugin-sdk.",
+      "repository_evidence": "PluginManifestSummary, PluginRegistrySnapshot, and PluginHostDebugSnapshot are not exported from packages/plugin-sdk or packages/plugin-protocol; they are app-local types in apps/stage-tamagotchi/src/shared/eventa and packages/stage-ui/src/stores/devtools/plugin-host-debug.ts. Public plugin examples depend on plugin-sdk/plugin-protocol or server-sdk.",
+      "explanation": "This misidentifies the boundary whose stability matters to third-party plugins and makes Step 1 of the proposed migration technically inapplicable as written.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction",
+        "recommendation",
+        "migration"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "There are 15 window modules and adding a window necessarily changes the main composition root and three or four locations.",
+      "repository_evidence": "There are 14 actual window directories when windows/shared is excluded. The inlay window is set up directly from tray code, and dashboard is not registered in main/index.ts.",
+      "explanation": "The composition-root friction is real for many windows, but the universal claim and count are overstated.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "createRequestWindowEventa is a general window factory.",
+      "repository_evidence": "apps/stage-tamagotchi/src/shared/eventa/index.ts:97-108 creates an Eventa request-contract object. The BrowserWindow reusable factory is libs/electron/window-manager/reusable.ts.",
+      "explanation": "The answer conflates an IPC contract factory with the actual reusable BrowserWindow abstraction.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "server-runtime discards remote permissions, configSchema, and dependencies.",
+      "repository_evidence": "server-runtime stores only module name and identity in its registry, and does not enforce permissions, but extension:announce and extension:module:announce forward the original event.data to peers.",
+      "explanation": "The security gap is valid, but “discards” is too broad; the fields are not retained or enforced locally but are forwarded on the event path.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "quality_attributes"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "The registry migration will reduce adding a window to at most two changed files.",
+      "repository_evidence": "A registry can remove composition-root edits, but a new window may still require its window module, route, renderer contract, or Eventa contract depending on the window type.",
+      "explanation": "This completion threshold is not established by the repository and is too strong as a general criterion.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "migration",
+        "verification"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "Older documentation contains Tauri-era desktop architecture context.",
+      "documentation_evidence": "docs/content/en/blog/Devlog-2025.10.20/index.md describes the Tauri-to-Electron migration.",
+      "implementation_evidence": "apps/stage-tamagotchi/package.json, electron.vite.config.ts, and current desktop documentation use Electron; crates is legacy.",
+      "state": "historical",
+      "decision_relevant": false
+    }
+  ],
+  "rationale": "The review is unusually well evidenced and compares viable options with explicit trade-offs, rollback paths, and verification. Its main defect is architectural classification: internal desktop IPC/debug snapshot duplication is presented as the public third-party plugin boundary, making the proposed contract-convergence migration materially misdirected. Several smaller claims overcount windows or overstate how universally the composition root and remote declarations behave."
+}

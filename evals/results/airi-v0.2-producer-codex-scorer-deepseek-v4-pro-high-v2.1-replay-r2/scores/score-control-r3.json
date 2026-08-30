@@ -1,0 +1,35 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron desktop app (apps/stage-tamagotchi; electron-vite build + electron-builder; package @proj-airi/stage-tamagotchi)",
+    "legacy_platform_treated_as_current": false,
+    "runtime_boundaries_identified": [
+      "Electron main process — in-process ExtensionHost runtime ('electron') via FileSystemLoader dynamic import (no process/JS sandbox)",
+      "Electron renderer/preload — host-owned iframe plugin UI with typed Eventa message bridge and sessionized static-asset URLs",
+      "Server Channel (server-runtime/server-sdk) — WebSocket external-process protocol boundary with auth token, peer, heartbeat, routing, reconnect",
+      "Godot sidecar — spawned child process with its own WebSocket bridge, token auth, ready/health, stop/restart lifecycle",
+      "MCP stdio servers — spawned subprocesses over stdio transport with separate lifecycle",
+      "Declared-but-unimplemented plugin transports (websocket / node-worker / web-worker / electron) in node runtime — all throw 'not implemented'"
+    ]
+  },
+  "accuracy": {
+    "gate_pass": true,
+    "material_error_count": 0,
+    "minor_error_count": 0,
+    "unresolved_decision_conflict_count": 0
+  },
+  "dimensions": {
+    "current_friction": 2,
+    "evidence": 2,
+    "generalization": 2,
+    "migration": 2,
+    "options": 2,
+    "quality_attributes": 2,
+    "recommendation": 2,
+    "scope_and_classification": 2,
+    "verification": 2
+  },
+  "documentation_drift": [],
+  "factual_errors": [],
+  "rationale": "The answer is a thorough, evidence-grounded architecture review of the current Electron desktop app. I independently verified every material claim against implementation: the Injeca composition root (main/index.ts), in-process ExtensionHost with FileSystemLoader dynamic import (no JS sandbox), the plugin permission system limiting kit/API rather than providing process isolation, per-window service installation, setMaxListeners(0) in RPC/preload files, module-level lifecycle hooks with no unregister, reusable vs referenced window managers, the WebSocket Server Channel (auth/peer/heartbeat/routing/reconnect), Godot and MCP as subprocesses with different protocols, the 5-kind transport union with only in-memory implemented in node runtime, and the cited test files (index.test.ts, core.test.ts). The three options (status quo, dual-runtime+broker, full isolated host) satisfy the comparison requirement with explicit quality-attribute trade-offs, cost/risk/rollback/no-change consequences, and a 5-phase incremental, observable, reversible migration with concrete verification criteria. Recommendation B follows from the stated drivers and verified evidence. No factual errors and no documentation/implementation conflicts were found, so the accuracy gate passes. Two cosmetic notes, neither decision-relevant: citations use placeholder/mismatched checkout paths (every cited file still resolves to matching content), and 'Server Channel 已经是本仓库的外部进程边界' is slightly loose wording since the WS server is embedded in the Electron main process and reachable by external peers — the answer uses the boundary correctly for its cross-process recommendation.",
+  "total": 18
+}

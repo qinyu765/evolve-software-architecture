@@ -1,0 +1,58 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron 42 three-process desktop app in packages/desktop (main/preload/renderer, sandboxed renderer via contextBridge); editor engine @muyajs/core (packages/muya TS rewrite) with legacy @marktext/muyajs (packages/muyajs) still aliased and being retired.",
+    "runtime_boundaries_identified": [
+      "main/preload/renderer process boundary (main owns OS/files/watcher/BrowserWindow/native menus; renderer owns UI/tabs/DOM editor; renderer must not use Electron/Node directly, only typed sender-scoped capability)",
+      "Window identity and routing (main authoritative for window lifecycle and open-path routing; BrowserWindow.id as transient transport id; WindowSessionId vs buffer UUID vs TabId)",
+      "File persistence (canonical path, encoding/BOM, line endings, atomic durable save, external-change/conflict semantics owned by main file service)",
+      "Document state (separate file content/metadata from view state, cursor, undo stack; IFileState/blocks not to become a cross-process general model)",
+      "Editor engine (@muyajs/core stays DOM/browser-side and Electron-free; src/index.ts public entrypoint; OT/block tree/DOM/engine history must not cross IPC)",
+      "Testing boundary (muya package tests engine; desktop unit/E2E tests host wiring; cross-boundary behavior tested on both sides)",
+      "Future Electron shell capability grouping (window/shell/file-dialog/filesystem-document/clipboard) with legacy mt::fs::* kept only as a compatibility surface"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "gate_pass": true,
+    "material_error_count": 0,
+    "minor_error_count": 0,
+    "unresolved_decision_conflict_count": 0
+  },
+  "dimensions": {
+    "current_friction": 2,
+    "evidence": 2,
+    "generalization": 2,
+    "migration": 2,
+    "options": 2,
+    "quality_attributes": 2,
+    "recommendation": 2,
+    "scope_and_classification": 2,
+    "verification": 2
+  },
+  "documentation_drift": [
+    {
+      "claim": "CLAUDE.md states editor and preferences windows use contextIsolation: false + nodeIntegration: true, referencing packages/desktop/src/main/config.js.",
+      "decision_relevant": true,
+      "documentation_evidence": "CLAUDE.md architecture section: 'editor and preferences windows use contextIsolation: false + nodeIntegration: true (see packages/desktop/src/main/config.js)'.",
+      "implementation_evidence": "packages/desktop/src/main/config.ts lines 11-19 and 34-40 set contextIsolation: true, sandbox: true, nodeIntegration: false, webSecurity: false for both window types; no config.js file exists.",
+      "state": "resolved"
+    },
+    {
+      "claim": "ARCHITECTURE.md still describes Muya as currently JavaScript and requiring core refactoring.",
+      "decision_relevant": true,
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md line 22 ('Muya, the editor backend, is currently still JavaScript') and line 28 ('Muya requires a core refactoring...').",
+      "implementation_evidence": "packages/muya is a TypeScript rewrite consumed as @muyajs/core; packages/muya/src/index.ts is the TS public entrypoint; editor.vue imports @muyajs/core.",
+      "state": "resolved"
+    },
+    {
+      "claim": "PARITY_SCOREBOARD.md says PG14 remains an expected failure (test.fail()), while the E2E source is now a plain passing test marked FIXED.",
+      "decision_relevant": true,
+      "documentation_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md line 69: 'PG14 | minor | ... | test.fail() | ❌ xfail (accept-defer)'.",
+      "implementation_evidence": "packages/desktop/test/e2e/parity-source-undo-saved.spec.ts lines 73-134: PG14 describe blocks use plain test with 'FIXED:' comments asserting single-undo behavior.",
+      "state": "resolved"
+    }
+  ],
+  "factual_errors": [],
+  "rationale": "The answer's cited evidence is accurate and current. Security config, preload surface, IPC permissiveness, dual-engine dependency and alias, WindowManager/EditorWindow buffer-UUID reasoning, main-side file/watcher semantics, renderer editor-store coupling, IFileState shape, editor.vue Muya `any` + synthetic history + replaceContent, and sourceCode handoff were all verified against the cited files. The two drift claims the answer explicitly makes (ARCHITECTURE.md Muya description; PG14 scoreboard vs E2E source) are confirmed exactly. The answer treats packages/muyajs as legacy and @muyajs/core as current, so it does not mistake the legacy platform for current. One supporting git-history claim (commit 565bfcdc being a directory move + root script proxy) could not be verified from this checkout because git objects are in an alternate object store and git is unavailable; it is not decision-critical. No false claims were found, so no factual errors are reported. The three documentation-vs-implementation drifts are all decision-relevant but were resolved by the answer preferring implementation/tests, leaving zero unresolved decision conflicts and a passing accuracy gate.",
+  "total": 18
+}

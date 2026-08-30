@@ -1,0 +1,55 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (apps/stage-tamagotchi; main process + renderer, Eventa IPC)",
+    "runtime_boundaries_identified": [
+      "In-process Electron main-process extension host (packages/plugin-sdk ExtensionHost; FileSystemLoader does `await import(entrypoint)` in the main process with no permissionResolver wired)",
+      "Out-of-process server channel (packages/server-runtime WebSocket on default port 6121; packages/server-sdk client used by services/ and plugins/)",
+      "plugin-sdk runtimes electron/node/web with only 'in-memory' transport implemented; websocket/node-worker transports throw 'not implemented'",
+      "Renderer<->main Eventa IPC namespace (eventa:invoke:electron:... / eventa:event:electron:...)",
+      "Background capability via a hidden BrowserWindow (windows/beat-sync show:false) plus tray keep-alive"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 2,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "documentation_drift": [],
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "main/index.ts:132-270 wires 14 window modules via injeca provide('windows:*'), each returning a manager",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/index.ts provides 12 windows:* entries (widgets, beat-sync, devtools:markdown-stress, onboarding, notice, about, chat, spotlight, settings, main, caption, desktop-overlay). The windows/ directory contains 14 module folders, but dashboard and inlay are not wired into index.ts, and beat-sync returns a BrowserWindow directly rather than a manager.",
+      "explanation": "The count mixes the directory population (14 modules) with what is actually wired in the composition root (12 providers), and 'each returns a manager' is imprecise for beat-sync. Does not change any recommendation.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "channel-server/index.ts:357-449 contains TLS certificate, pairing QR code, and config rollback",
+      "repository_evidence": "setupServerChannel is at lines 357-449, but the pairing QR payload is getServerChannelQrPayload (108-123), TLS certificate generation is generateCertificate/getOrCreateCertificate (297-355), and config rollback is inside createServerChannelService (476-505). All are in the same file but outside the cited 357-449 range.",
+      "explanation": "Line-range citation is imprecise; the substance (TLS, QR pairing, rollback all exist in this file) is correct. Does not affect any decision.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    }
+  ],
+  "rationale": "The answer is grounded in the current checkout and nearly every cited symbol/line range checks out. Verified: ExtensionManifestV1 at plugin-sdk/src/plugin-host/shared/types.ts:233-253 (apiVersion v1, kind, id, permissions, entrypoints); ExtensionHost two-layer permission and kit/binding/capability lifecycle in core.ts; Electron host constructed at host/index.ts:236 with `new ExtensionHost({ runtime: 'electron' })` and no permissionResolver, so core.ts:250-255 falls back to `permissionResolver?.() ?? manifest.permissions` (request-granted) — the security gap is real; FileSystemLoader `await import(entrypoint)` at runtimes/node/loaders/fs.ts:72-76; node/web runtimes throw 'not implemented' for websocket/node-worker; server-runtime createServer default port 6121 (server/index.ts:109); server-sdk client announce/authenticate/registry-sync/heartbeat/reconnect and superjson codec; channel-server TLS/QR/rollback; 6 services and 5 root plugins using server-sdk; extension.airi.json discovery + Valibot validation (registry.ts:62-165); eventa:invoke/event:electron naming and the hand-copied plugin types with TODO at capabilities.ts:42-44; desktop-overlay AIRI_DESKTOP_OVERLAY=1 gate and forced injeca.invoke at index.ts:244-258; beat-sync show:false. Current desktop is Electron; the legacy Tauri crates/ directory is absent from this checkout and the answer does not treat it as current. Two minor, non-decision-affecting imprecisions: the '14 window modules' count (12 are wired in index.ts) and the channel-server 357-449 line range for QR/rollback. No documentation-vs-implementation drift was found; the answer does not rely on stale documentation. The review covers all nine dimensions at full strength: it states confidence from maturity levels, cites evidence densely, explains friction (manual wiring, dual protocols, in-process third-party execution), ranks options A/B/C with quality-attribute trade-offs and rollback, and gives a concrete phase-0-3 migration with test commands and acceptance criteria. Gate passes (0 material errors, 0 unresolved decision conflicts).",
+  "total": 18
+}

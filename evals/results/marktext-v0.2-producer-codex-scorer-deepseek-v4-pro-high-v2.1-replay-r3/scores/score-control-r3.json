@@ -1,0 +1,48 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron 42 desktop shell (packages/desktop) whose renderer editor engine is @muyajs/core (packages/muya, TypeScript rewrite); the legacy packages/muyajs JavaScript engine (@marktext/muyajs, the muya/ alias) is retained only as a retiring dependency/alias with a few remaining call sites.",
+    "runtime_boundaries_identified": [
+      "Main/preload/renderer security boundary: contextIsolation: true, sandbox: true, nodeIntegration: false; renderer reaches main only through the typed contextBridge surface in preload/index.ts (config.ts, preload/index.ts, context-isolation.spec.ts).",
+      "Window/session/tab/path identity: ephemeral BrowserWindow.id vs durable buffer-store id (editor.ts) vs logical tab id vs normalized+resolved path key for comparison and watching.",
+      "File workflow semantics: loadMarkdownFile snapshot (markdown/encoding/BOM/EOL/trailing-newline) and atomic fsync+rename save with parent-dir recreation, plus watcher that separates dir-vs-file changes from own-save echoes (filesystem/markdown.ts, filesystem/index.ts, watcher.ts).",
+      "Editor host boundary inside the renderer: markdown + serialized cursor/capabilities in; content/selection/history signals out; engine block tree, OT ops, internal history and DOM references kept out of the file protocol (editor.vue adapter logic)."
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "gate_pass": true,
+    "material_error_count": 0,
+    "minor_error_count": 0,
+    "unresolved_decision_conflict_count": 0
+  },
+  "dimensions": {
+    "current_friction": 2,
+    "evidence": 2,
+    "generalization": 2,
+    "migration": 2,
+    "options": 2,
+    "quality_attributes": 2,
+    "recommendation": 2,
+    "scope_and_classification": 2,
+    "verification": 2
+  },
+  "documentation_drift": [
+    {
+      "claim": "Architecture documentation describes a pre-monorepo layout with a root src/ tree and a JavaScript Muya backend.",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md:12-15 lists a root src/ tree with src/muya; line 22 states Muya 'is currently still JavaScript'.",
+      "implementation_evidence": "Root package.json + pnpm-workspace.yaml define a pnpm monorepo with packages/desktop, packages/muya (TypeScript @muyajs/core), packages/muyajs, packages/website; packages/desktop/src/main/config.ts shows the Electron 42 shell; editor.vue imports @muyajs/core.",
+      "state": "resolved",
+      "decision_relevant": false
+    },
+    {
+      "claim": "Parity scoreboard states PG14 (source-mode undo) remains an expected failure (xfail).",
+      "documentation_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md:10: 'PG14 alone remains xfail (accept-defer — see its row)'.",
+      "implementation_evidence": "packages/desktop/test/e2e/parity-source-undo-saved.spec.ts:73-81 has a describe block marked FIXED with plain test() calls (no test.fail()) asserting the single-undo behavior, including a redo and block-type test.",
+      "state": "conflict",
+      "decision_relevant": false
+    }
+  ],
+  "factual_errors": [],
+  "rationale": "The answer's load-bearing claims were checked against implementation, configuration, tests, docs, and the visible portion of history. The monorepo layout, @muyajs/core runtime vs legacy @marktext/muyajs alias/dependency, Electron security flags (contextIsolation/sandbox/nodeIntegration/webSecurity:false), WindowManager coupling, BrowserWindow.id vs buffer-store id separation, file.ts TODO, FILE_SAVE full-state payload, loadMarkdownFile snapshot fields, write-file-atomic fsync+rename semantics, watcher own-save echo handling, IPC unknown/void-vs-boolean drift, IFileState mixing UI/engine state, editor.vue dual-history + adaptSelectionChange + json-change adaptation, muya README active-development notice, hand-written muya-core.d.ts, and the test references (context-isolation, flush-before-save, tabs, PARITY_SCOREBOARD, parity-source-undo-saved) all verified accurate. The answer correctly treated documentation as intent/historical where stale (ARCHITECTURE.md) and surfaced the PG14 scoreboard-vs-test conflict without presenting stale docs as current; neither drift changes the recommendation. Four specific older commit-hash attributions (565bfcdc, efcaf0c2, d2f0028e, 6c23b1ba/ac273f46) could not be independently re-verified in this session because git execution and the alternate object store were unavailable; the substantive facts they support (monorepo split, 15 parity gaps, engine migration touching editor code) were confirmed elsewhere and c907b29c is visible in HEAD history. No factual errors were found. The answer compares three options including the current shape, gives a clear evidence-grounded recommendation (progressive facade/adapter), and provides incremental, observable, reversible steps with concrete tests and failure modes. All nine dimensions earn full credit; total 18/18.",
+  "total": 18
+}

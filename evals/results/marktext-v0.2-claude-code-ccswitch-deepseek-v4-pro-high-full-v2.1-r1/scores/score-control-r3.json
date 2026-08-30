@@ -1,0 +1,67 @@
+{
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 2,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron 42 desktop app (packages/desktop), cross-platform win32/darwin/linux",
+    "runtime_boundaries_identified": [
+      "renderer sandbox / contextBridge webPreferences (config.ts: contextIsolation/sandbox/nodeIntegration)",
+      "typed IPC channel registry (shared/types/ipc.ts) plus preload generic bridge",
+      "BaseWindow subclass seam (WindowType/WindowLifecycle/BaseWindowEvents)",
+      "window dual-ID invariant (win.id vs bufferStoreInfo.id/restoreBufferId)",
+      "@muyajs/core src/index.ts single export hub with muya-core.d.ts type shielding",
+      "IFileState cross-process contract (shared/types/files.ts)",
+      "main-process atomic write durability (write-file-atomic + fsync)",
+      "ipcMain.emit internal channel seam (utils/internalIpc.ts)",
+      "common (pure) vs main (Node fs) vs preload (pathe) path-identity split"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "documentation_drift": [
+    {
+      "claim": "CLAUDE.md Architecture section states editor and preferences windows use 'contextIsolation: false + nodeIntegration: true (see packages/desktop/src/main/config.js)'",
+      "documentation_evidence": "Root CLAUDE.md, 'Architecture: Three-Process Electron Model' preload note",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:11-20 and :34-41 set contextIsolation:true, sandbox:true, nodeIntegration:false, webSecurity:false; no config.js exists (only config.ts)",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "阶段 3：IPC 载荷按通道收紧（决策 C）",
+      "repository_evidence": "IPC typing is presented as 决策 B in §3.2 ('决策 B：IPC 载荷类型化的节奏'); 决策 C in §3.3 is the window responsibility layering. §4 cites 决策 C for both stage 3 and stage 4.",
+      "explanation": "Internal cross-reference typo in the migration roadmap — stage 3 should cite 决策 B. The substance is unambiguous, so no architectural conclusion is affected.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "migration"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "IPC contract has '4 类通道 + ~150 条'",
+      "repository_evidence": "shared/types/ipc.ts defines roughly 180 entries (40 invoke + ~75 send + 2 sync + ~63 event).",
+      "explanation": "Rough magnitude understates the channel count by ~30, but the argument (large review surface for a big-bang typing pass) does not depend on the exact number.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "options"
+      ]
+    }
+  ],
+  "rationale": "The answer's load-bearing claims were verified against implementation, config, build files, and history and all hold: config.ts sandbox flags (contextIsolation:true, sandbox:true, nodeIntegration:false, webSecurity:false), dual engine dependencies (package.json:62-63) with zero runtime muya/lib or @marktext/muyajs imports (grep hits only muya.d.ts declarations and three comments), path-identity duplication (main fs.statSync inode fallback vs preload mt::paths::is-same-sync), internalIpc's ipcMain.emit dispatch and windowManager.ts:421-476 subscriptions, the win.id/bufferStoreInfo.id dual-ID invariant (editor.ts:139-147), the four-category IPC registry with deliberately permissive payloads (ipc.ts), and muya's src/index.ts export hub with BACKLOG OT-no-transport (line 152) and focusMode no-op (line 123). The one documentation/implementation conflict (CLAUDE.md's contextIsolation:false note) was correctly resolved in favor of config.ts. Only two minor blemishes remain: the roadmap mislabels stage 3's decision (决策 C instead of 决策 B) and '~150 条' undercounts the ~180 channels; neither changes any recommendation. No material errors and no unresolved decision-relevant conflicts, so the accuracy gate passes. The answer scores full marks across all nine dimensions: classification grounded in multiple independent signals, precise cited evidence that separates implementation from stale documentation, concrete friction (three 'same-meaning-different-representation' debts), explicit quality-attribute trade-offs with verification gates, two-to-three options per domain including status quo, a recommendation that follows from the evidence, and an incremental, observable, reversible migration path.",
+  "total": 18
+}

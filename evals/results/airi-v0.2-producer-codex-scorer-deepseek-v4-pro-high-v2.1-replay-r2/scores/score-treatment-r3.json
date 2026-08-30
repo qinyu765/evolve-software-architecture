@@ -1,0 +1,75 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (apps/stage-tamagotchi; electron.vite.config.ts + @moeru/eventa electron adapters; injeca composition root in src/main/index.ts)",
+    "legacy_platform_treated_as_current": false,
+    "runtime_boundaries_identified": [
+      "Electron Main process vs Vue Renderer (preload + Eventa boundary)",
+      "Extension host runtime inside Electron main (FileSystemLoader dynamic import, no OS-level isolation)",
+      "Eventa contract boundary (apps/stage-tamagotchi/src/shared/eventa/plugin domain modules)",
+      "Plugin SDK package boundary (packages/plugin-sdk, ExtensionHost core)",
+      "Backend capability boundaries: Server channel, Godot sidecar (child process + websocket), MCP stdio (child processes), plugin host",
+      "Per-window manager boundary (createReusableWindow / WidgetsWindowManager)",
+      "Persisted configuration state vs runtime session state (extensions/v1 manifests vs live sessions)"
+    ]
+  },
+  "accuracy": {
+    "gate_pass": true,
+    "material_error_count": 0,
+    "minor_error_count": 3,
+    "unresolved_decision_conflict_count": 0
+  },
+  "dimensions": {
+    "evidence": 2,
+    "generalization": 2,
+    "migration": 2,
+    "options": 2,
+    "quality_attributes": 2,
+    "recommendation": 2,
+    "scope_and_classification": 2,
+    "verification": 2,
+    "current_friction": 2
+  },
+  "documentation_drift": [
+    {
+      "claim": "AGENTS.md documents `crates/` as the legacy Tauri desktop and states the current desktop is Electron.",
+      "decision_relevant": false,
+      "documentation_evidence": "AGENTS.md: 'Legacy: `crates/` (old Tauri desktop; current desktop is Electron).'",
+      "implementation_evidence": "No `crates/` directory or Cargo.toml exists in the checkout; package.json workspaces list only packages/plugins/services/examples/docs/engines/apps; the active desktop is apps/stage-tamagotchi (Electron).",
+      "state": "historical"
+    }
+  ],
+  "factual_errors": [
+    {
+      "affected_dimensions": [
+        "evidence"
+      ],
+      "claim": "Multi-transport design cited as `docs/design/multi-transport.md:152`.",
+      "explanation": "The file exists at `packages/plugin-sdk/docs/design/multi-transport.md` (lines 152-155 show status 'Planned'); the cited path drops the `packages/plugin-sdk/` prefix. The substantive claim (transports unimplemented) is correct and confirmed by `runtimes/node/index.ts:29-35`.",
+      "repository_evidence": "packages/plugin-sdk/docs/design/multi-transport.md:152-155; packages/plugin-sdk/src/plugin-host/runtimes/node/index.ts:29-35",
+      "severity": "minor",
+      "source_conflict": false
+    },
+    {
+      "affected_dimensions": [
+        "evidence"
+      ],
+      "claim": "MCP lifecycle example cited as `apps/stage-tamagotchi/src/main/services/mcp-servers/index.ts:45`.",
+      "explanation": "The file is at `.../services/airi/mcp-servers/index.ts` (line 45 is `export interface McpStdioManager`); the cited path omits the `airi/` segment. Substance is correct.",
+      "repository_evidence": "apps/stage-tamagotchi/src/main/services/airi/mcp-servers/index.ts:45",
+      "severity": "minor",
+      "source_conflict": false
+    },
+    {
+      "affected_dimensions": [
+        "evidence"
+      ],
+      "claim": "Plugin identity/permission/resource-cleanup boundaries cited with `host.ts:1` (extensionId, sessionId, moduleId, manifest v1, permissions, capabilities, resource sessions and cleanup).",
+      "explanation": "host.ts substantiates extensionId/sessionId/moduleId and capability summaries, but manifest v1, permission grants, and resource-session cleanup are implemented in `packages/plugin-sdk/src/plugin-host/core.ts` (ExtensionSession, PermissionService, cleanupExtensionSession). The grouped claim is true across the codebase but the single anchor over-attributes.",
+      "repository_evidence": "apps/stage-tamagotchi/src/shared/eventa/plugin/host.ts; packages/plugin-sdk/src/plugin-host/core.ts:79-108, 547-557",
+      "severity": "minor",
+      "source_conflict": false
+    }
+  ],
+  "rationale": "The answer is an unusually well-grounded architecture review. I verified its load-bearing claims against the checkout: the Electron main composition root (src/main/index.ts injeca providers), in-process plugin loading via FileSystemLoader's direct `import(entrypoint)` (packages/plugin-sdk/.../fs.ts:72-76), permissions as in-process API access control rather than sandboxing (core.ts assertExtensionPermission/PermissionService), unimplemented multi-transport (runtimes/node/index.ts throws for websocket/node-worker/electron/web-worker; doc status 'Planned'), window listener friction (18+ `setMaxListeners` sites plus the 'window-namespaced contexts' TODO), lifecycle.ts hooks lacking unregister, and Godot/MCP as distinct in-process lifecycle managers with real subprocess/port/token/timeout logic. The recommended ports (`ExtensionRuntime`/`ExtensionHostService`, `WidgetsWindowManager`) correspond to existing symbols, and the `shared/eventa/plugin` domain split + barrel re-export claim is confirmed (index.ts:66-69 and the CapabilityDescriptor TODO at 218-220). Current desktop is Electron; the legacy Tauri `crates/` is documented in AGENTS.md but absent from this checkout, and the answer correctly treats Electron as current without touching legacy. Three minor citation imprecisions (two wrong sub-paths, one over-attributed anchor) do not affect any recommendation; no material errors were found. The three git history hashes cited as churn examples could not be independently verified (Bash disabled and the alternate object store was denied), but they are supporting evidence, not load-bearing. The review scores full marks on all nine dimensions: scope/confidence is stated from multiple signals, evidence distinguishes fact from inference, friction and quality-attribute trade-offs are explicit, three options (including status quo) are compared with cost/risk/rollback, the recommendation follows from the stated trust-model driver, and migration steps 0-5 are incremental, observable, and reversible with concrete completion criteria. Gate passes: 0 material errors, 0 unresolved decision-relevant conflicts.",
+  "total": 18
+}

@@ -1,0 +1,56 @@
+{
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron (apps/stage-tamagotchi; BrowserWindow/ipcMain/injeca main-process composition root)",
+    "runtime_boundaries_identified": [
+      "Electron main process (injeca composition root) vs renderer via preload/Eventa window contexts",
+      "Plugin host runs in-process in Electron main via FileSystemLoader import(); no OS-level isolation; external transports (websocket/node-worker/electron/web-worker) throw not-implemented",
+      "Godot stage sidecar child process + local WebSocket bridge (spawn, random port, token, ready/error/close/timeout)",
+      "MCP stdio child processes (StdioClientTransport, stopAll/applyAndRestart)",
+      "Built-in HTTP ServerManager (in-process lifecycle contract)",
+      "Per-window managers (widgets/main/chat/etc.) with per-window Eventa contexts and setMaxListeners(0) workarounds"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 2,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "documentation_drift": [],
+  "factual_errors": [
+    {
+      "severity": "minor",
+      "claim": "MCP background-lifecycle evidence is at apps/stage-tamagotchi/src/main/services/mcp-servers/index.ts:45",
+      "repository_evidence": "The file is actually at apps/stage-tamagotchi/src/main/services/airi/mcp-servers/index.ts; line 45 declares `export interface McpStdioManager` with stopAll/applyAndRestart lifecycle methods.",
+      "explanation": "Citation path is one directory level off (missing `airi`), but the cited symbol and line content are correct and the underlying claim holds.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "Multi-transport status evidence is at docs/design/multi-transport.md:152",
+      "repository_evidence": "The file is actually at packages/plugin-sdk/docs/design/multi-transport.md; lines 152-155 state `Planned` / `Baseline architecture validated; hardening required`, consistent with the node runtime throwing not-implemented errors for websocket/worker/electron transports.",
+      "explanation": "Citation path omits the `packages/plugin-sdk` prefix; the referenced line content and the conclusion (multi-transport incomplete) are correct.",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    }
+  ],
+  "rationale": "The answer is a thorough, evidence-grounded architecture review. I verified its central factual claims against the checkout: the Electron main process is the injeca composition root owning windows, server channel, HTTP server, Godot stage, MCP stdio, and the plugin host (main/index.ts:130-272); plugins load in-process via FileSystemLoader's `import()` (fs.ts:72-76) with API-level permission enforcement (core.ts PermissionDeniedError/PermissionService), not OS isolation; extensionId/sessionId/moduleId identity and per-session cleanup exist (core.ts); the node plugin runtime throws not-implemented for websocket/worker/electron transports (runtimes/node/index.ts:29-37) and the multi-transport doc marks the design 'Planned' (packages/plugin-sdk/docs/design/multi-transport.md:152-155); lifecycle.ts hooks are append-only with no unregister; and `setMaxListeners(0)` plus the 'window-namespaced contexts' TODO are present across many window files. GodotStageManager (spawn/random port/token/ready/error/close/timeout/stop), McpStdioManager (stopAll/applyAndRestart), ServerManager, WidgetsWindowManager, ExtensionHostService, and createReusableWindow all exist as named. Documentation and implementation agree on the not-yet-implemented transports, so there is no decision-relevant drift. The only inaccuracies are two citation paths that are one directory level off (mcp-servers missing `airi`, multi-transport.md missing the `packages/plugin-sdk` prefix); the cited symbols and line content resolve at those nearby paths, and neither affects the recommendation. The three git hashes cited as high-frequency-change evidence could not be confirmed from the accessible refs/logs (the commit-graph object store is an external alternate), but this is a non-decision-relevant supporting claim and does not change the conclusion. The recommendation (Option B: keep in-process embedding, stabilize ports/lifecycle/window boundaries, defer true externalization) follows from the verified drivers, compares three viable options including the current shape, and provides incremental, observable, reversible steps with concrete verification and rollback. The answer identifies Electron as the current platform and never treats the legacy Tauri desktop (documented in AGENTS.md under crates/, which no longer exists in the checkout) as current. Nine dimensions all meet full-credit signals; accuracy gate passes (0 material errors, 0 unresolved decision conflicts).",
+  "total": 18
+}

@@ -1,0 +1,56 @@
+{
+  "dimensions": {
+    "scope_and_classification": 1,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 17,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron via apps/stage-tamagotchi.",
+    "runtime_boundaries_identified": [
+      "Electron main process and renderer windows",
+      "In-process plugin host with manifest/session/module/binding/permission ownership",
+      "Eventa IPC and plugin protocol",
+      "Embedded HTTP/WebSocket server channel and standalone server-runtime",
+      "MCP stdio child processes",
+      "Godot child-process/WebSocket sidecar"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 1,
+    "minor_error_count": 0,
+    "unresolved_decision_conflict_count": 1,
+    "gate_pass": false
+  },
+  "factual_errors": [
+    {
+      "severity": "material",
+      "claim": "The answer says the current host only has setting-up/ready/failed/stopped and treats richer capability lifecycle as merely proposed.",
+      "repository_evidence": "ExtensionSession.phase is four-state in packages/plugin-sdk/src/plugin-host/core.ts:97, but core.ts:800-829 and runtimes/shared/services/dependencies.ts:16-119 implement announced/ready/degraded/withdrawn capabilities and waits; the Electron bridge and tests exercise them.",
+      "explanation": "The four states describe extension sessions, not the whole capability boundary. This overstates what is absent and affects the recommendation to defer the abstraction.",
+      "source_conflict": true,
+      "affected_dimensions": [
+        "evidence",
+        "recommendation",
+        "migration"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "Capability lifecycle is only a proposed future abstraction.",
+      "documentation_evidence": "packages/plugin-sdk/docs/design/capability-orchestration.md:84-106,182-193 describes the expanded module lifecycle and labels the document Proposed.",
+      "implementation_evidence": "Current code already provides a partial capability registry, capability-state IPC bridge, wait primitives, and tests; only the broader waiting-deps/module orchestration remains absent.",
+      "state": "conflict",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "The review is strong on options, trade-offs, staged migration, and verification. Scope/classification is implicit rather than explicitly stating repository type and confidence. The decision-relevant capability-lifecycle overstatement leaves the v2.1 accuracy gate failing."
+}

@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "contract": {
+    "rubric_sha256": "64489b2290d24f0ae95fdabe14abcf34a4edbf6f7dcc044a65ed3034ec3c3b4e",
+    "schema_sha256": "e5609858147c7005cf786d059abe4d402d48271ed45f6701ee1a9c519bf3c8a6"
+  },
+  "policy": "../scorer-policy-v2.1.md",
+  "cells": [
+    {
+      "case_id": "airi-v0.2-baseline",
+      "producer_profile_id": "claude-code-ccswitch-deepseek-v4-pro-high",
+      "scorer_profile_id": "claude-code-ccswitch-deepseek-v4-pro-high",
+      "canonical": {
+        "result_directory": "airi-v0.2-claude-code-ccswitch-deepseek-v4-pro-high-full-v2.1-r1",
+        "manifest_sha256": "85f17fa411792897ebc4b8dc2eab179ebb8caf7dd195f3c2cedf80fefbcb83f1"
+      },
+      "audit_only": []
+    },
+    {
+      "case_id": "airi-v0.2-baseline",
+      "producer_profile_id": "claude-code-ccswitch-deepseek-v4-pro-high",
+      "scorer_profile_id": "codex-gpt-5.6-luna-max",
+      "canonical": {
+        "result_directory": "airi-v0.2-producer-deepseek-scorer-codex-gpt-5.6-luna-v2.1-r1",
+        "manifest_sha256": "fe72388016ee2aeb4a2f9acfbeef93425acc55d7b3fc4de4e9979d14b4bbb69f"
+      },
+      "audit_only": []
+    },
+    {
+      "case_id": "airi-v0.2-baseline",
+      "producer_profile_id": "codex-gpt-5.6-luna-max",
+      "scorer_profile_id": "claude-code-ccswitch-deepseek-v4-pro-high",
+      "canonical": {
+        "result_directory": "airi-v0.2-producer-codex-scorer-deepseek-v4-pro-high-v2.1-replay-r2",
+        "manifest_sha256": "2a9af2d1220bfe1f332534c70072f6e8bdaa86d96a6989c6f8aa1523308ff296"
+      },
+      "audit_only": [
+        {
+          "result_directory": "airi-v0.2-producer-codex-scorer-deepseek-v4-pro-high-v2.1-r1",
+          "manifest_sha256": "f91fcc36e64db494ac702706271d12c3062bceba99c83fe551f9dbc67d7bbd38",
+          "reason": "Incomplete first cross-runtime attempt retained for its unknown-dimension contract rejection."
+        }
+      ]
+    },
+    {
+      "case_id": "airi-v0.2-baseline",
+      "producer_profile_id": "codex-gpt-5.6-luna-max",
+      "scorer_profile_id": "codex-gpt-5.6-luna-max",
+      "canonical": {
+        "result_directory": "airi-v0.2-codex-gpt-5.6-luna-max-full-v2.1-r1",
+        "manifest_sha256": "3d26ebf14eaf1134f2e3532b341e63d758b1d7d710ecbe157a78985b813d942b"
+      },
+      "audit_only": []
+    },
+    {
+      "case_id": "marktext-v0.2-baseline",
+      "producer_profile_id": "claude-code-ccswitch-deepseek-v4-pro-high",
+      "scorer_profile_id": "claude-code-ccswitch-deepseek-v4-pro-high",
+      "canonical": {
+        "result_directory": "marktext-v0.2-claude-code-ccswitch-deepseek-v4-pro-high-full-v2.1-r1",
+        "manifest_sha256": "3ac3ee05afd158d520100b999c97a105fc55f5ba9dcc7945676810e2240fec48"
+      },
+      "audit_only": []
+    },
+    {
+      "case_id": "marktext-v0.2-baseline",
+      "producer_profile_id": "claude-code-ccswitch-deepseek-v4-pro-high",
+      "scorer_profile_id": "codex-gpt-5.6-luna-max",
+      "canonical": {
+        "result_directory": "marktext-v0.2-producer-deepseek-scorer-codex-gpt-5.6-luna-v2.1-r1",
+        "manifest_sha256": "88bef638d9460f1d410f5da11a6b4f32477ea2a25af87468fe2704e80cd83e6a"
+      },
+      "audit_only": []
+    },
+    {
+      "case_id": "marktext-v0.2-baseline",
+      "producer_profile_id": "codex-gpt-5.6-luna-max",
+      "scorer_profile_id": "claude-code-ccswitch-deepseek-v4-pro-high",
+      "canonical": {
+        "result_directory": "marktext-v0.2-producer-codex-scorer-deepseek-v4-pro-high-v2.1-replay-r3",
+        "manifest_sha256": "fbfdbe892f3c580969a339d6f83a4c28867b1f33159639e901eba18baa45e2e4"
+      },
+      "audit_only": [
+        {
+          "result_directory": "marktext-v0.2-producer-codex-scorer-deepseek-v4-pro-high-v2.1-r1",
+          "manifest_sha256": "a9a03deebfab16fe2abd0e7c9d08167e43ff91a932d4dcd6183d4772ba3611e0",
+          "reason": "Incomplete first cross-runtime attempt retained for two unknown-dimension contract rejections."
+        },
+        {
+          "result_directory": "marktext-v0.2-producer-codex-scorer-deepseek-v4-pro-high-v2.1-replay-r2",
+          "manifest_sha256": "c0cfa326c06e506a71ec9c91755594762d0e89accf1cb613a4be4fe6f6d91ffa",
+          "reason": "Complete but potentially overlapping replay retained only as execution audit evidence."
+        }
+      ]
+    },
+    {
+      "case_id": "marktext-v0.2-baseline",
+      "producer_profile_id": "codex-gpt-5.6-luna-max",
+      "scorer_profile_id": "codex-gpt-5.6-luna-max",
+      "canonical": {
+        "result_directory": "marktext-v0.2-codex-gpt-5.6-luna-max-full-v2.1-r1",
+        "manifest_sha256": "934b6201b0c706ce87ab35c87c4195a020616733ba65833ee5b2e85610629de3"
+      },
+      "audit_only": []
+    }
+  ]
+}

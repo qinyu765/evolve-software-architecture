@@ -1,0 +1,125 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 1,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 17,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron desktop shell, package range ~42.1.0, with Windows, macOS, and Linux build targets.",
+    "runtime_boundaries_identified": [
+      "Electron main process与sandboxed renderer之间的preload/contextBridge边界",
+      "renderer↔main IPC与main内部ipcMain事件边界",
+      "WindowManager/BaseWindow与BrowserWindow生命周期边界",
+      "renderer文档状态与main文件系统、watcher、bufferStore之间的边界",
+      "renderer与@muyajs/core编辑器引擎之间的边界",
+      "renderer与Electron shell能力之间的领域API边界"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 1,
+    "minor_error_count": 5,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": false
+  },
+  "factual_errors": [
+    {
+      "severity": "material",
+      "claim": "将markdownToHtml、getImageInfo等归为可稳定的纯函数缝隙，并以muya-core.d.ts作为当前契约依据。",
+      "repository_evidence": "packages/muya/src/state/markdownToHtml.ts使用DOM容器、sanitize和Mermaid；packages/muya/src/utils/image.ts的getImageInfo(image: HTMLElement)读取DOM并修改token.range；而packages/desktop/src/types/muya-core.d.ts声明了不同的getImageInfo签名。",
+      "explanation": "答案混淆了纯工具函数与DOM/导出相关API，导致编辑器边界稳定化建议建立在错误的当前契约上。",
+      "source_conflict": true,
+      "affected_dimensions": [
+        "evidence",
+        "quality_attributes",
+        "recommendation",
+        "generalization"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "当前checkout是develop分支且没有更早Git历史可挖。",
+      "repository_evidence": "git status显示HEAD (no branch)，虽指向develop同一提交；git log --all仍包含565bfcdc monorepo拆分、0d866412 TS rewrite迁移等历史。",
+      "explanation": "历史来源被错误描述，未充分履行核对Git历史的要求，但不直接推翻主要架构结论。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "scope_and_classification",
+        "evidence"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "IPC handler散落五处。",
+      "repository_evidence": "答案列出的main/ipc、WindowManager、DataCenter、EditorBufferStore、App和menu/actions/file已至少六处，仓库中还存在preferences、keyboard及其他ipc监听位置。",
+      "explanation": "数量和范围低估了当前扩散程度，虽不改变拆分命名空间的方向。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "current_friction"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "删除三个Vite alias即可完成旧引擎alias清理。",
+      "repository_evidence": "除electron.vite.config.ts的三个target alias外，packages/desktop/vitest.config.ts仍有muya alias，tsconfig.base.json也有muya路径映射。",
+      "explanation": "迁移步骤不完整，可能留下测试或类型解析路径。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "migration"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "blocks应作为不透明状态透传/持久化。",
+      "repository_evidence": "packages/desktop/src/renderer/src/store/editor.ts的createBufferedTabState明确未序列化blocks；sourceCode.vue还注明blocks只对muya有效。",
+      "explanation": "答案没有区分运行时编辑器状态与当前持久化恢复状态，文件契约建议需更精确。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence",
+        "recommendation"
+      ]
+    },
+    {
+      "severity": "minor",
+      "claim": "project的rootDirectory位于editor.ts:576。",
+      "repository_evidence": "editor.ts:576处于文件信息处理逻辑；BufferedProjectState和rootDirectory序列化实际位于packages/desktop/src/renderer/src/store/project.ts。",
+      "explanation": "方向性判断基本正确，但行号证据错误。",
+      "source_conflict": false,
+      "affected_dimensions": [
+        "evidence"
+      ]
+    }
+  ],
+  "documentation_drift": [
+    {
+      "claim": "编辑器和preferences窗口使用contextIsolation:false、nodeIntegration:true。",
+      "documentation_evidence": "根CLAUDE.md的旧Architecture段落作此描述，并指向不存在的config.js。",
+      "implementation_evidence": "packages/desktop/src/main/config.ts为两个窗口设置contextIsolation:true、sandbox:true、nodeIntegration:false。",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "MarkText仍是旧src/{common,main,muya,renderer}布局，Muya仍主要是JavaScript。",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md保留旧目录和旧引擎描述。",
+      "implementation_evidence": "当前仓库是pnpm monorepo，packages/desktop直接使用@muyajs/core，packages/muya为TypeScript引擎。",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "renderer↔main新IPC通道应统一使用mt::，未加前缀的内部通道只是少量遗留。",
+      "documentation_evidence": "packages/website/content/docs/dev/IPC.md作此命名约定。",
+      "implementation_evidence": "packages/desktop/src/shared/types/ipc.ts把app-*、watcher-*、window-*、broadcast-*等内部通道放入IpcSendChannels，main代码还通过ipcMain.emit/onInternalChannel使用它们。",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "这是覆盖面很强的评审：现状摩擦、三组方案、质量属性、回滚和渐进验证门都具体且可执行。主要扣分来自编辑器纯函数边界的事实错误，以及Git历史、handler范围、alias清理和少量引用不精确。文档漂移均被答案识别并以当前实现解决，因此未产生未决决策冲突；但一个material factual error使accuracy gate为false。"
+}

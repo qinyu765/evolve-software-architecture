@@ -1,0 +1,76 @@
+{
+  "dimensions": {
+    "scope_and_classification": 2,
+    "evidence": 2,
+    "current_friction": 2,
+    "quality_attributes": 2,
+    "options": 2,
+    "recommendation": 2,
+    "migration": 2,
+    "verification": 2,
+    "generalization": 2
+  },
+  "total": 18,
+  "acceptance_checks": {
+    "current_desktop_platform": "Electron 42 desktop app targeting macOS, Windows, and Linux; renderer currently uses @muyajs/core while legacy @marktext/muyajs remains declared/aliased.",
+    "runtime_boundaries_identified": [
+      "Electron main process",
+      "sandboxed preload/contextBridge",
+      "Vue/Pinia renderer",
+      "shared serializable types and IPC contracts"
+    ],
+    "legacy_platform_treated_as_current": false
+  },
+  "accuracy": {
+    "material_error_count": 0,
+    "minor_error_count": 0,
+    "unresolved_decision_conflict_count": 0,
+    "gate_pass": true
+  },
+  "factual_errors": [],
+  "documentation_drift": [
+    {
+      "claim": "Architecture documentation still describes a root src tree, src/muya, and a JavaScript Muya engine.",
+      "documentation_evidence": "packages/website/content/docs/dev/ARCHITECTURE.md:5-22",
+      "implementation_evidence": "pnpm-workspace.yaml; packages/desktop; packages/muya; @muyajs/core imports in renderer",
+      "state": "historical",
+      "decision_relevant": true
+    },
+    {
+      "claim": "CLAUDE.md says editor and preference windows use contextIsolation:false and nodeIntegration:true.",
+      "documentation_evidence": "CLAUDE.md:241-245",
+      "implementation_evidence": "packages/desktop/src/main/config.ts:8-20; context-isolation.spec.ts:5-37",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "IPC documentation presents the contract as fully type-enforced, while the implementation intentionally permits unknown payloads and has a void/boolean drift.",
+      "documentation_evidence": "packages/website/content/docs/dev/IPC.md:3-12",
+      "implementation_evidence": "packages/desktop/src/shared/types/ipc.ts:10-12,85; editorBufferStore/index.ts:187-198",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "The parity scoreboard still marks PG14 as xfail.",
+      "documentation_evidence": "packages/desktop/test/PARITY_SCOREBOARD.md:69,77-90",
+      "implementation_evidence": "editor.vue:1518-1567; parity-source-undo-saved.spec.ts:73-80; commit 5d3d2819",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "CI comments and path filters treat packages/muya as not affecting the desktop app.",
+      "documentation_evidence": ".github/workflows/test.yml:6-9; build.yml:6-9",
+      "implementation_evidence": "packages/desktop/package.json:62-63; direct @muyajs/core imports in renderer",
+      "state": "resolved",
+      "decision_relevant": true
+    },
+    {
+      "claim": "Other CLAUDE.md architecture/path-alias text still describes the legacy @marktext/muyajs engine as the renderer dependency.",
+      "documentation_evidence": "CLAUDE.md:230-259,288-293",
+      "implementation_evidence": "renderer imports @muyajs/core; legacy muya alias remains only as configuration/type migration residue",
+      "state": "resolved",
+      "decision_relevant": true
+    }
+  ],
+  "rationale": "The review is evidence-backed, distinguishes current implementation from stale documentation, compares three viable options, and gives reversible migration and verification criteria. No factual errors were found; all decision-relevant documentation drift was identified as historical or resolved."
+}
