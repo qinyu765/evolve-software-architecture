@@ -3,10 +3,13 @@ import json
 import unittest
 from pathlib import Path
 
+from scripts.run_forward_eval import EvaluationError, validate_score
+
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "evals" / "results"
 CANONICAL_INDEX = RESULTS / "architecture-review-v2.1-canonical.json"
+REGRESSION_FIXTURES = ROOT / "evals" / "fixtures" / "scorer-v2.1-regressions.json"
 
 
 def load_json(path: Path) -> dict:
@@ -94,6 +97,49 @@ class ScorerEvidenceTest(unittest.TestCase):
             for manifest in RESULTS.glob("*v2.1*/manifest.json")
         }
         self.assertEqual(referenced_directories, v21_directories)
+
+    def test_v21_gold_fixtures_lock_adjudicated_accuracy_boundaries(self) -> None:
+        fixture = load_json(REGRESSION_FIXTURES)
+        self.assertEqual(fixture["schema_version"], 1)
+        cases = fixture["cases"]
+        self.assertEqual(
+            {case["id"] for case in cases},
+            {
+                "airi-worker-thread-is-not-process-isolation",
+                "display-label-is-not-schema-identifier",
+                "marktext-focus-mode-stale-documentation",
+                "marktext-git-history-is-inspectable",
+                "marktext-main-renderer-alias-is-live",
+                "marktext-pg14-stale-scoreboard",
+                "minor-only-error-does-not-block",
+                "non-decision-relevant-drift-does-not-block",
+            },
+        )
+
+        for case in cases:
+            with self.subTest(case=case["id"]):
+                self.assertTrue(case["repository_evidence"])
+                self.assertTrue(case["gold_reason"])
+                payload = case["payload"]
+                expected = case["expected"]
+                if expected["valid"]:
+                    validate_score(payload, require_accuracy=True)
+                    self.assertEqual(
+                        payload["accuracy"],
+                        {
+                            "material_error_count": expected["material_error_count"],
+                            "minor_error_count": expected["minor_error_count"],
+                            "unresolved_decision_conflict_count": expected[
+                                "unresolved_decision_conflict_count"
+                            ],
+                            "gate_pass": expected["gate_pass"],
+                        },
+                    )
+                else:
+                    with self.assertRaisesRegex(
+                        EvaluationError, expected["validation_error"]
+                    ):
+                        validate_score(payload, require_accuracy=True)
 
 
 if __name__ == "__main__":
