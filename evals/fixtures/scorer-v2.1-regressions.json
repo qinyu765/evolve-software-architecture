@@ -1,6 +1,9 @@
 {
   "schema_version": 1,
-  "contract": "architecture-review-v2.1",
+  "contract": {
+    "rubric_sha256": "64489b2290d24f0ae95fdabe14abcf34a4edbf6f7dcc044a65ed3034ec3c3b4e",
+    "schema_sha256": "e5609858147c7005cf786d059abe4d402d48271ed45f6701ee1a9c519bf3c8a6"
+  },
   "cases": [
     {
       "id": "airi-worker-thread-is-not-process-isolation",

@@ -63,6 +63,7 @@ class ScorerEvidenceTest(unittest.TestCase):
 
         referenced_directories: set[str] = set()
         canonical_directories: set[str] = set()
+        audit_directories: set[str] = set()
         for cell in cells:
             canonical = cell["canonical"]
             directory = canonical["result_directory"]
@@ -88,7 +89,7 @@ class ScorerEvidenceTest(unittest.TestCase):
             for audit in cell["audit_only"]:
                 audit_directory = audit["result_directory"]
                 self.assertTrue(audit["reason"])
-                self.assertNotIn(audit_directory, canonical_directories)
+                audit_directories.add(audit_directory)
                 referenced_directories.add(audit_directory)
                 audit_manifest = RESULTS / audit_directory / "manifest.json"
                 self.assertEqual(audit["manifest_sha256"], sha256(audit_manifest))
@@ -97,11 +98,13 @@ class ScorerEvidenceTest(unittest.TestCase):
             manifest.parent.name
             for manifest in RESULTS.glob("*v2.1*/manifest.json")
         }
+        self.assertTrue(canonical_directories.isdisjoint(audit_directories))
         self.assertEqual(referenced_directories, v21_directories)
 
     def test_v21_gold_fixtures_lock_adjudicated_accuracy_boundaries(self) -> None:
         fixture = load_json(REGRESSION_FIXTURES)
         self.assertEqual(fixture["schema_version"], 1)
+        self.assertEqual(fixture["contract"], load_json(CANONICAL_INDEX)["contract"])
         cases = fixture["cases"]
         self.assertEqual(
             {case["id"] for case in cases},
