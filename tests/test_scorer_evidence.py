@@ -24,6 +24,7 @@ class ScorerEvidenceTest(unittest.TestCase):
     def test_v21_canonical_index_covers_complete_matrix_and_all_attempts(self) -> None:
         index = load_json(CANONICAL_INDEX)
         self.assertEqual(index["schema_version"], 1)
+        self.assertTrue((RESULTS / index["policy"]).is_file())
 
         contract = index["contract"]
         self.assertEqual(

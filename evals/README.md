@@ -6,6 +6,8 @@ The v2 rubric keeps the nine dimensions and an 18-point total, then adds an inde
 
 The v2.1 contract makes the cross-field accuracy rule explicit: `accuracy.unresolved_decision_conflict_count` is the count of `documentation_drift` entries with `decision_relevant == true` and `state` in `{"conflict", "unknown"}`; `accuracy.gate_pass` is true exactly when that count and `material_error_count` are both zero. The runner rejects mismatches instead of normalizing them. v2.1 uses separate rubric and schema files so manifests pin the calibration contract without changing historical v2 results.
 
+The canonical v2.1 matrix is indexed by `results/architecture-review-v2.1-canonical.json`. Its matrix summary, clean DeepSeek replay, manual adjudication, and scorer policy are recorded in `results/architecture-review-v2.1-matrix-summary.md`, `results/architecture-review-v2.1-scorer-replay-r2-summary.md`, `results/architecture-review-v2.1-scorer-adjudication.md`, and `scorer-policy-v2.1.md`. Codex GPT-5.6 Luna/max is the default v2.1 scorer; DeepSeek V4 Pro is a shadow scorer and never fills a failed default score automatically.
+
 Run deterministic checks and inspect the 30-call plan without contacting a model:
 
 ```bash
