@@ -29,16 +29,19 @@ def sha256(path: Path) -> str:
 
 class ScorerEvidenceTest(unittest.TestCase):
     def test_v21_evidence_contains_no_unsanitized_local_paths(self) -> None:
-        for result_dir in sorted(RESULTS.glob("*v2.1*")):
-            for path in sorted(result_dir.rglob("*")):
-                if not path.is_file():
-                    continue
-                with self.subTest(path=path.relative_to(ROOT)):
-                    self.assertIsNone(
-                        UNSANITIZED_LOCAL_PATH.search(
-                            path.read_text(encoding="utf-8")
-                        )
+        evidence_files = [
+            path
+            for path in sorted(RESULTS.rglob("*"))
+            if path.is_file() and "v2.1" in path.relative_to(RESULTS).as_posix()
+        ]
+        self.assertIn(CANONICAL_INDEX, evidence_files)
+        for path in evidence_files:
+            with self.subTest(path=path.relative_to(ROOT)):
+                self.assertIsNone(
+                    UNSANITIZED_LOCAL_PATH.search(
+                        path.read_text(encoding="utf-8")
                     )
+                )
 
     def test_v21_canonical_index_covers_complete_matrix_and_all_attempts(self) -> None:
         index = load_json(CANONICAL_INDEX)
