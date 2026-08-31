@@ -869,15 +869,27 @@ class ForwardEvaluationTest(unittest.TestCase):
             eval_path = (
                 "/var/folders/fs/example/T/airi-forward-eval-checkouts-abc/control"
             )
+            nested_eval_path = (
+                "/private/var/folders/fs/example/T/air/cache dir/"
+                "airi-forward-eval-transient-def/treatment"
+            )
+            other_temp_path = "/var/folders/fs/example/T/tool/cache.json"
             escaped_eval_path = eval_path.replace("/", r"\/")
             redacted = redact_text(
-                f"{link}/file {eval_path}/file {escaped_eval_path}/file "
-                f"[evidence](<{eval_path}/file>)",
+                f"{link}/file {eval_path}/file {nested_eval_path}/file "
+                f"{escaped_eval_path}/file "
+                f"[evidence](<{eval_path}/file>) "
+                f"[nested](<{nested_eval_path}/file>) "
+                f"[temp](<{other_temp_path}>)",
                 [link],
             )
             self.assertNotIn(str(link), redacted)
             self.assertNotIn("airi-forward-eval-checkouts-abc", redacted)
+            self.assertNotIn("airi-forward-eval-transient-def", redacted)
+            self.assertNotIn("/var/folders/", redacted)
             self.assertIn("[evidence](</evaluation-path/control/file>)", redacted)
+            self.assertIn("[nested](</evaluation-path/treatment/file>)", redacted)
+            self.assertIn("[temp](</evaluation-path>)", redacted)
 
     def test_redact_value_recurses_into_structured_scores(self) -> None:
         value = {

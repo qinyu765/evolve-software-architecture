@@ -1,5 +1,6 @@
 import hashlib
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -10,6 +11,12 @@ ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "evals" / "results"
 CANONICAL_INDEX = RESULTS / "architecture-review-v2.1-canonical.json"
 REGRESSION_FIXTURES = ROOT / "evals" / "fixtures" / "scorer-v2.1-regressions.json"
+UNSANITIZED_LOCAL_PATH = re.compile(
+    r"/(?:private/)?var/folders/"
+    r"|/Users/(?!redacted-user(?:/|$))"
+    r"|/home/(?!redacted-user(?:/|$))"
+    r"|airi-forward-eval-(?:checkouts|transient)-"
+)
 
 
 def load_json(path: Path) -> dict:
@@ -21,6 +28,21 @@ def sha256(path: Path) -> str:
 
 
 class ScorerEvidenceTest(unittest.TestCase):
+    def test_v21_evidence_contains_no_unsanitized_local_paths(self) -> None:
+        evidence_files = [
+            path
+            for path in sorted(RESULTS.rglob("*"))
+            if path.is_file() and "v2.1" in path.relative_to(RESULTS).as_posix()
+        ]
+        self.assertIn(CANONICAL_INDEX, evidence_files)
+        for path in evidence_files:
+            with self.subTest(path=path.relative_to(ROOT)):
+                self.assertIsNone(
+                    UNSANITIZED_LOCAL_PATH.search(
+                        path.read_text(encoding="utf-8")
+                    )
+                )
+
     def test_v21_canonical_index_covers_complete_matrix_and_all_attempts(self) -> None:
         index = load_json(CANONICAL_INDEX)
         self.assertEqual(index["schema_version"], 1)

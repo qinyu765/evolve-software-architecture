@@ -405,9 +405,27 @@ def redact_text(text: str, paths: Iterable[Path] = ()) -> str:
     )
     for path in sorted(spellings, key=len, reverse=True):
         redacted = redacted.replace(path, "/evaluation-path")
-    redacted = re.sub(
+    angle_eval_root = (
         r"/(?:private/)?var/folders/[^/\s]+/[^/\s]+/T/"
-        r"airi-forward-eval-(?:checkouts|transient)-[^/\s)\"']+",
+        r"(?:[^/\r\n>]+/)*?"
+        r"airi-forward-eval-(?:checkouts|transient)-[^/\s)>\"']+"
+    )
+    plain_eval_root = (
+        r"/(?:private/)?var/folders/[^/\s]+/[^/\s]+/T/"
+        r"(?:[^/\r\n)>\"']+/)*?"
+        r"airi-forward-eval-(?:checkouts|transient)-[^/\s)>\"']+"
+    )
+    redacted = re.sub(
+        r"(?<=<)" + angle_eval_root, "/evaluation-path", redacted
+    )
+    redacted = re.sub(plain_eval_root, "/evaluation-path", redacted)
+    redacted = re.sub(
+        r"(?<=<)/(?:private/)?var/folders/[^>\r\n]+(?=>)",
+        "/evaluation-path",
+        redacted,
+    )
+    redacted = re.sub(
+        r"/(?:private/)?var/folders/[^\s)>\]\"']+",
         "/evaluation-path",
         redacted,
     )
