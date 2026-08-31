@@ -869,14 +869,20 @@ class ForwardEvaluationTest(unittest.TestCase):
             eval_path = (
                 "/var/folders/fs/example/T/airi-forward-eval-checkouts-abc/control"
             )
+            nested_eval_path = (
+                "/var/folders/fs/example/T/air/"
+                "airi-forward-eval-checkouts-def/control"
+            )
             escaped_eval_path = eval_path.replace("/", r"\/")
             redacted = redact_text(
-                f"{link}/file {eval_path}/file {escaped_eval_path}/file "
+                f"{link}/file {eval_path}/file {nested_eval_path}/file "
+                f"{escaped_eval_path}/file "
                 f"[evidence](<{eval_path}/file>)",
                 [link],
             )
             self.assertNotIn(str(link), redacted)
             self.assertNotIn("airi-forward-eval-checkouts-abc", redacted)
+            self.assertNotIn("airi-forward-eval-checkouts-def", redacted)
             self.assertIn("[evidence](</evaluation-path/control/file>)", redacted)
 
     def test_redact_value_recurses_into_structured_scores(self) -> None:

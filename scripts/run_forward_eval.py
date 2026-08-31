@@ -406,7 +406,7 @@ def redact_text(text: str, paths: Iterable[Path] = ()) -> str:
     for path in sorted(spellings, key=len, reverse=True):
         redacted = redacted.replace(path, "/evaluation-path")
     redacted = re.sub(
-        r"/(?:private/)?var/folders/[^/\s]+/[^/\s]+/T/"
+        r"/(?:private/)?var/folders/[^/\s]+/[^/\s]+/T/(?:[^/\s]+/)*"
         r"airi-forward-eval-(?:checkouts|transient)-[^/\s)\"']+",
         "/evaluation-path",
         redacted,
