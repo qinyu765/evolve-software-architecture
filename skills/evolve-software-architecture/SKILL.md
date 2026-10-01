@@ -46,6 +46,8 @@ Verify the current-state claims that drive a recommendation. Documentation may d
 
 Use [quality-attributes.md](references/core/quality-attributes.md) to rank the few attributes governing the decision and state their trade-offs. Compare viable alternatives, including retaining or locally extending the current shape when defensible. Explain ownership, assumptions, migration cost, operational consequences, and evidence that would invalidate each option.
 
+Do not use an unconfirmed requirement to eliminate an option. Compatibility includes observable behavior across existing execution and extension contexts, not just signatures; verify consequential preservation claims or keep them conditional.
+
 Recommend a direction supported by those drivers. Prefer small, meaningful interfaces over speculative layers. Give incremental steps, behavior/compatibility checks, rollback points, and observable completion criteria. Identify abstractions to defer and the signals that would justify them. Use [decision-record.md](references/core/decision-record.md) for decisions worth recording in an ADR.
 
 ## Deliver at the task's scale

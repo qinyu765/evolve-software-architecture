@@ -27,6 +27,8 @@ Choose evidence according to the claim. Runtime behavior needs the active implem
 
 For a consequential disagreement, record both claims and determine whether it is historical, resolved, still conflicting, or unknown. Explain whether it changes the recommendation. If unresolved, narrow or condition the recommendation rather than asserting a current fact. Before proposing a new interface or lifecycle, search for existing capabilities and their callers/tests; verify that the proposed work is actually missing.
 
+When comparing a replacement mechanism, check existing consumers and observable behavior across relevant execution, extension, ownership, and failure contexts. A planned regression suite is not evidence that compatibility is already preserved; use focused counterexamples or state what remains unverified. Keep a decision-changing requirement inferred by the agent conditional, and compare the local option under the user's confirmed scope before ruling it out.
+
 ## Classification signals
 
 Classify from multiple signals, not a directory name alone:
