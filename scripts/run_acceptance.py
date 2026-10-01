@@ -153,11 +153,13 @@ def main() -> int:
             raise SystemExit('Unknown or ineligible task ID')
         tasks = [t for t in tasks if t['id'] in ids]
     source_manifest = None
+    source_manifest_bytes = None
     if args.phase == 'reviews':
         if args.answers_from is None:
             raise SystemExit('Reviews require --answers-from')
         source_manifest = args.answers_from / 'manifest.json'
-        source = json.loads(source_manifest.read_text())
+        source_manifest_bytes = source_manifest.read_bytes()
+        source = json.loads(source_manifest_bytes)
         if source['candidate_commit'] != candidate or source['profile'] != profile or source['case_sha256'] != hashlib.sha256(CASE.read_bytes()).hexdigest():
             raise SystemExit('Review must match the answer candidate, task definition, and execution profile')
         for task in tasks:
@@ -167,6 +169,8 @@ def main() -> int:
     args.output_dir.mkdir(parents=True, exist_ok=False)
     (args.output_dir / 'answers').mkdir()
     (args.output_dir / 'records').mkdir()
+    if source_manifest_bytes is not None:
+        (args.output_dir / 'source-manifest.json').write_bytes(source_manifest_bytes)
     with tempfile.TemporaryDirectory(prefix='architecture-acceptance-setup-') as temporary:
         bundle = materialize_package(ROOT, candidate, Path(temporary))
         package_sha = tree_digest(bundle)
@@ -184,7 +188,7 @@ def main() -> int:
                 'package_sha256': package_sha, 'case_sha256': hashlib.sha256(CASE.read_bytes()).hexdigest(),
                 'runner_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                 'profile': profile, 'repositories': case['repositories'], 'tasks': tasks,
-                'source_manifest_sha256': hashlib.sha256(source_manifest.read_bytes()).hexdigest() if source_manifest else None,
+                'source_manifest_sha256': hashlib.sha256(source_manifest_bytes).hexdigest() if source_manifest_bytes is not None else None,
                 'dataset_complete': False, 'records': []}
     write(args.output_dir / 'manifest.json', manifest)
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.concurrency) as pool:

@@ -18,6 +18,8 @@ An installed Skill can also have a material coverage or version gap. State it ra
 
 While waiting, continue inspection and technology-independent reasoning where useful, but stop conclusions and implementation steps that depend on the missing knowledge. If documentation is authorized, prefer the maintainer's sources for the repository's version; distinguish current documentation from older repository behavior.
 
+Do not treat inspecting repository code or bundled manuals as permission to complete a technology-dependent review. When absence is already established by the user, first present the fallback choice and wait. A full API/lifecycle analysis, compatibility plan, or migration recommendation followed by a disclaimer is not a substitute for asking beforehand.
+
 ## Resolve disagreements through the decision
 
 User intent and explicit constraints govern the assignment. Repository instructions and verified implementation establish local requirements and current behavior. Companion advice is a technology practice to assess, not evidence that a local pattern is wrong or absent.

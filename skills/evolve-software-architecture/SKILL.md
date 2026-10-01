@@ -27,6 +27,8 @@ Follow [technology-context.md](references/technology-context.md) to select avail
 
 **If no suitable technology Skill is installed and accessible, ask the user before substituting official documentation or proceeding with technology-dependent conclusions.** Explain the specific gap and offer documentation, a user-supplied Skill, or a narrower scope. Honor authorization already given for this task; do not ask again. While awaiting the answer, repository inventory and technology-independent analysis may continue. Do not install Skills automatically.
 
+If the request already establishes that guidance and fallback authorization are missing, ask before a detailed review. Source inspection does not bypass that choice: do not deliver API/lifecycle compatibility advice or a migration recommendation under a “repository-only” or “generic” label. Limit the interim response to established scope/inventory and the concrete question, then wait for the answer.
+
 ## Investigate the decision
 
 For an existing-system review, locate actual change amplification, missing ownership, or fragile interfaces. Separate symptoms from causes and real variation from hypothetical extensibility.
