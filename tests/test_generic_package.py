@@ -29,7 +29,7 @@ class GenericPackageTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             repo = Path(temporary) / "source"
             repo.mkdir()
-            shutil.copytree(ROOT / PACKAGE, repo / PACKAGE)
+            shutil.copytree(ROOT / PACKAGE, repo / PACKAGE, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
             shutil.copytree(ROOT / ARCHIVE, repo / ARCHIVE)
             subprocess.run(["git", "init", "-q", repo], check=True)
             subprocess.run(["git", "add", "."], cwd=repo, check=True)
@@ -40,7 +40,7 @@ class GenericPackageTest(unittest.TestCase):
             )
             bundle = Path(temporary) / "bundle"
             installed = materialize_package(repo, "HEAD", bundle)
-            self.assertEqual(tree_digest(installed), tree_digest(ROOT / PACKAGE))
+            self.assertEqual(tree_digest(installed), tree_digest(repo / PACKAGE))
             self.assertFalse((bundle / "docs").exists())
             self.assertFalse((installed / "references/project-types").exists())
             self.assertTrue((installed / "references/technology-context.md").is_file())

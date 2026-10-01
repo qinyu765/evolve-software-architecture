@@ -81,7 +81,7 @@ def run_task(task: dict, args: argparse.Namespace, sources: dict, candidate: str
             stdout, stderr, returncode = '', f'Call exceeded {args.timeout} seconds', 124
             timed_out = True
         answer = output.read_text() if output.exists() else ''
-        paths = [str(temp), str(ROOT), *(str(v['path']) for v in sources.values())]
+        paths = [temp, ROOT, *(v['path'] for v in sources.values())]
         clean_answer = redact_text(answer, paths)
         (args.output_dir / 'answers' / (task['id'] + '.md')).write_text(clean_answer, encoding='utf-8')
         traces, usage = [], None
@@ -189,8 +189,15 @@ def main() -> int:
     write(args.output_dir / 'manifest.json', manifest)
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.concurrency) as pool:
         futures = [pool.submit(run_task, task, args, sources, candidate, inventory, policy) for task in tasks]
+        indexed = dict(zip(futures, tasks))
         for future in concurrent.futures.as_completed(futures):
-            record = future.result()
+            try:
+                record = future.result()
+            except Exception as error:
+                task = indexed[future]
+                record = {'id': task['id'], 'capture_success': False,
+                          'infrastructure_error': redact_text(str(error), [ROOT, *(v['path'] for v in sources.values())])}
+                write(args.output_dir / 'records' / (task['id'] + '.json'), record)
             manifest['records'].append({k: record[k] for k in ('id', 'capture_success')})
             write(args.output_dir / 'manifest.json', manifest)
     manifest['records'].sort(key=lambda r: r['id'])

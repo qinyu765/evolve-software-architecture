@@ -1,0 +1,7 @@
+{
+  "kind": "capture_infrastructure_failure",
+  "reason": "Capture supplied str paths to the historical redaction helper, which requires pathlib.Path. The first completed invocation failed before saving its answer. Remaining answer-process evaluations were stopped to avoid further unrecorded calls.",
+  "raw_answer_available": false,
+  "status": "audit_only",
+  "release_gate": false
+}
