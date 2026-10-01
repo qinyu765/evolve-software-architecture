@@ -1,0 +1,118 @@
+{
+  "id": "click-major-requirement",
+  "kind": "behavior",
+  "repository": "click",
+  "returncode": 0,
+  "timed_out": false,
+  "answer_present": true,
+  "repository_unchanged": true,
+  "elapsed_seconds": 428.41,
+  "usage": {
+    "input_tokens": 637812,
+    "cached_input_tokens": 565120,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 8080,
+    "reasoning_output_tokens": 3282
+  },
+  "read_commands": [
+    {
+      "command": "/bin/zsh -lc \"pwd; rg --files -g 'AGENTS.md' -g 'pyproject.toml' -g 'tox.ini' -g '*requirements*' -g '*.yaml' -g '*.yml' -g 'CHANGES.rst' -g 'setup.cfg'\"",
+      "exit_code": 0,
+      "output_sha256": "6c5b8654945bfcb1442c18a53656e10d936c339f91afc1288644eac28cc8650e"
+    },
+    {
+      "command": "/bin/zsh -lc 'git status --short; git log -6 --oneline; git tag --points-at HEAD; git rev-parse HEAD'",
+      "exit_code": 0,
+      "output_sha256": "9bbaafba78ad13d2bcb5fdc4b4d18fbd03581756c33c991fe5d3a09912eb52a2"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,220p' src/click/globals.py; sed -n '390,860p' src/click/core.py\"",
+      "exit_code": 0,
+      "output_sha256": "91fd89a8cf3ebc98b181a888abd1ed7649fa079f139dda5697472e1ed7de8073"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,300p' src/click/decorators.py; sed -n '880,1190p' src/click/core.py\"",
+      "exit_code": 0,
+      "output_sha256": "ed57acddb682f4ea4dab7bb7fa479657f9fb8507758b0e60f191e34d472bacb7"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files --hidden -g 'AGENTS.md' -g '.github/workflows/*'; cat pyproject.toml; cat tox.ini; cat .github/workflows/tests.yaml\"",
+      "exit_code": 0,
+      "output_sha256": "79867ead204d08b258c072356711b8429071d4e36372115dd1f0a47d200b5b37"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'async|await|coroutine|cancel|thread|return value|result_callback|invoke|forward' docs/commands.rst docs/testing.rst docs/advanced.rst docs/contexts.rst tests/test_context.py tests/test_custom_classes.py; git show --stat ffd43e9\"",
+      "exit_code": 0,
+      "output_sha256": "16210cbe272e56b993ef7ec6d4545bf68e857b3a0cdacfa49a3b65ea44b5d7d2"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/core.py | sed -n '727,862p'; nl -ba src/click/core.py | sed -n '1390,1460p'; nl -ba src/click/core.py | sed -n '1590,1785p'\"",
+      "exit_code": 0,
+      "output_sha256": "9ad79cc5cb111cb18a2e6b965729abeee7e211e5f26c7ed841d876db1f7a3d9c"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/decorators.py | sed -n '1,157p'; nl -ba src/click/decorators.py | sed -n '175,259p'\"",
+      "exit_code": 0,
+      "output_sha256": "bb92511bdba4361694c8348115bf65aaa0ce791d655806c188643f3f6e45adce"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba tests/test_context.py | sed -n '100,300p'; cat tests/test_custom_classes.py\"",
+      "exit_code": 0,
+      "output_sha256": "70ef7e6ad5ee596f32c1abfc59b58af622183a10818be72f8a80a8b107550e16"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/testing.py | sed -n '110,205p'; nl -ba src/click/testing.py | sed -n '235,523p'\"",
+      "exit_code": 0,
+      "output_sha256": "3ab21d96c54ce4d5697c49eda90d0b67ccc2965c4656beb33f91d2856bb46c75"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/decorators.py | sed -n '15,125p'; nl -ba tests/test_context.py | sed -n '120,245p'; nl -ba docs/commands.rst | sed -n '392,422p'; nl -ba docs/commands.rst | sed -n '532,578p'; nl -ba docs/advanced.rst | sed -n '353,386p'; nl -ba src/click/core.py | sed -n '288,338p'; nl -ba src/click/core.py | sed -n '920,949p'\"",
+      "exit_code": 0,
+      "output_sha256": "8ea68e109d1865dcd1790407bba2b0164180c5cdd5659597641a5de29169b2c2"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'close|cleanup|result_callback|invoke_without_command|chain|return_value|KeyboardInterrupt|Abort|catch_exceptions|should_strip_ansi' tests/test_commands.py tests/test_command_chaining.py tests/test_context.py tests/test_testing.py tests/test_basic.py tests/test_multicommand.py; nl -ba src/click/core.py | sed -n '2348,2385p'; nl -ba src/click/__init__.py | tail -22; rg --files --hidden | rg -i 'agent|skill|arch|contribut|readme'\"",
+      "exit_code": 0,
+      "output_sha256": "1832dbf2db14ab41da0a267d88c9589f3d9dcfdecc628a3e234e2693c93c73b8"
+    },
+    {
+      "command": "/bin/zsh -lc \"python3 -B -c 'import sys; print(sys.version)' ; git remote -v; git log -5 --format='%h %ad %s' --date=short; nl -ba docs/testing.rst | head -30; nl -ba tests/test_command_chaining.py | sed -n '1,245p'\"",
+      "exit_code": 0,
+      "output_sha256": "af2c57564d8c81e8264382113c3c07eafdc561969918ae3b4400649c733faee8"
+    },
+    {
+      "command": "/bin/zsh -lc \"git show ffd43e9 -- src/click/testing.py CHANGES.rst; git log --oneline --all -- src/click/globals.py | head -18; git log --oneline --all --grep='async\\\\|cancel\\\\|coroutine\\\\|context\\\\|result callback' -i | head -55; rg -n 'async|asyncio|await|coroutine|cancel' src tests docs pyproject.toml tox.ini CHANGES.rst\"",
+      "exit_code": 1,
+      "output_sha256": "ae8c966dd5a3fb020059ce86ed78b97d928f45a6ef1a47f2b74a7439c0577e39"
+    },
+    {
+      "command": "/bin/zsh -lc \"command -v python3; rg --files tests; cat CONTRIBUTING.rst; nl -ba tests/test_chain.py | sed -n '1,310p'; nl -ba tests/test_commands.py | sed -n '530,551p'; git log HEAD --oneline -- src/click/core.py | head -30\"",
+      "exit_code": 0,
+      "output_sha256": "f0f33eededa9f5831413e1679d59f64b1bee65d963a460979a903dde59c99490"
+    },
+    {
+      "command": "/bin/zsh -lc \"ls -l /Library/Developer/CommandLineTools/usr/bin/python3 /Applications/Xcode.app/Contents/Developer/usr/bin/python3 2>/dev/null; nl -ba docs/contrib.rst | sed -n '1,160p'; git merge-base --is-ancestor ffd43e9 HEAD; git show HEAD:README.md | head -75; nl -ba src/click/types.py | sed -n '745,805p'; nl -ba src/click/core.py | sed -n '458,481p'\"",
+      "exit_code": 0,
+      "output_sha256": "cc169e3c4995f86c4d7edb1d1453117d3bd6808dde506fbcdd9f45dcfe2c2074"
+    },
+    {
+      "command": "/bin/zsh -lc \"/Library/Developer/CommandLineTools/usr/bin/python3 -B -c 'import sys, asyncio, inspect\nsys.path.insert(0, '\\\\''src'\\\\'')\nimport click\nfrom click.testing import CliRunner\nprint('\\\\''runtime:'\\\\'', sys.version.split()[0], '\\\\''click:'\\\\'', click.__version__, '\\\\''source:'\\\\'', click.__file__)\nran = []\n@click.command()\nasync def leaf():\n    ran.append('\\\\''ran'\\\\'')\n    return 42\nr = CliRunner().invoke(leaf, standalone_mode=False)\nprint('\\\\''leaf_nonstandalone:'\\\\'', r.exit_code, inspect.iscoroutine(r.return_value), ran)\nr.return_value.close()\noriginal = leaf.callback\nreturned = []\ndef track():\n    c = original()\n    returned.append(c)\n    return c\nleaf.callback = track\nr = CliRunner().invoke(leaf)\nprint('\\\\''leaf_default:'\\\\'', r.exit_code, r.return_value, ran)\nfor c in returned:\n    c.close()\nfor chain in (False, True):\n    log = []\n    @click.group(chain=chain)\n    @click.pass_context\n    def group(ctx):\n        log.append('\\\\''group'\\\\'')\n        ctx.call_on_close(lambda: log.append('\\\\''group_close'\\\\''))\n    @group.command()\n    @click.pass_context\n    async def sub(ctx):\n        log.append('\\\\''async_body'\\\\'')\n        return 3\n    base = sub.callback\n    def wrap():\n        ctx = click.get_current_context()\n        ctx.call_on_close(lambda: log.append('\\\\''sub_close'\\\\''))\n        return base()\n    sub.callback = wrap\n    @group.result_callback()\n    def result(value):\n        log.append('\\\\''result'\\\\'')\n        return value\n    r = CliRunner().invoke(group, ['\\\\''sub'\\\\''], standalone_mode=False)\n    c = r.return_value[0] if chain else r.return_value\n    print('\\\\''group_before_await:'\\\\'', chain, log, inspect.iscoroutine(c))\n    asyncio.run(c)\n    print('\\\\''group_after_await:'\\\\'', chain, log)\n@click.group()\ndef multi():\n    pass\n@multi.command()\ndef done():\n    return 7\npending = []\n@multi.result_callback()\nasync def one(x):\n    return x + 1\n@multi.result_callback()\ndef two(x):\n    pending.append(x)\n    return '\\\\''done'\\\\''\nr = CliRunner().invoke(multi, ['\\\\''done'\\\\''], standalone_mode=False)\nprint('\\\\''stacked_results:'\\\\'', r.return_value, inspect.iscoroutine(pending[0]))\npending[0].close()\nasync def crossed():\n    a_entered, b_entered, a_read = asyncio.Event(), asyncio.Event(), asyncio.Event()\n    ca, cb = click.Context(click.Command('\\\\''a'\\\\'')), click.Context(click.Command('\\\\''b'\\\\''))\n    readings = []\n    async def a():\n        with ca:\n            a_entered.set()\n            await b_entered.wait()\n            readings.append(('\\\\''a'\\\\'', click.get_current_context().command.name))\n            a_read.set()\n    async def b():\n        await a_entered.wait()\n        with cb:\n            b_entered.set()\n            await a_read.wait()\n            readings.append(('\\\\''b'\\\\'', click.get_current_context().command.name))\n    await asyncio.gather(a(), b())\n    return readings\nprint('\\\\''crossed_contexts:'\\\\'', asyncio.run(crossed()))\nprint('\\\\''final_context:'\\\\'', click.get_current_context(silent=True))\n'\"",
+      "exit_code": 0,
+      "output_sha256": "fac0245e34e0e1003ae5a1b4215aac73b84cacdcb30809a0f933fb5ed9ebd4c8"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/types.py | sed -n '693,746p'; nl -ba tests/test_basic.py | sed -n '44,63p'; nl -ba tests/test_testing.py | sed -n '383,405p'; git show 422e211 -- src/click/core.py tests/test_commands.py; git show 7d3a871 -- src/click/core.py tests/test_chain.py; git status --short\"",
+      "exit_code": 0,
+      "output_sha256": "3f8781a9d7aade74130ee0e5fe26cda7bf2b5d080d75c7538e59b92b55b2ddfa"
+    },
+    {
+      "command": "/bin/zsh -lc \"/Library/Developer/CommandLineTools/usr/bin/python3 -B -c 'import sys, asyncio\nsys.path.insert(0, '\\\\''src'\\\\'')\nimport click\nfrom click.testing import CliRunner\nevents, contexts = [], []\ndef allocate(ctx, param, value):\n    name = ctx.command.name\n    events.append('\\\\''parse_'\\\\'' + name)\n    contexts.append(ctx)\n    ctx.call_on_close(lambda: events.append('\\\\''close_'\\\\'' + name))\n    return value\n@click.group(chain=True)\ndef cli():\n    pass\n@cli.command()\n@click.option('\\\\''--value'\\\\'', default='\\\\''x'\\\\'', callback=allocate)\ndef first(value):\n    events.append('\\\\''first_cancel'\\\\'')\n    raise asyncio.CancelledError()\n@cli.command()\n@click.option('\\\\''--value'\\\\'', default='\\\\''x'\\\\'', callback=allocate)\ndef second(value):\n    events.append('\\\\''second_body'\\\\'')\ntry:\n    CliRunner().invoke(cli, ['\\\\''first'\\\\'', '\\\\''second'\\\\''], standalone_mode=False)\nexcept asyncio.CancelledError:\n    pass\nprint('\\\\''chain_cancel_events:'\\\\'', events)\nprint('\\\\''remaining_cleanup_counts:'\\\\'', [(ctx.command.name, len(ctx._exit_stack._exit_callbacks)) for ctx in contexts])\nprint('\\\\''current_context:'\\\\'', click.get_current_context(silent=True))\nfor ctx in contexts:\n    ctx.close()\n'\"",
+      "exit_code": 0,
+      "output_sha256": "a54e39d7c837bbf1c37fd5fd142b1e8249b5554e53ccd94d65bd97f1c82dc500"
+    }
+  ],
+  "runtime_errors": [],
+  "stderr": "",
+  "companion_inventory": [],
+  "capture_success": true
+}

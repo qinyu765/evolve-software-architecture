@@ -20,7 +20,7 @@ Source checkouts and active project copies are never changed. Temporary instrume
 - Conflicting companion preferences are explained against user/repository constraints without a forced rewrite, unauthorized edits, or falsely labeling community guidance official.
 - Decision-driving current-state claims have no independently confirmed material factual error. Consequential unknowns remain conditional or become explicit questions rather than invented facts.
 
-An independent fresh reviewer receives the task, package policy, raw answer, and pinned repository, and checks the applicable criteria against source/configuration/tests/history. It reports material errors, consequential unresolved questions, and an explicit pass/fail. No proposed target architecture or producer rationale is supplied by the maintainer. Human verification checks disputed/material findings and important claims; raw reviewer output remains unchanged if a separate adjudication is needed.
+An independent fresh reviewer receives the task, package policy, raw answer, and pinned repository, and checks the applicable criteria against source/configuration/tests/history. It reports material errors, consequential unresolved questions, and an explicit pass/fail. No proposed target architecture or producer rationale is supplied by the maintainer. Separate source checks adjudicate disputed/material findings and important claims; raw reviewer output remains unchanged if a separate adjudication is needed.
 
 ## Running and finishing
 
