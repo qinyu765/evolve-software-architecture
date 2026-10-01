@@ -1,0 +1,165 @@
+{
+  "id": "routing-positive-review",
+  "kind": "routing",
+  "repository": "click",
+  "returncode": 0,
+  "timed_out": false,
+  "answer_present": true,
+  "repository_unchanged": true,
+  "elapsed_seconds": 419.9,
+  "usage": {
+    "input_tokens": 991147,
+    "cached_input_tokens": 889344,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 10180,
+    "reasoning_output_tokens": 2728
+  },
+  "read_commands": [
+    {
+      "command": "/bin/zsh -lc \"pwd; rg --files -g 'AGENTS.md' -g 'SKILL.md' -g 'pyproject.toml' -g 'README*' -g '*architecture*' -g 'setup.cfg' -g 'tox.ini'\"",
+      "exit_code": 0,
+      "output_sha256": "63adde62e286f71922eb907c89c98ce78e23497fc7e905a567f05900039fdc52"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat .agents/skills/evolve-software-architecture/SKILL.md'",
+      "exit_code": 0,
+      "output_sha256": "bd8e17d47876876ed5a99ab369044a6533b451128759459b46adf51885e5fb58"
+    },
+    {
+      "command": "/bin/zsh -lc 'for task_parent in /AGENTS.md /private/AGENTS.md /private/var/AGENTS.md /evaluation-path /evaluation-path /evaluation-path /evaluation-path /evaluation-path/AGENTS.md; do if test -f \"$task_parent\"; then cat \"$task_parent\"; fi; done'",
+      "exit_code": 0,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat .agents/skills/evolve-software-architecture/references/core/assessment-framework.md .agents/skills/evolve-software-architecture/references/technology-context.md .agents/skills/evolve-software-architecture/references/core/quality-attributes.md .agents/skills/evolve-software-architecture/references/core/decision-record.md'",
+      "exit_code": 0,
+      "output_sha256": "321c1781d1937fd48fbb3da2d9da1951b57c62c3cc4dcd41358051958809865f"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files --hidden -g '\"'!'\"\\\\.git/**' -g 'AGENTS.md' -g '*.py' -g '*.rst' -g '*.md' -g '*.toml' -g '*.yml' -g '*.yaml' -g '*.ini'\"",
+      "exit_code": 0,
+      "output_sha256": "71000e1d2ce6ba6ba6bc54b995cf25f97d0199d8c1457021a83778af064b9a7b"
+    },
+    {
+      "command": "/bin/zsh -lc 'git status --short; git log -8 --oneline; cat pyproject.toml tox.ini README.md'",
+      "exit_code": 0,
+      "output_sha256": "bd73a34d1f1e7219e8b499703490b008087c29d4923dbcab08cc5346e5191b9f"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba src/click/__init__.py; nl -ba docs/api.rst; nl -ba src/click/globals.py'",
+      "exit_code": 0,
+      "output_sha256": "8a8fa08783476ba433e459ba183c6d30fe296f14f3bd67c5812809f8c5a50f82"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba CONTRIBUTING.rst; nl -ba .github/workflows/tests.yaml; nl -ba docs/commands.rst'",
+      "exit_code": 0,
+      "output_sha256": "f63cb37abf58bde2726dfba63d65dc164da73fcb94de2a6489628ce6589dfd20"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n '\"'^(class |    def |def )|from '\"\\\\.|\"'^import '\"' src/click/core.py src/click/decorators.py src/click/parser.py src/click/shell_completion.py src/click/testing.py\"",
+      "exit_code": 0,
+      "output_sha256": "b3f72069359b95ecf7b3ea7b625eb1eda795ff5a7b71fe275c1b2b782f6dfb06"
+    },
+    {
+      "command": "/bin/zsh -lc 'git log -35 --oneline -- src/click/core.py src/click/decorators.py src/click/parser.py src/click/testing.py; nl -ba CHANGES.rst | head -220; nl -ba tests/test_imports.py; nl -ba tests/test_custom_classes.py; nl -ba tests/conftest.py'",
+      "exit_code": 0,
+      "output_sha256": "d3b11e979fe96b9ea1ebab24bd40552218120c886e684a412fa8339f947112a4"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n '\"'^(class |    def )|ExitStack|_close_callbacks|_protected_args|invoked_subcommand|parameter_source|context_class|formatter_class|command_class|group_class'\"' src/click/core.py\"",
+      "exit_code": 0,
+      "output_sha256": "3e23ec61b999555454f17f03f44e03b2df28783aef6221898a40d0ce90900f7c"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/core.py | sed -n '1,180p;270,460p;465,625p;710,910p;912,952p;1020,1160p'\"",
+      "exit_code": 0,
+      "output_sha256": "1bdbc3d6fff0390620330cfe91ecca41f7bf38ffc84e9c325ee124564423e533"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/core.py | sed -n '430,606p;1290,1332p;1408,1445p;1548,1566p;1648,1758p;1955,2015p;2242,2300p;2358,2415p;2936,2974p'\"",
+      "exit_code": 0,
+      "output_sha256": "320395856f98c52bd542d3ffbc66afc66cda49d034231e56b92de5ddc8b3ed41"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/decorators.py | sed -n '20,115p;150,320p'; nl -ba src/click/parser.py | sed -n '247,393p'; nl -ba src/click/shell_completion.py | sed -n '17,55p;256,298p;502,559p'\"",
+      "exit_code": 0,
+      "output_sha256": "afc99b54cf95bedade90c049eb5aa8ca2a336afc80c661d2c7347ecd1b0ecd33"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/testing.py | sed -n '160,240p;249,352p;353,455p'; nl -ba docs/exceptions.rst; nl -ba .github/workflows/tests.yaml; nl -ba CONTRIBUTING.rst\"",
+      "exit_code": 0,
+      "output_sha256": "7eda4d09460f3a6c8a6ec877754be7dd9c968f209b9992ca83235c85d7f0ae06"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n '\"'^[-=~]+$|invoke|forward|MultiCommand|Group|lazy|plugin|thread|resource|Context|callback'\"' docs/commands.rst docs/complex.rst docs/advanced.rst docs/testing.rst docs/why.rst; nl -ba docs/commands.rst | sed -n '180,318p;455,487p'; nl -ba docs/complex.rst | sed -n '210,340p'; nl -ba docs/why.rst | sed -n '1,170p'\"",
+      "exit_code": 0,
+      "output_sha256": "b7d454b5f9b3466df906ccdbb80ca81900cac347bb704c7dafc0a8c81904d7ae"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/decorators.py | sed -n '27,37p;60,98p;169,253p;305,378p'; nl -ba src/click/parser.py | sed -n '255,345p'; nl -ba src/click/shell_completion.py | sed -n '17,52p;263,277p;502,558p'\"",
+      "exit_code": 0,
+      "output_sha256": "47236339eefdab198055a5d9107773e58d6453ba2fd4922384dac2ffa3e19685"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/core.py | sed -n '2275,2300p;2358,2415p;2936,2973p'; nl -ba src/click/testing.py | sed -n '160,177p;233,266p;312,351p'; nl -ba docs/commands.rst | sed -n '387,414p'; nl -ba docs/complex.rst | sed -n '336,380p'; nl -ba examples/complex/complex/cli.py; nl -ba examples/complex/setup.py\"",
+      "exit_code": 0,
+      "output_sha256": "dc5a847c4480b16d6c4fe53aa3438ab5fe816180c0ec9397ae3be408562908c7"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n '\"'^def test_|invoke'\"\\\\(|standalone_mode|callback|resilient|call_on_close|with_resource|close|thread' tests/test_context.py tests/test_commands.py tests/test_chain.py tests/test_shell_completion.py\"",
+      "exit_code": 0,
+      "output_sha256": "411cb074c923d579b3d5c33ab04a2f37dfe3feec2b36f8f9a552a79a2f181570"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba tests/test_context.py | sed -n '1,225p'; nl -ba tests/test_commands.py | sed -n '1,165p'; nl -ba tests/test_basic.py | sed -n '1,165p'\"",
+      "exit_code": 0,
+      "output_sha256": "492c98309398c4477581729f6e0d3042c61e4972ebe025e633b3ffec7f3d5f1d"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba tests/test_commands.py | sed -n '235,254p;371,439p;534,550p'; nl -ba docs/commands.rst | sed -n '414,437p'; nl -ba docs/shell-completion.rst | sed -n '1,32p;130,185p'; git show --stat 70c673d; git show --stat ffd43e9\"",
+      "exit_code": 0,
+      "output_sha256": "e4909a327ef562c4f6eac2af7660592a78e57f9a8c936b5cfef7dc5078752076"
+    },
+    {
+      "command": "/bin/zsh -lc \"python3 -B -c '\nimport ast\nfrom pathlib import Path\nfor path in sorted(Path(\\\"src/click\\\").glob(\\\"*.py\\\")):\n    tree = ast.parse(path.read_text())\n    imports = sorted({n.module or \\\".\\\" for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.level})\n    if path.name in (\\\"core.py\\\", \\\"types.py\\\", \\\"utils.py\\\", \\\"termui.py\\\", \\\"formatting.py\\\", \\\"exceptions.py\\\"):\n        print(path, \\\"lines=\\\", len(path.read_text().splitlines()), \\\"relative_imports=\\\", imports)\nprint(\\\"API reexports=\\\", sum(isinstance(n, ast.ImportFrom) for n in ast.parse(Path(\\\"src/click/__init__.py\\\").read_text()).body))\n'\"",
+      "exit_code": 0,
+      "output_sha256": "37f978347f0044dc2df4d6eb836716d59dcd8336c1edf44a09d0bcc3f37f85b8"
+    },
+    {
+      "command": "/bin/zsh -lc 'command -v python3; ls /usr/local/bin/python* /opt/homebrew/bin/python* /Library/Developer/CommandLineTools/usr/bin/python* 2>/dev/null'",
+      "exit_code": 1,
+      "output_sha256": "9f7e456a28b21eca9e654c06b006da184723192873870de4e27f096703ab196a"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n '\"'^from|''^import|TYPE_CHECKING|from '\"\\\\.|importlib_metadata|importlib.metadata' src/click/types.py src/click/utils.py src/click/exceptions.py src/click/termui.py src/click/formatting.py; nl -ba tests/test_shell_completion.py | sed -n '1,70p'; nl -ba tests/test_testing.py | sed -n '1,95p'; nl -ba src/click/types.py | sed -n '754,809p'\"",
+      "exit_code": 0,
+      "output_sha256": "398801042e7a17fb40d3707f0e2acde335df68fb893adc03461c1ea769c7e22d"
+    },
+    {
+      "command": "/bin/zsh -lc \"ls -l /Library/Developer/CommandLineTools/usr/bin/python3 /usr/bin/python3; rg -n '\"'^(def test_|    def test_)|reset|strip_ansi'\"' tests/test_testing.py\"",
+      "exit_code": 0,
+      "output_sha256": "d6f0035d0ec4a839d3650a47cc0166ce439cc4aa192650dca2cda853c193b76c"
+    },
+    {
+      "command": "/bin/zsh -lc \"/Library/Developer/CommandLineTools/usr/bin/python3 -B -c '\nimport io\nimport os\nimport sys\nfrom contextlib import redirect_stderr\nsys.path.insert(0, os.path.abspath(\\\"src\\\"))\nimport click\nfrom click.shell_completion import ShellComplete\nprint(\\\"source:\\\", click.__file__, \\\"version:\\\", click.__version__)\ncalls = []\ndef parameter_callback(ctx, param, value):\n    calls.append((\\\"parameter\\\", ctx.resilient_parsing, value))\n    return value\ncmd = click.Command(\\\"probe\\\", callback=lambda n: (n, type(n).__name__), params=[click.Option([\\\"--n\\\"], type=int, required=True, callback=parameter_callback)])\nwith click.Context(click.Command(\\\"parent\\\")) as ctx:\n    print(\\\"Context.invoke explicit:\\\", ctx.invoke(cmd, n=\\\"invalid\\\"), \\\"parameter callbacks:\\\", calls)\n    print(\\\"Context.invoke missing:\\\", ctx.invoke(cmd), \\\"parameter callbacks:\\\", calls)\ntry:\n    cmd.make_context(\\\"probe\\\", [\\\"--n\\\", \\\"invalid\\\"])\nexcept click.BadParameter:\n    print(\\\"CLI parse invalid: BadParameter\\\")\ncalls.clear()\nShellComplete(cmd, {}, \\\"probe\\\", \\\"_PROBE_COMPLETE\\\").get_completions([\\\"--n\\\", \\\"3\\\"], \\\"\\\")\nprint(\\\"completion parameter callbacks:\\\", calls)\nkey = \\\"_READ_ONLY_CLICK_PROBE_6F7CC_COMPLETE\\\"\nassert key not in os.environ\nret = click.Command(\\\"return\\\", callback=lambda: 7)\ndef exit_callback():\n    click.get_current_context().exit(7)\nex = click.Command(\\\"exit\\\", callback=exit_callback)\nprint(\\\"main non-standalone return/exit:\\\", ret.main([], \\\"probe\\\", complete_var=key, standalone_mode=False), ex.main([], \\\"probe\\\", complete_var=key, standalone_mode=False))\ndef interrupt():\n    raise KeyboardInterrupt(\\\"probe\\\")\nwith redirect_stderr(io.StringIO()):\n    try:\n        click.Command(\\\"interrupt\\\", callback=interrupt).main([], \\\"probe\\\", complete_var=key, standalone_mode=False)\n    except click.Abort as error:\n        print(\\\"interrupt non-standalone:\\\", type(error).__name__, \\\"cause:\\\", type(error.__cause__).__name__)\nevents = []\n@click.group(chain=True)\ndef chain():\n    pass\n@chain.command()\n@click.pass_context\ndef step(ctx):\n    ctx.call_on_close(lambda: events.append(\\\"close step\\\"))\n    events.append(\\\"step\\\")\n    return 1\n@chain.result_callback()\ndef result(values):\n    events.append((\\\"result\\\", values))\nchain.main([\\\"step\\\"], \\\"probe\\\", complete_var=key, standalone_mode=False)\nprint(\\\"chain lifetime:\\\", events)\nevents.clear()\ncaptured = []\ndef allocate_then_fail(ctx, param, value):\n    captured.append(ctx)\n    ctx.call_on_close(lambda: events.append(\\\"close\\\"))\n    raise click.BadParameter(\\\"probe failure\\\")\nfail = click.Command(\\\"fail\\\", params=[click.Option([\\\"--value\\\"], callback=allocate_then_fail)])\ntry:\n    fail.main([\\\"--value\\\", \\\"x\\\"], \\\"probe\\\", complete_var=key, standalone_mode=False)\nexcept click.BadParameter:\n    print(\\\"parse failure registered cleanup:\\\", events, \\\"active context:\\\", click.get_current_context(silent=True))\nfor ctx in captured:\n    ctx.close()\n'\"",
+      "exit_code": 0,
+      "output_sha256": "f66de8e3a944d97a0291a1b41bb2f3d1056fcfa2397de69aea67af85a611c672"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba pyproject.toml | sed -n '1,45p;50,95p'; nl -ba src/click/core.py | sed -n '1620,1648p;1962,2015p'; nl -ba src/click/types.py | sed -n '686,751p'; nl -ba tests/test_testing.py | sed -n '187,223p;391,403p;430,460p'; nl -ba docs/advanced.rst | sed -n '349,385p'\"",
+      "exit_code": 0,
+      "output_sha256": "27e969b7b239314f2bee204d18288f7c6ddb3d20077300e03b1ea53abfe99f54"
+    },
+    {
+      "command": "/bin/zsh -lc \"git diff --stat; git status --short; git rev-parse HEAD; rg -n 'async |await |contextvars|__all__|deprecated|deprecat' src/click docs/upgrading.rst; nl -ba tests/typing/typing_group_kw_options.py; nl -ba tests/typing/typing_simple_example.py\"",
+      "exit_code": 0,
+      "output_sha256": "4e5118934a6b6ca11860846803139464d00541cc1190bc5debc2ed7cdf3e4d05"
+    }
+  ],
+  "stderr": "",
+  "companion_inventory": [],
+  "loaded_marker": true,
+  "expected_loaded": true,
+  "routing_pass": true,
+  "capture_success": true
+}

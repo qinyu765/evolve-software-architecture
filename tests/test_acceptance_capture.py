@@ -44,12 +44,15 @@ class AcceptanceCaptureTest(unittest.TestCase):
                     "type": "command_execution", "command": f"cat {last.parent}/repository/README.md",
                     "aggregated_output": "source", "exit_code": 0,
                 }}
-                return subprocess.CompletedProcess(command, 0, json.dumps(event) + "\n", "")
+                error = {"type": "error", "message": f"synthetic diagnostic at {last.parent}/repository"}
+                return subprocess.CompletedProcess(command, 0, json.dumps(event) + "\n" + json.dumps(error) + "\n", "")
 
             with patch("scripts.run_acceptance.subprocess.run", side_effect=fake_model):
                 record = run_task(task, args, sources, candidate, [], "")
             self.assertTrue(record["capture_success"])
             self.assertEqual(len(record["read_commands"]), 1)
+            self.assertEqual(len(record["runtime_errors"]), 1)
+            self.assertNotIn("architecture-acceptance-", record["runtime_errors"][0])
             saved = (output / "answers/capture-only.md").read_text()
             self.assertNotIn("architecture-acceptance-", saved)
             self.assertNotIn("architecture-acceptance-", record["read_commands"][0]["command"])

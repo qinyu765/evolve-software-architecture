@@ -42,4 +42,8 @@ Release also requires package validation, existing tests, byte-identical archive
 
 ## Result index
 
-Results and independent adjudication will be linked here after the fixed candidate has completed acceptance. A missing or incomplete result does not satisfy the release gate.
+See the [selected evidence and adjudication](results/generic-v0.2-acceptance-summary.md) and [machine-readable index](results/generic-v0.2-acceptance-summary.json). Failed attempts remain alongside successful runs and do not count as passes.
+
+A targeted additional [AIRI startup-boundary task](cases/generic-v0.2-boundary-bootstrap.json) traces a privileged operation from UI through actual startup and bridge configuration. It was added after the broad review did not explicitly explain preload; it does not name the expected topology, add an Electron adapter, or retroactively satisfy the historical broad-review gate. Use `--case evals/cases/generic-v0.2-boundary-bootstrap.json` with the same answer/review commands and profile to reproduce it.
+
+The selected package includes two evidenced narrow corrections: asking before a detailed review when guidance and authorization are already known to be absent, and checking observable compatibility without treating inferred requirements as confirmed scope. Only the affected tasks were repeated. Release readiness concerns proposal quality and cooperation behavior; implemented migrations, repeatability and universal model gains remain outside this run's evidence.

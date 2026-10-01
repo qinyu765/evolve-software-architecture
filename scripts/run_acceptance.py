@@ -57,7 +57,7 @@ def run_task(task: dict, args: argparse.Namespace, sources: dict, candidate: str
             answer = args.answers_from / 'answers' / (task['id'] + '.md')
             prompt = ('Independently audit the answer below against this pinned repository and the supplied Skill policy. '
                       'This is an evaluation, not a request to perform the original task. Do not load or execute Skills. '
-                      'Work read-only; do not edit files or external state. Investigate decision-driving claims using source, '
+                      'Work read-only; do not edit files or external state. Published /evaluation-path/repository links are deliberate local-path redactions; resolve their repository-relative suffix in this checkout. Investigate decision-driving claims using source, '
                       'configuration, tests, and history. Do not prescribe an expected target architecture. '
                       'Check source/provenance, companion cooperation and user constraints, existing capabilities, '
                       'alternatives, compatibility, migration, rollback, verification, and missing-guidance authorization '
@@ -84,7 +84,7 @@ def run_task(task: dict, args: argparse.Namespace, sources: dict, candidate: str
         paths = [temp, ROOT, *(v['path'] for v in sources.values())]
         clean_answer = redact_text(answer, paths)
         (args.output_dir / 'answers' / (task['id'] + '.md')).write_text(clean_answer, encoding='utf-8')
-        traces, usage = [], None
+        traces, usage, runtime_errors = [], None, []
         for line in stdout.splitlines():
             try:
                 event = json.loads(line)
@@ -92,6 +92,8 @@ def run_task(task: dict, args: argparse.Namespace, sources: dict, candidate: str
                 continue
             if event.get('type') == 'turn.completed':
                 usage = event.get('usage')
+            if event.get('type') in ('error', 'turn.failed'):
+                runtime_errors.append(redact_text(json.dumps(event, ensure_ascii=False), paths))
             item = event.get('item', {})
             if event.get('type') == 'item.completed' and item.get('type') == 'command_execution':
                 traces.append({'command': redact_text(item.get('command', ''), paths),
@@ -101,7 +103,7 @@ def run_task(task: dict, args: argparse.Namespace, sources: dict, candidate: str
         record = {'id': task['id'], 'kind': task['kind'], 'repository': task['repository'],
                   'returncode': returncode, 'timed_out': timed_out, 'answer_present': bool(answer.strip()),
                   'repository_unchanged': unchanged, 'elapsed_seconds': round(time.monotonic() - started, 2),
-                  'usage': usage, 'read_commands': traces,
+                  'usage': usage, 'read_commands': traces, 'runtime_errors': runtime_errors,
                   'stderr': redact_text(stderr, paths) if returncode else '',
                   'companion_inventory': inventory if task['repository'] == 'airi' else []}
         if args.phase == 'answers':
@@ -117,6 +119,7 @@ def run_task(task: dict, args: argparse.Namespace, sources: dict, candidate: str
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--case', type=Path, default=CASE)
     parser.add_argument('--phase', choices=('answers', 'reviews'), required=True)
     parser.add_argument('--airi-source', type=Path, required=True)
     parser.add_argument('--click-source', type=Path, required=True)
@@ -131,7 +134,7 @@ def main() -> int:
     args = parser.parse_args()
     if min(args.timeout, args.concurrency) < 1:
         raise SystemExit('Timeout and concurrency must be positive')
-    case = json.loads(CASE.read_text())
+    case = json.loads(args.case.read_text())
     candidate = git(ROOT, 'rev-parse', f'{args.skill_ref}^{{commit}}')
     sources = {k: dict(v, path=path.resolve()) for k, v, path in (
         ('airi', case['repositories']['airi'], args.airi_source),
@@ -160,7 +163,7 @@ def main() -> int:
         source_manifest = args.answers_from / 'manifest.json'
         source_manifest_bytes = source_manifest.read_bytes()
         source = json.loads(source_manifest_bytes)
-        if source['candidate_commit'] != candidate or source['profile'] != profile or source['case_sha256'] != hashlib.sha256(CASE.read_bytes()).hexdigest():
+        if source['candidate_commit'] != candidate or source['profile'] != profile or source['case_sha256'] != hashlib.sha256(args.case.read_bytes()).hexdigest():
             raise SystemExit('Review must match the answer candidate, task definition, and execution profile')
         for task in tasks:
             record = json.loads((args.answers_from / 'records' / (task['id'] + '.json')).read_text())
@@ -185,7 +188,7 @@ def main() -> int:
                                   'summary': body[body.find('\n---', 4) + 4:].strip().split('\n\n')[0]})
     manifest = {'protocol': 'generic-v0.2-compact', 'phase': args.phase,
                 'date': datetime.now(timezone.utc).isoformat(), 'candidate_commit': candidate,
-                'package_sha256': package_sha, 'case_sha256': hashlib.sha256(CASE.read_bytes()).hexdigest(),
+                'package_sha256': package_sha, 'case_sha256': hashlib.sha256(args.case.read_bytes()).hexdigest(),
                 'runner_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                 'profile': profile, 'repositories': case['repositories'], 'tasks': tasks,
                 'source_manifest_sha256': hashlib.sha256(source_manifest_bytes).hexdigest() if source_manifest_bytes is not None else None,
