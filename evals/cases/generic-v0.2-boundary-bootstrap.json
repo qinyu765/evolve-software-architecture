@@ -1,0 +1,22 @@
+{
+  "id": "generic-architecture-v0.2-boundary-bootstrap",
+  "repositories": {
+    "airi": {
+      "url": "https://github.com/moeru-ai/airi",
+      "commit": "5228f94123e42416435e7f7e8215df26f3bb065b"
+    },
+    "click": {
+      "url": "https://github.com/pallets/click",
+      "version": "8.1.8",
+      "commit": "934813e4d421071a1b3db3973c02fe2721359a6e"
+    }
+  },
+  "tasks": [
+    {
+      "id": "airi-boundary-bootstrap",
+      "repository": "airi",
+      "kind": "behavior",
+      "prompt": "使用 $evolve-software-architecture，沿 AIRI 当前桌面 UI 发起特权插件操作的完整路径，核对实际启动配置、跨边界桥接入口、权限授予和状态所有权。考虑增加第三方插件和新窗口时哪些边界需要稳定，比较保留现状与渐进调整，给出回滚和验证标准。请聚焦此边界、简洁说明事实与未决项；使用适用的已安装技术栈 Skills，缺少覆盖时已授权版本适用的维护方官方文档。只提供建议，不改代码。"
+    }
+  ]
+}

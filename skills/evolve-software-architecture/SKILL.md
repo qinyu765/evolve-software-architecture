@@ -1,93 +1,57 @@
 ---
 name: evolve-software-architecture
-description: Evidence-based software architecture guidance for understanding an existing repository, identifying structural friction, and choosing a durable evolution path across project types. Use when the user asks for architecture evaluation, module boundaries, extensibility, long-term maintainability, technical-debt direction, cross-module or cross-process design within an existing system, major refactoring strategy, or architecture trade-offs. Invoke explicitly for a repository health review. Keep ordinary local fixes, styling, renames, and routine dependency updates focused unless they expose an architectural decision.
+description: Evidence-based architecture guidance for existing repositories; evaluate boundaries, technical-debt direction, substantial new requirements, and incremental refactoring. Use when a decision changes module or process ownership, extensibility, compatibility, or cross-cutting design. Combine repository evidence with applicable technology Skills to compare trade-offs and produce a migration plan. Keep ordinary local fixes, styling, renames, and routine dependency updates focused unless they expose an architectural decision.
 ---
 
 # Evolve Software Architecture
 
-Provide architecture guidance that lowers future change cost without pretending that one design can predict every future requirement. Ground every recommendation in the repository's current facts, project type, constraints, and evidence. Prefer a small number of deep, well-placed seams over a broad layer scheme or framework fashion.
+Lower future change cost through evidence-based, reversible architecture decisions. This Skill supplies the judgment workflow; relevant technology Skills supply platform constraints and implementation knowledge. It carries no built-in framework adapter or dependency catalog.
 
-## Operating contract
+## Working boundary
 
-Produce advice before implementation. Stop at a decision-ready recommendation unless the user explicitly asks for a change. Treat “long-term” as reversible evolution: state what should be stable, what may vary, what is still unknown, and how to learn before committing to an expensive abstraction.
+Deliver a decision-ready recommendation and execution plan before changing code. Implement only when the user requests it, using applicable technology Skills and repository workflows. Cover existing-system reviews, structural refactoring, and substantial new requirements; do not expand a local task into a whole-repository review or introduce a separate greenfield workflow.
 
-Keep these distinctions visible:
+Keep **facts** (observed evidence), **inferences** (reasoned interpretations), **unknowns** (unestablished decision inputs), and **constraints** (limits the decision must respect) distinct where confusing them could change the recommendation. Use the user's language and the project's domain vocabulary.
 
-- **Fact** — directly observed in source, configuration, documentation, history, or a user statement.
-- **Inference** — a reasoned interpretation of facts; state the reasoning.
-- **Unknown** — important information not yet established; propose the cheapest way to learn it.
-- **Constraint** — a limit that the design must respect, including platform, product, team, release, security, and operational limits.
+## Establish context and technology support
 
-Use the user's language for the answer. Use the project's existing domain vocabulary after locating it. Do not import web-application assumptions into desktop, SDK, CLI, mobile, data, or embedded work.
+Read repository instructions, manifests, entry points, relevant architecture documents, tests, and change history. Classify the system from multiple signals; directory names and a helper's file inventory are insufficient. Trace the relevant runtime or API flow, state ownership, module/process/trust boundaries, and failure paths before choosing a target design.
 
-## Workflow
-
-### 1. Establish the repository context
-
-Inspect before judging. Read the closest `AGENTS.md` or `CLAUDE.md`, repository instructions, manifests, entry points, current architecture documents, roadmap, and relevant ADRs. Inspect the recent history and the files that have changed repeatedly. Record the repository type and confidence in that classification.
-
-Use the read-only helper when a compact inventory is useful:
+Use [assessment-framework.md](references/core/assessment-framework.md) for deeper investigation and evidence provenance. The optional read-only inventory helper is:
 
 ```bash
 python3 <skill-root>/scripts/collect_repo_signals.py --repo <repository>
 ```
 
-Read [assessment-framework.md](references/core/assessment-framework.md) for the evidence table and investigation order. Read [project-type-selection.md](references/project-types/project-type-selection.md), then load only the project-type adapter that matches the observed signals. If no adapter is justified, use the core workflow and label the missing domain knowledge as an unknown.
+Follow [technology-context.md](references/technology-context.md) to select available, applicable technology Skills and reconcile their guidance with repository facts and constraints. Prefer verified maintainer-published Skills, then credible community Skills with inspectable provenance. Load only relevant guidance; names or marketplace placement do not establish official status.
 
-### 2. Model the current system
+**If no suitable technology Skill is installed and accessible, ask the user before substituting official documentation or proceeding with technology-dependent conclusions.** Explain the specific gap and offer documentation, a user-supplied Skill, or a narrower scope. Honor authorization already given for this task; do not ask again. While awaiting the answer, repository inventory and technology-independent analysis may continue. Do not install Skills automatically.
 
-Describe the important runtime and build-time flows, ownership of state, module interfaces, process boundaries, external dependencies, and test seams. Locate where a change currently spreads and where knowledge is duplicated. Name the current seam; do not invent a target architecture before understanding the existing one.
+If the request already establishes that guidance and fallback authorization are missing, ask before a detailed review. Source inspection does not bypass that choice: do not deliver API/lifecycle compatibility advice or a migration recommendation under a “repository-only” or “generic” label. Limit the interim response to established scope/inventory and the concrete question, then wait for the answer.
 
-Separate:
+## Investigate the decision
 
-- symptoms from root causes;
-- accidental complexity from domain complexity;
-- a real variation point from a hypothetical one;
-- a missing boundary from a boundary that would only add indirection.
+For an existing-system review, locate actual change amplification, missing ownership, or fragile interfaces. Separate symptoms from causes and real variation from hypothetical extensibility.
 
-### 3. Choose quality attributes deliberately
+For a substantial new requirement:
 
-Read [quality-attributes.md](references/core/quality-attributes.md). Select the few attributes that actually govern this decision, rank them, and explain the trade-offs. Consider maintainability, extensibility, testability, operability, performance, security, portability, and cost as competing dimensions rather than a checklist to maximize simultaneously.
+- establish the intended behavior, compatibility commitments, and constraints;
+- check existing APIs, implementation, configuration, tests, and history for capabilities that already satisfy part of the request;
+- trace which boundaries, owners, consumers, and failure paths must change;
+- compare extending the current seams with structural change before proposing a new abstraction.
 
-### 4. Compare options
+Verify the current-state claims that drive a recommendation. Documentation may describe intent or an older implementation. Reconcile consequential disagreements with implementation, configuration, tests, and history; otherwise label the uncertainty and make the recommendation conditional or ask the user. A missing search result is not proof of absence. Do not recommend building an abstraction merely because it was not mentioned in a document.
 
-Present at least two viable options, including keeping the current shape when it remains defensible. For each option state:
+## Compare and recommend
 
-- the boundary and ownership it creates;
-- the changes it enables and the assumptions it introduces;
-- migration and rollback cost;
-- operational and testing consequences;
-- the evidence that would make the option wrong.
+Use [quality-attributes.md](references/core/quality-attributes.md) to rank the few attributes governing the decision and state their trade-offs. Compare viable alternatives, including retaining or locally extending the current shape when defensible. Explain ownership, assumptions, migration cost, operational consequences, and evidence that would invalidate each option.
 
-Use deep-module reasoning as one tool: ask whether a small interface earns its complexity through leverage and locality. Do not treat it as a universal architecture style.
+Do not use an unconfirmed requirement to eliminate an option. Compatibility includes observable behavior across existing execution and extension contexts, not just signatures; verify consequential preservation claims or keep them conditional.
 
-### 5. Recommend an evolution path
+Recommend a direction supported by those drivers. Prefer small, meaningful interfaces over speculative layers. Give incremental steps, behavior/compatibility checks, rollback points, and observable completion criteria. Identify abstractions to defer and the signals that would justify them. Use [decision-record.md](references/core/decision-record.md) for decisions worth recording in an ADR.
 
-Recommend one option only after the comparison. Split the path into reversible steps, identify the first useful vertical slice, preserve behaviour during migration, and specify observable exit criteria. State what not to build yet and what signal would justify revisiting it. Surface decisions that deserve an ADR using [decision-record.md](references/core/decision-record.md).
+## Deliver at the task's scale
 
-### 6. Verify the recommendation
+Make scope and confidence, decisive evidence, current friction or requirement impact, quality-attribute priorities, alternatives, the recommendation, migration/verification, and consequential open decisions easy to find. Use a compact answer for a narrow boundary decision and a fuller review for a broad request; these are content requirements, not mandatory headings.
 
-Give concrete checks: tests through the intended interface, dependency or architecture checks, performance or failure-mode checks, and a review of the resulting diff. Revisit the recommendation when a new repository type, constraint, or source of evidence invalidates an assumption.
-
-## Output contract
-
-Structure the answer with these sections unless the user asks for a different format:
-
-1. **Scope and confidence** — what decision is being considered and how the repository was classified.
-2. **Observed facts** — evidence with paths, symbols, commands, or history references.
-3. **Current friction** — the change amplification, coupling, or missing ownership that matters.
-4. **Quality-attribute priorities** — ranked attributes and explicit trade-offs.
-5. **Options** — at least two, including the current design when reasonable.
-6. **Recommendation** — the chosen direction, rationale, and rejected alternatives.
-7. **Migration and verification** — incremental steps, rollback, tests, observability, and completion criteria.
-8. **Open decisions** — only questions whose answers can change the recommendation.
-
-Mark facts, inferences, and unknowns inline when confusing them would change the decision. Keep repository-specific observations in the current review or its evaluation case; promote a rule into a core reference only after it survives materially different project types.
-
-## Resources
-
-- [assessment-framework.md](references/core/assessment-framework.md) — evidence-first repository investigation.
-- [quality-attributes.md](references/core/quality-attributes.md) — selecting and balancing quality attributes.
-- [decision-record.md](references/core/decision-record.md) — ADR-ready decision format.
-- [project-type-selection.md](references/project-types/project-type-selection.md) — adapter selection and promotion rules.
-- [desktop-tauri.md](references/project-types/desktop-tauri.md) — desktop/Tauri-specific concerns.
+Identify the technology Skills or authorized documentation that materially informed the decision, their known provenance/version limits, and any unresolved gaps. Do not present their general practices as facts about this repository. Keep project-specific findings in the review or evaluation case rather than converting them into universal rules.

@@ -1,0 +1,98 @@
+{
+  "id": "click-major-requirement",
+  "kind": "behavior",
+  "repository": "click",
+  "returncode": 0,
+  "timed_out": false,
+  "answer_present": true,
+  "repository_unchanged": true,
+  "elapsed_seconds": 269.34,
+  "usage": {
+    "input_tokens": 425472,
+    "cached_input_tokens": 366080,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 5110,
+    "reasoning_output_tokens": 1926
+  },
+  "read_commands": [
+    {
+      "command": "/bin/zsh -lc \"pwd; rg --files -g 'AGENTS.md' -g 'pyproject.toml' -g 'tox.ini' -g 'core.py' -g 'globals.py' -g 'decorators.py' -g 'testing.py' -g '*commands*' -g '*context*' -g '*custom*' -g '*testing*' -g 'CHANGES*' -g '*architecture*'\"",
+      "exit_code": 0,
+      "output_sha256": "ba1cfa6638eca7707cf4cf8d30de7378a80c9b1fc5015eabf224d563da871c2c"
+    },
+    {
+      "command": "/bin/zsh -lc 'git status --short; git log -6 --oneline; git describe --tags --always; git show --stat --oneline ffd43e9'",
+      "exit_code": 0,
+      "output_sha256": "593425acfd9ff60024634586c3a6040eba8b4a8fb7bd9e9fba9b77538906e4fa"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n '\"'^class |def (invoke|main|forward|__enter__|__exit__|scope|close|make_context|with_resource|call_on_close)|_depth|_close_callbacks|ExitStack|KeyboardInterrupt|EOFError'\"' src/click/core.py; nl -ba tests/test_custom_classes.py; nl -ba docs/testing.rst | sed -n '1,65p'; nl -ba docs/commands.rst | sed -n '350,450p'\"",
+      "exit_code": 0,
+      "output_sha256": "c51187a4156baf9f4f2672b78d6de0e4140d66ff7d34b1251c99f135da7bad6c"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba pyproject.toml; nl -ba tox.ini; nl -ba src/click/globals.py; nl -ba src/click/decorators.py | sed -n '1,145p'; nl -ba src/click/__init__.py | tail -25\"",
+      "exit_code": 0,
+      "output_sha256": "4456c1388ad9ff36edd130881d7af92c31a7f3e4c24d665550eacd5cb771877c"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/testing.py | sed -n '150,550p'; rg -n 'async|resource|close|invoke|context_class|chain' tests/test_context.py tests/test_commands.py tests/test_testing.py; git show ffd43e9; rg --files -g 'AGENTS.md' -g '*skill*' -g '*SKILL*' -g '*requirements*' -g '.github/workflows/*'\"",
+      "exit_code": 1,
+      "output_sha256": "3deae8b5bf9c06057e414411df799fc47d9089a6ed74c1add37e0e42984d4bc6"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/core.py | sed -n '455,615p'; nl -ba src/click/core.py | sed -n '714,819p'; nl -ba src/click/core.py | sed -n '837,985p'; nl -ba src/click/core.py | sed -n '1010,1165p'\"",
+      "exit_code": 0,
+      "output_sha256": "4520e81e6c313c0688efdfb5e702c8397d81f87a78d920bbb44c9b58bd228348"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/core.py | sed -n '1425,1450p'; nl -ba src/click/core.py | sed -n '1655,1750p'; nl -ba docs/commands.rst | sed -n '375,460p'; nl -ba docs/testing.rst | sed -n '1,28p'; nl -ba tests/test_commands.py | sed -n '151,208p'; nl -ba tests/test_context.py | sed -n '100,255p'\"",
+      "exit_code": 0,
+      "output_sha256": "c00242a3416174bfba085ce2a3ffbd76df6752944926b1c3fd388884ff3462ad"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'thread|context|async|invoke|subclass' docs/advanced.rst docs/api.rst docs/commands.rst docs/complex.rst CHANGES.rst; git log --oneline --all -- src/click/globals.py | head -25; git log --oneline --all --grep='context\\\\|resource\\\\|close\\\\|async' -i | head -45; rg --files .github requirements tests/typing | head -60; rg -n 'async|await' src tests docs\"",
+      "exit_code": 1,
+      "output_sha256": "32b9f599d053705ce958bbd7d5ded9b0dfbc3cc102bc1dc23f0207996450c6f8"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/core.py | sed -n '1014,1135p'; nl -ba src/click/core.py | sed -n '1428,1448p'; nl -ba src/click/core.py | sed -n '1663,1750p'\"",
+      "exit_code": 0,
+      "output_sha256": "f247d627b5ae3872840b88eba3babfbbd948997a54feaeb9655a44ced4d3a57c"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba tests/test_commands.py | sed -n '150,208p'; nl -ba docs/commands.rst | sed -n '407,431p'; nl -ba docs/testing.rst | sed -n '1,25p'; nl -ba docs/advanced.rst | sed -n '350,389p'; nl -ba .github/workflows/tests.yaml | sed -n '1,130p'; git log -8 --oneline -- src/click/core.py; git log --oneline --grep='context.*pop\\\\|ExitStack\\\\|resource' -i HEAD | head -25\"",
+      "exit_code": 0,
+      "output_sha256": "3c0c608287c611f37796e39b5a3f84457b65cb47c2693ad3fb85be64ce6ab133"
+    },
+    {
+      "command": "/bin/zsh -lc \"python3 -B -c 'from pathlib import Path; p=Path.cwd(); files=[d/\\\"AGENTS.md\\\" for d in [p,*p.parents]]; [(print(str(f)),print(f.read_text())) for f in files if f.is_file()]'; git show 8934907 -- src/click/core.py tests/test_context.py; git log --oneline HEAD --grep='context.*pop' -i; git status --short\"",
+      "exit_code": 0,
+      "output_sha256": "fae5ecd2a822229d1cc53a9e699ab03504a949c581fc451ff8477c4ed6a4f3b2"
+    },
+    {
+      "command": "/bin/zsh -lc \"command -v -a python3; nl -ba docs/index.rst | tail -75; git show c23223b --; git log --oneline HEAD --grep='context' -i | head -25; nl -ba src/click/types.py | sed -n '735,820p'; nl -ba src/click/testing.py | sed -n '160,225p'\"",
+      "exit_code": 0,
+      "output_sha256": "8b75465d388fab74164bddf229a3d85fa4ac11b2eb03e4c5f6289d8a170b0d6e"
+    },
+    {
+      "command": "/bin/zsh -lc \"python3 -B -c 'import sys,asyncio,inspect; sys.path.insert(0,\\\"src\\\"); import click; from click.testing import CliRunner; ran=[]\n@click.command()\nasync def cmd():\n    ran.append(True)\n    return click.get_current_context().info_name\nr=CliRunner().invoke(cmd,standalone_mode=False); print(\\\"version\\\",click.__version__,\\\"exit\\\",r.exit_code,\\\"awaitable\\\",inspect.isawaitable(r.return_value),\\\"ran\\\",ran)\ntry:\n    asyncio.run(r.return_value)\nexcept Exception as e:\n    print(type(e).__name__,str(e))\nasync def crossed():\n    a=click.Context(click.Command(\\\"a\\\")); b=click.Context(click.Command(\\\"b\\\")); entered=asyncio.Event(); seen=asyncio.Event()\n    async def one():\n        with a:\n            await entered.wait(); print(\\\"A sees\\\",click.get_current_context().command.name); seen.set()\n    async def two():\n        with b:\n            entered.set(); await seen.wait()\n    await asyncio.gather(one(),two())\nasyncio.run(crossed())'\"",
+      "exit_code": 0,
+      "output_sha256": "80399d279a7eabc79f65b30c32661f5bfeff50e9034fae6cfe5c09c9429039e5"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba docs/contrib.rst | sed -n '1,140p'; nl -ba src/click/decorators.py | sed -n '165,228p'; nl -ba src/click/core.py | sed -n '687,716p'; nl -ba tests/test_testing.py | sed -n '160,189p'; nl -ba tests/test_testing.py | sed -n '386,405p'; git log --oneline HEAD --grep='close.*pop\\\\|pop.*close' -i; git status --porcelain\"",
+      "exit_code": 0,
+      "output_sha256": "797b36e168941b762990fd8e4abe972393848a495af3320b904c743d509f6981"
+    },
+    {
+      "command": "/bin/zsh -lc \"python3 -B -c 'import sys,contextvars; sys.path.insert(0,\\\"src\\\"); import click; from click.testing import CliRunner\n@click.command()\n@click.pass_context\ndef cli(ctx):\n    same=contextvars.Context().run(click.get_current_context)\n    click.echo(\\\"same_thread_empty_python_context=\\\"+str(same is ctx))\nr=CliRunner().invoke(cli); print(r.output.strip()); print(\\\"exit\\\",r.exit_code,\\\"exception\\\",r.exception)\nv=contextvars.ContextVar(\\\"proposed_stack\\\",default=()); v.set((\\\"click-context\\\",)); print(\\\"ContextVar_inside_empty_python_context\\\",contextvars.Context().run(v.get))'; git status --short\"",
+      "exit_code": 0,
+      "output_sha256": "f616400a92da4ced1de16f06bab3b8b3f8dff5ddcb8124d39ab838814107a471"
+    }
+  ],
+  "runtime_errors": [],
+  "stderr": "",
+  "companion_inventory": [],
+  "capture_success": true
+}

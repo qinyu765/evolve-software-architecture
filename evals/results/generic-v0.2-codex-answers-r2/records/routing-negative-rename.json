@@ -1,0 +1,30 @@
+{
+  "id": "routing-negative-rename",
+  "kind": "routing",
+  "repository": "click",
+  "returncode": 0,
+  "timed_out": false,
+  "answer_present": true,
+  "repository_unchanged": true,
+  "elapsed_seconds": 21.9,
+  "usage": {
+    "input_tokens": 29308,
+    "cached_input_tokens": 26624,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 206,
+    "reasoning_output_tokens": 0
+  },
+  "read_commands": [
+    {
+      "command": "/bin/zsh -lc \"rg -n -A 22 -B 4 'def _posixify' src/click/utils.py\"",
+      "exit_code": 0,
+      "output_sha256": "e6862d77f078869ce4345835c45da9f97e517127861baf34f574cbbc578e50e6"
+    }
+  ],
+  "stderr": "",
+  "companion_inventory": [],
+  "loaded_marker": false,
+  "expected_loaded": false,
+  "routing_pass": true,
+  "capture_success": true
+}

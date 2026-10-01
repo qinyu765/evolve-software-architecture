@@ -1,0 +1,351 @@
+{
+  "id": "airi-companion-conflict",
+  "kind": "behavior",
+  "repository": "airi",
+  "returncode": 0,
+  "timed_out": false,
+  "answer_present": true,
+  "repository_unchanged": true,
+  "elapsed_seconds": 307.04,
+  "usage": {
+    "input_tokens": 1236648,
+    "cached_input_tokens": 1126016,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 6825,
+    "reasoning_output_tokens": 1294
+  },
+  "read_commands": [
+    {
+      "command": "/bin/zsh -lc 'cat .agents/skills/vue/SKILL.md .agents/skills/vue-best-practices/SKILL.md'",
+      "exit_code": 0,
+      "output_sha256": "dccad0060496cd0c77124946f89d4ac49fccd16282d9360e8c5d661c01701ca7"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat .agents/skills/evolve-software-architecture/SKILL.md .agents/skills/evolve-software-architecture/references/technology-context.md .agents/skills/evolve-software-architecture/references/core/assessment-framework.md .agents/skills/evolve-software-architecture/references/core/quality-attributes.md .agents/skills/evolve-software-architecture/references/core/decision-record.md'",
+      "exit_code": 0,
+      "output_sha256": "b31c2c122b04e4f0ea9277a834ca97d733cf572ca10cd1387935fc5cb60d05ab"
+    },
+    {
+      "command": "/bin/zsh -lc \"pwd; rg --files -g 'AGENTS.md' -g '*plugin*' -g '*Plugin*' -g 'package.json' -g '*architecture*'\"",
+      "exit_code": 0,
+      "output_sha256": "088d90c56b4a1ff3fbf7c83d9105cd32c43030de1115686421860e28d0aa863f"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat AGENTS.md package.json packages/stage-pages/package.json packages/stage-ui/package.json apps/stage-tamagotchi/package.json'",
+      "exit_code": 0,
+      "output_sha256": "e5c309a57ad9232350094f1b8c8e99041ebc98f03011734d620a02c891e5be60"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat .agents/skills/vue/references/core-new-apis.md .agents/skills/vue-best-practices/references/reactivity.md .agents/skills/vue-best-practices/references/sfc.md .agents/skills/vue-best-practices/references/component-data-flow.md .agents/skills/vue-best-practices/references/composables.md .agents/skills/vue-best-practices/references/state-management.md'",
+      "exit_code": 0,
+      "output_sha256": "c83d310a3d7239ca60e93c4b29be18268efc2ab40e528f94c7aac9163ec90704"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files packages/stage-pages/src packages/stage-ui/src apps/stage-tamagotchi/src | rg '(plugins|plugin-host|plugin-tools|/shared/)'\"",
+      "exit_code": 0,
+      "output_sha256": "b5892abb6c396f75d0f3025c8059638b47edf1613e92bcc8ed2f331da4192f83"
+    },
+    {
+      "command": "/bin/zsh -lc \"git log -8 --format='%h %s' -- packages/stage-pages/src/pages/devtools/plugin-host.vue packages/stage-ui/src/stores/devtools/plugin-host-debug.ts packages/stage-ui/src/stores/plugin-host-capabilities.ts apps/stage-tamagotchi/src/main/services/airi/plugins\"",
+      "exit_code": 0,
+      "output_sha256": "4f93816cbf61ab51ce25fb9f1376ce0a94a7c58a4633195b5234ee094060cd00"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba packages/stage-pages/src/pages/devtools/plugin-host.vue'",
+      "exit_code": 0,
+      "output_sha256": "a92e509d58302b11c780b8cd35074a66bce30e8e2c57c7387356a5099ebd3796"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba packages/stage-ui/src/stores/devtools/plugin-host-debug.ts'",
+      "exit_code": 0,
+      "output_sha256": "e0e8441ff314a3f8d6c122d8546c2adb95fa33ca6798485cf369f7cc29eaddff"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba packages/stage-ui/src/stores/plugin-host-capabilities.ts'",
+      "exit_code": 0,
+      "output_sha256": "55f8ba45cf3f4208aa0be47cdd05174dab54886a1d6349705625f66569382683"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat .agents/skills/vue-best-practices/references/sfc.md .agents/skills/vue-best-practices/references/component-data-flow.md'",
+      "exit_code": 0,
+      "output_sha256": "46487c52be70fcbb2499e44c1c409023cd57e2376a909b9c23098d20340d78e9"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat .agents/skills/vue/references/core-new-apis.md .agents/skills/vue-best-practices/references/reactivity.md'",
+      "exit_code": 0,
+      "output_sha256": "233f1fc71f6ee961711d1f084a765f9ad3520351583f312cf9cbdbd027f0cb06"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'vue:|pinia:|eventa:|\\\"scripts\\\"|\\\"type.?check\\\"|\\\"lint\\\"|\\\"vue\\\"|\\\"pinia\\\"|\\\"exports\\\"|plugin-protocol' package.json pnpm-workspace.yaml packages/stage-ui/package.json packages/stage-pages/package.json apps/stage-tamagotchi/package.json packages/plugin-sdk/package.json packages/plugin-protocol/package.json\"",
+      "exit_code": 0,
+      "output_sha256": "8632e4b02349f7d46885ef26b58c5868e74abb715dfc18e76eba097a1c01d342"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'usePluginHostInspectorStore|setBridge|plugin-host-debug|plugin-host.vue|pluginHostInspect|pluginHostList' apps packages docs/solutions docs/content packages/plugin-sdk/docs pnpm-workspace.yaml pnpm-lock.yaml\"",
+      "exit_code": 0,
+      "output_sha256": "67653d2df51fe87f6ccecb38c9b0c4debab5da5f2645a9be43dec22bb941b5b3"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat .agents/skills/eventa/SKILL.md'",
+      "exit_code": 0,
+      "output_sha256": "47f44b6134af55bc1029344a1e875d7d3beee22358ac9f77c0964c31749a32c0"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/host/debug.ts'",
+      "exit_code": 0,
+      "output_sha256": "c298f715e515a2176ddd718a56872be6f8f1bd591e9ed7de3c4001d45d3ebcc7"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba apps/stage-tamagotchi/src/shared/eventa/plugin/host.ts'",
+      "exit_code": 0,
+      "output_sha256": "456676a7a59a5e10f300aaa3ece5ceecbf0f87cdf9838d1f4bd168e2d79a5f2e"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba apps/stage-tamagotchi/src/renderer/App.vue'",
+      "exit_code": 0,
+      "output_sha256": "388b9ae94ef2543d733ca99b72957e3ddcf5df493a7c4f5b9206c8c5edd79c65"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'plugin|stage-pages|routesFolder' apps/stage-tamagotchi/electron.vite.config.ts apps/stage-web/vite.config.ts apps/stage-tamagotchi/src/main/services/airi/plugins/index.ts apps/stage-tamagotchi/src/main/services/airi/plugins/index.test.ts packages/plugin-sdk/docs/design/architecture.md\"",
+      "exit_code": 0,
+      "output_sha256": "f440c15b73a78d47ee4680e82e296ab125acfd32fabf73ba4c344ac6ba892471"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files docs/solutions packages/stage-ui packages/stage-pages | rg '(plugin|extension|test|README)'\"",
+      "exit_code": 0,
+      "output_sha256": "5ce71b2782659b9fc7fa82f809af4a00d5e0060521bf7052a10693d5666af306"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba apps/stage-tamagotchi/src/shared/eventa/plugin/host.ts'",
+      "exit_code": 0,
+      "output_sha256": "456676a7a59a5e10f300aaa3ece5ceecbf0f87cdf9838d1f4bd168e2d79a5f2e"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/host/debug.ts'",
+      "exit_code": 0,
+      "output_sha256": "c298f715e515a2176ddd718a56872be6f8f1bd591e9ed7de3c4001d45d3ebcc7"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/index.ts'",
+      "exit_code": 0,
+      "output_sha256": "ba042437724ebbf0c5612a0d648f97071c9544051de54f0532440b68655422f5"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat .agents/skills/vue-best-practices/references/composables.md .agents/skills/vue-best-practices/references/state-management.md .agents/skills/eventa/SKILL.md'",
+      "exit_code": 0,
+      "output_sha256": "e3300436251645ca1b059099863c66f60eb4f41ba87cdb81d7be13beba43e736"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat packages/plugin-protocol/package.json packages/plugin-sdk/package.json packages/stage-ui/vitest.config.ts vitest.config.ts'",
+      "exit_code": 0,
+      "output_sha256": "23f450ce873bc8d23cd292f3d76475f52e222584568167e92a7894c442f88b9b"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat packages/plugin-sdk/docs/design/architecture.md packages/stage-ui/README.md'",
+      "exit_code": 0,
+      "output_sha256": "00faa1ebaba25fc814191fa0c6e19cd0c96a765a49bade21a88eafdab22cab15"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'async function|setEnabled|setAutoReload|inspect|unload|dispose|loaded|serialize|queue|refresh' apps/stage-tamagotchi/src/main/services/airi/plugins/host/index.ts apps/stage-tamagotchi/src/main/services/airi/plugins/host/registry.ts apps/stage-tamagotchi/src/main/services/airi/plugins/host/config.ts apps/stage-tamagotchi/src/renderer/stores/plugin-tools.ts\"",
+      "exit_code": 0,
+      "output_sha256": "eff794c4e9c5e99f5d75712ed8c414af3a958c251717598004eaabed904dc942"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'it\\\\(|test\\\\(' apps/stage-tamagotchi/src/main/services/airi/plugins/index.test.ts apps/stage-tamagotchi/src/renderer/stores/plugin-tools.test.ts apps/stage-tamagotchi/src/shared/eventa/plugin/domains.test.ts\"",
+      "exit_code": 0,
+      "output_sha256": "69b2340c0253a391aa504a75d573d2bd03bc4780b8e3516b690ad1ed3e461ce8"
+    },
+    {
+      "command": "/bin/zsh -lc 'git show --stat --oneline 668440a73 -- packages/stage-ui/src/stores/devtools/plugin-host-debug.ts packages/stage-pages/src/pages/devtools/plugin-host.vue apps/stage-tamagotchi/src/shared/eventa/plugin/host.ts'",
+      "exit_code": 0,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '430,530p' apps/stage-tamagotchi/src/main/services/airi/plugins/host/index.ts\"",
+      "exit_code": 0,
+      "output_sha256": "7d9ab0cffedfbbf3594225761f1f803712e95a4dba7c01fda0a035de640f775b"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1030,1108p' apps/stage-tamagotchi/src/main/services/airi/plugins/index.test.ts\"",
+      "exit_code": 0,
+      "output_sha256": "87994e27f3a1ae972a25010d641bda139f6f8410011496170317cc3f908e3eac"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'requestId|inFlight|pendingCount|generation|refreshPromise|latestRequest|activeRequest' packages/stage-ui/src/stores apps/stage-tamagotchi/src/renderer/bridges apps/stage-tamagotchi/src/renderer/stores\"",
+      "exit_code": 0,
+      "output_sha256": "b99c043d852a0589d695fc51fa6eba49e18d589dc72c018a3d73e595cf672ab7"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '275,460p' AGENTS.md\"",
+      "exit_code": 0,
+      "output_sha256": "e4b2cd21ebeb1718987c8748b508c227796f7ebfa8b5e939fa3c9fbdbb6d239a"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files packages/stage-pages/src apps/stage-tamagotchi/src/renderer packages/stage-ui/src | rg 'extension|plugin'\"",
+      "exit_code": 0,
+      "output_sha256": "a94f94d68d565e13e7ab60a8186c386dd9a5f17cb272e17559ff9aa30c4a68bc"
+    },
+    {
+      "command": "/bin/zsh -lc \"git log -5 --format='%h %s' --follow -- packages/stage-ui/src/stores/devtools/plugin-host-debug.ts\"",
+      "exit_code": 0,
+      "output_sha256": "85c6aee9f8ca96dabe00e29c22451eb5b740aadd7e2b69a2723f743efa15271e"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat packages/plugin-protocol/src/types/index.ts packages/plugin-protocol/tsdown.config.ts'",
+      "exit_code": 0,
+      "output_sha256": "88bcd2e15c48e771b336227b9399df3a2a33ab9ceb25e4ccdc8cf2429cdffc86"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '208,238p' apps/stage-tamagotchi/electron.vite.config.ts\"",
+      "exit_code": 0,
+      "output_sha256": "a22c0aaef443aa92dd95892b42dffd11844827525799cb4e2091df3453faf90d"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '30,55p' package.json\"",
+      "exit_code": 0,
+      "output_sha256": "a1f7b22af87d63c477e4fc59edf6a2e7a891c664af7039e6ba64430d2a9ddc07"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba packages/stage-ui/src/stores/settings/stage-model.ts'",
+      "exit_code": 0,
+      "output_sha256": "428764298bf864adc2d910bc5ebe457bc3fc0e17f538278a64a11a8887442e05"
+    },
+    {
+      "command": "/bin/zsh -lc 'git show 9ca2eefb3 -- packages/stage-ui/src/stores/devtools/plugin-host-debug.ts apps/stage-tamagotchi/src/renderer/App.vue'",
+      "exit_code": 0,
+      "output_sha256": "90172f4d1c643caa0cab85e97d31edd0b2c7d94aaea2f1c02577ea863bf3dab2"
+    },
+    {
+      "command": "/bin/zsh -lc 'git show ca4c99f07 -- packages/stage-ui/src/stores/devtools/plugin-host-debug.ts packages/stage-pages/src/pages/devtools/plugin-host.vue'",
+      "exit_code": 0,
+      "output_sha256": "dfcc7cc284a5a6718dbbcba2c5f33edb5c55ba8af444af89b7570693fc4395dc"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n -A 8 -B 3 'routesFolder' apps/stage-web/vite.config.ts; rg -n '\"'^  vue@|''^  pinia@|@moeru/eventa:'\"' pnpm-lock.yaml | head -20\"",
+      "exit_code": 0,
+      "output_sha256": "6b7e2cc508b1d4694c57c74c36ce665608fc234044ec90af77962c9f8536c0c7"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba apps/stage-tamagotchi/src/renderer/stores/plugin-tools.ts; rg -n 'loading|disabled' packages/ui/src/components/Button/Button.vue packages/ui/src/components/Button/*.vue\"",
+      "exit_code": 1,
+      "output_sha256": "6a3b61ecdf8445121355ed2c9911e0b9ed24f9a828eceac19b9e37715192ecc6"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,90p' packages/plugin-protocol/src/types/events.ts; rg -n '\"'^import|''^export.*from|CapabilityDescriptor'\"' packages/plugin-sdk/src/index.ts packages/plugin-sdk/src/plugin-host/types.ts apps/stage-tamagotchi/src/shared/eventa/plugin/capabilities.ts packages/stage-ui/src/stores/devtools/plugin-host-debug.ts\"",
+      "exit_code": 2,
+      "output_sha256": "b36f8b9306da0d1805de92a77ab5be864393e05c0009842e4e233f074be4dc95"
+    },
+    {
+      "command": "/bin/zsh -lc 'git status --short; git rev-parse --short HEAD'",
+      "exit_code": 0,
+      "output_sha256": "9905e81b26bb1526f5bf286fb79006eadf5cf5e9450e9a6f0167e92185ee87df"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files packages/ui/src/components | rg '/Button|button'; rg -n 'CapabilityDescriptor' packages/plugin-sdk/src/plugin-host; rg -n 'loading|disabled' packages/ui/src/components -g '*Button*'; rg -n 'plugin-host|Plugin Host' docs/solutions\"",
+      "exit_code": 1,
+      "output_sha256": "9e9c3b2d0c0170a5af423bd6a121d4e4eccedb4e6243f0af1968027dfc12289d"
+    },
+    {
+      "command": "/bin/zsh -lc 'git show ca4c99f07 -- packages/stage-ui/src/stores/devtools/plugin-host-debug.ts'",
+      "exit_code": 0,
+      "output_sha256": "c985f0d083fab92f5b05ee01df20e422581bd6b43fb2c26d1e3394fc9f41bc33"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba packages/ui/src/components/misc/button.vue'",
+      "exit_code": 0,
+      "output_sha256": "a84377f3e3288b79d48f3bd34a60831bb840603ca29d7867e37c9dae49b02921"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba packages/plugin-sdk/src/plugin/apis/protocol.ts | head -95; sed -n '1,45p' packages/plugin-sdk/src/plugin-host/index.ts; cat packages/electron-vueuse/src/eventa.ts\"",
+      "exit_code": 1,
+      "output_sha256": "0ca52c058208d373efa959baa8946de00af680fb6d8f27f90801618d705b21a0"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files packages/plugin-sdk/src/plugin/apis packages/electron-vueuse/src | rg '(protocol|eventa)'\"",
+      "exit_code": 0,
+      "output_sha256": "a35df9c0de019ef827e9ca32ffa8b10dd264c534c3c2edc7b7b5d94fd0810e23"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'CapabilityDescriptor|\"'^import|''^export.*from'\"' packages/plugin-sdk/src/plugin/apis/protocol packages/electron-vueuse/src -g '*.ts'\"",
+      "exit_code": 0,
+      "output_sha256": "c811ee498cad1ee1f87199e19fee04c73f9fb2961568e0f8c63aae71c34ec21b"
+    }
+  ],
+  "stderr": "",
+  "companion_inventory": [
+    {
+      "name": "agent-browser-electron",
+      "git_tree": "35eb9fadb8567839a15c9c325a8f0d12151daf82",
+      "declared_metadata": "---\nname: agent-browser-electron\ndescription: Use when Codex needs to inspect, debug, or automate an Electron app through `agent-browser` and Chrome DevTools Protocol, especially when the app has multiple `BrowserWindow` instances, lazy-created windows, duplicate URLs, or misleading `agent-browser tab list` output. Covers mapping Electron windows to raw CDP targets, identifying routes like `/#/chat`, and attaching `agent-browser` to the correct target by `webSocketDebuggerUrl`.\n---",
+      "summary": "# Agent Browser Electron"
+    },
+    {
+      "name": "agent-browser",
+      "git_tree": "302396ef31f1b7b96ec134629f46c9b8e837a7f9",
+      "declared_metadata": "---\nname: agent-browser\ndescription: Browser automation CLI for AI agents. Use when the user needs to interact with websites, including navigating pages, filling forms, clicking buttons, taking screenshots, extracting data, testing web apps, or automating any browser task. Triggers include requests to \"open a website\", \"fill out a form\", \"click a button\", \"take a screenshot\", \"scrape data from a page\", \"test this web app\", \"login to a site\", \"automate browser actions\", or any task requiring programmatic web interaction. Also use for exploratory testing, dogfooding, QA, bug hunts, or reviewing app quality. Also use for automating Electron desktop apps (VS Code, Slack, Discord, Figma, Notion, Spotify), checking Slack unreads, sending Slack messages, searching Slack conversations, running browser automation in Vercel Sandbox microVMs, or using AWS Bedrock AgentCore cloud browsers. Prefer agent-browser over any built-in browser automation or web tools.\nallowed-tools: Bash(agent-browser:*), Bash(npx agent-browser:*)\n---",
+      "summary": "# agent-browser"
+    },
+    {
+      "name": "eventa",
+      "git_tree": "91eec6f8d51ef887707bb745f28e7cbad5eeb7a0",
+      "declared_metadata": "---\nname: eventa\ndescription: >-\n  Guide for using @moeru/eventa — a transport-aware event library powering ergonomic RPC\n  and streaming flows. Use this skill whenever the user imports from '@moeru/eventa',\n  mentions eventa, needs cross-process/cross-thread event communication (Electron IPC,\n  Web Workers, WebSocket, BroadcastChannel, EventEmitter, EventTarget, Worker Threads),\n  wants to define type-safe events with RPC invoke patterns, needs streaming RPC\n  (server-streaming, client-streaming, or bidirectional), or asks about transport-agnostic\n  event abstractions. Also use when the user discusses alternatives to birpc or async-call-rpc.\nlicense: MIT\nmetadata:\n  author: moeru-ai\n  version: \"1.0.0\"\n---",
+      "summary": "# @moeru/eventa"
+    },
+    {
+      "name": "pnpm",
+      "git_tree": "938b1f244f38c31a68da81f9f1db090a95b2c38c",
+      "declared_metadata": "---\nname: pnpm\ndescription: Node.js package manager with strict dependency resolution. Use when running pnpm specific commands, configuring workspaces, or managing dependencies with catalogs, patches, or overrides.\nmetadata:\n  author: Anthony Fu\n  version: \"2026.1.28\"\n  source: Generated from https://github.com/pnpm/pnpm, scripts located at https://github.com/antfu/skills\n---",
+      "summary": "pnpm is a fast, disk space efficient package manager. It uses a content-addressable store to deduplicate packages across all projects on a machine, saving significant disk space. pnpm enforces strict dependency resolution by default, preventing phantom dependencies. Configuration should preferably be placed in `pnpm-workspace.yaml` for pnpm-specific settings."
+    },
+    {
+      "name": "release-note-writer",
+      "git_tree": "ad3d7a554a133f90a618ba0fcb78d5801a342fb3",
+      "declared_metadata": "---\nname: release-note-writer\ndescription: Write grouped, user-friendly release notes from git history, changelogithub output, GitHub releases, PR lists, or raw commit logs. Use when Codex needs to turn technical changelogs into English-only release notes for AIRI or similar products, including end-user highlights, developer/API notes, contributor-facing internal tooling notes, upgrade notes, or follow-up style-rule updates after wording feedback.\n---",
+      "summary": "# Release Note Writer"
+    },
+    {
+      "name": "server-gateway-refactor",
+      "git_tree": "d7ab46054e84a2d7ed5667fbe96765fcb9899d2e",
+      "declared_metadata": "---\nname: server-gateway-refactor\ndescription: Use when refactoring AIRI apps/server routes that mix Hono route wiring, business operation orchestration, external gateway calls, billing, rate limiting, telemetry, or websocket session state. Applies especially to OpenAI-compatible, speech, Stripe, and websocket gateway surfaces.\n---",
+      "summary": "# Server Gateway Refactor"
+    },
+    {
+      "name": "stage-tamagotchi-godot-csharp",
+      "git_tree": "cd3c359ccaaa34a0c0e516baa7996a5439ba035a",
+      "declared_metadata": "---\nname: stage-tamagotchi-godot-csharp\ndescription: >-\n  Apply engine-local C# development method and code style only when working in\n  `engines/stage-tamagotchi-godot`, including its `.cs` files, `.csproj`,\n  engine-local `.editorconfig`, and Godot-specific C# structure decisions. Do\n  not use for TypeScript, Electron, renderer code, shared workspace config,\n  repo-wide C# conventions, or any file outside\n  `engines/stage-tamagotchi-godot`.\n---",
+      "summary": "# Stage Tamagotchi Godot C#"
+    },
+    {
+      "name": "unocss",
+      "git_tree": "e3001c9b57943bae2b14fd855538e3f9583704fe",
+      "declared_metadata": "---\nname: unocss\ndescription: UnoCSS instant atomic CSS engine, superset of Tailwind CSS. Use when configuring UnoCSS, writing utility rules, shortcuts, or working with presets like Wind, Icons, Attributify.\nmetadata:\n  author: Anthony Fu\n  version: \"2026.1.28\"\n  source: Generated from https://github.com/unocss/unocss, scripts located at https://github.com/antfu/skills\n---",
+      "summary": "UnoCSS is an instant atomic CSS engine designed to be flexible and extensible. The core is un-opinionated - all CSS utilities are provided via presets. It's a superset of Tailwind CSS, so you can reuse your Tailwind knowledge for basic syntax usage."
+    },
+    {
+      "name": "vue-best-practices",
+      "git_tree": "bfcc56863a0cfc7aebe9e48092f13838eaf204c2",
+      "declared_metadata": "---\nname: vue-best-practices\ndescription: MUST be used for Vue.js tasks. Strongly recommends Composition API with `<script setup>` and TypeScript as the standard approach. Covers Vue 3, SSR, Volar, vue-tsc. Load for any Vue, .vue files, Vue Router, Pinia, or Vite with Vue work. ALWAYS use Composition API unless the project explicitly requires Options API.\nlicense: MIT\nmetadata:\n  author: github.com/vuejs-ai\n  version: \"18.0.0\"\n---",
+      "summary": "# Vue Best Practices Workflow"
+    },
+    {
+      "name": "vue",
+      "git_tree": "67781251a0cbf66e07edfb40aefb4bddafb77b4b",
+      "declared_metadata": "---\nname: vue\ndescription: Vue 3 Composition API, script setup macros, reactivity system, and built-in components. Use when writing Vue SFCs, defineProps/defineEmits/defineModel, watchers, or using Transition/Teleport/Suspense/KeepAlive.\nmetadata:\n  author: Anthony Fu\n  version: \"2026.1.31\"\n  source: Generated from https://github.com/vuejs/docs, scripts at https://github.com/antfu/skills\n---",
+      "summary": "# Vue"
+    },
+    {
+      "name": "vueuse-functions",
+      "git_tree": "c1fee5d31d36f87dee6f2fe02a8a6b9810c2b32b",
+      "declared_metadata": "---\nname: vueuse-functions\ndescription: Apply VueUse composables where appropriate to build concise, maintainable Vue.js / Nuxt features.\nlicense: MIT\nmetadata:\n    author: SerKo <https://github.com/serkodev>\n    version: \"1.0\"\ncompatibility: Requires Vue 3 (or above) or Nuxt 3 (or above) project\n---",
+      "summary": "# VueUse Functions"
+    },
+    {
+      "name": "xsai",
+      "git_tree": "75e7c15e426db9f78a431524f2acfd6c74c64b01",
+      "declared_metadata": "---\nname: xsai\ndescription: Use this skill when the user is building with `xsai` or any `@xsai/*` package, or is evaluating xsAI for a small OpenAI-compatible workflow with text generation, streaming, tool calling, structured output, embeddings, image generation, speech synthesis, or transcription.\n---",
+      "summary": "# xsAI"
+    }
+  ],
+  "loaded_marker": true,
+  "capture_success": true
+}

@@ -1,0 +1,102 @@
+{
+  "id": "click-review-authorized",
+  "kind": "behavior",
+  "repository": "click",
+  "returncode": 0,
+  "timed_out": false,
+  "answer_present": true,
+  "repository_unchanged": true,
+  "elapsed_seconds": 239.94,
+  "usage": {
+    "input_tokens": 409959,
+    "cached_input_tokens": 348672,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 5913,
+    "reasoning_output_tokens": 1998
+  },
+  "read_commands": [
+    {
+      "command": "/bin/zsh -lc \"pwd; git status --short; git rev-parse HEAD; git describe --tags --exact-match; rg --files -g 'AGENTS.md' -g 'pyproject.toml' -g 'tox.ini' -g '*requirements*' -g '.github/workflows/*' -g 'CHANGES.rst'\"",
+      "exit_code": 0,
+      "output_sha256": "281062608864568abced1884a7ce5971a91f3413691bad30ed8f2daaa8c94fe5"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/testing.py | sed -n '1,560p'\"",
+      "exit_code": 0,
+      "output_sha256": "3648a742d3667803a4e284a06e51fa327ef91e5d947de17558f05ae728193dfe"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/core.py | sed -n '400,655p'; nl -ba tests/test_context.py | sed -n '1,285p'\"",
+      "exit_code": 0,
+      "output_sha256": "32b3a33751ef3a47a07e92bffe953943d0345bc0765037656cb949cf55335eed"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files --hidden -g 'AGENTS.md' -g '.github/workflows/*'; cat pyproject.toml; cat tox.ini\"",
+      "exit_code": 0,
+      "output_sha256": "60bb0422185419a99eb010e021f946b3c2451d6088099fa55b987a1224932d7d"
+    },
+    {
+      "command": "/bin/zsh -lc 'git show --stat ffd43e9; git show ffd43e9 --; git show --stat d83868a; git log -12 --oneline'",
+      "exit_code": 0,
+      "output_sha256": "171f856949077eddf9fc644074cdb37aa091e5904a896d5ffde6302747673fc2"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba tests/test_imports.py; nl -ba tests/test_custom_classes.py | sed -n '1,205p'; nl -ba tests/test_commands.py | sed -n '490,595p'; nl -ba .github/workflows/tests.yaml\"",
+      "exit_code": 0,
+      "output_sha256": "45d159296af9a62c521371130ede4f823b85a9b703e51434dc96db2c3f9cd676"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/core.py | sed -n '890,1145p'; nl -ba src/click/core.py | sed -n '1350,1445p'; nl -ba src/click/core.py | sed -n '1620,1790p'\"",
+      "exit_code": 0,
+      "output_sha256": "5d40264f36ae35a812157513a53555eb2fa21e8c089603be55083674c2f10b25"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/testing.py | sed -n '375,510p'; nl -ba docs/api.rst | sed -n '1,190p'; nl -ba docs/exceptions.rst | sed -n '1,125p'; nl -ba docs/testing.rst | sed -n '1,155p'\"",
+      "exit_code": 0,
+      "output_sha256": "5561ebee92b9b9d2714ad3613844dc71c37cf9a08794b6280678acde1429170e"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'subprocess|Popen|check_output|check_call|os.system|call_on_close|with_resource|isolation|FORCED_WIDTH|standalone_mode|return_value' tests docs CHANGES.rst; git log --oneline -- src/click/core.py src/click/testing.py | head -65; nl -ba src/click/globals.py | sed -n '1,115p'; nl -ba src/click/__init__.py | sed -n '1,105p'\"",
+      "exit_code": 0,
+      "output_sha256": "97504d52d0d2cde8f43c6b2a48f1491b0c9309f529dbbc3046e8707bcf90985f"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba docs/api.rst | sed -n '1,195p'; nl -ba docs/exceptions.rst | sed -n '1,80p'; nl -ba docs/testing.rst | sed -n '1,35p'; nl -ba tests/test_imports.py\"",
+      "exit_code": 0,
+      "output_sha256": "21e60bcd8d4574a3ce204f6dacf398b5e0edb07c077fe13e208e29d35540b768"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/testing.py | sed -n '380,510p'; nl -ba tests/test_custom_classes.py | sed -n '1,115p'; nl -ba tests/test_testing.py | sed -n '1,110p'; nl -ba tests/test_testing.py | sed -n '320,485p'\"",
+      "exit_code": 0,
+      "output_sha256": "3f65ae2467579d98c500eec33482ee01a70138849945e78b5c1b4a6281b90382"
+    },
+    {
+      "command": "/bin/zsh -lc \"git show d83868a --; git log --oneline -S 'self._exit_stack' -- src/click/core.py; git log --oneline -S 'pop_context()' -- src/click/core.py; git show 422e211 --; nl -ba CHANGES.rst | sed -n '1,98p'; rg -n 'class .*CliRunner|def make_env|def isolation|def get_default_prog_name|cleanup|close' tests/test_testing.py tests/conftest.py docs/commands.rst\"",
+      "exit_code": 0,
+      "output_sha256": "6e4e883f98c65ce399cf520aea4ca3f22c605b71dfd7d5530fd8c1fba464bda9"
+    },
+    {
+      "command": "/bin/zsh -lc \"python3 -B -c 'import sys\nsys.path.insert(0, \\\"src\\\")\nimport json\nimport click\nfrom click import formatting, globals as click_globals, termui, utils, _compat\nfrom click.testing import CliRunner\nout = {\\\"source\\\": click.__file__, \\\"version\\\": click.__version__, \\\"python\\\": sys.version.split()[0]}\n@click.command()\ndef returning():\n    return 1\n@click.command()\n@click.pass_context\ndef exiting(ctx):\n    ctx.exit(1)\nrows = []\nfor cli in (returning, exiting):\n    for standalone in (True, False):\n        result = CliRunner().invoke(cli, standalone_mode=standalone)\n        rows.append({\\\"callback\\\":cli.name, \\\"standalone\\\":standalone, \\\"exit_code\\\": result.exit_code, \\\"return_value\\\": result.return_value, \\\"exception\\\": type(result.exception).__name__ if result.exception else None})\nout[\\\"return_semantics\\\"] = rows\nwidth = formatting.FORCED_WIDTH\ntry:\n    with CliRunner(charset=\\\"no-such-encoding-audit\\\").isolation():\n        pass\nexcept LookupError as e:\n    out[\\\"initialization_failure\\\"] = {\\\"exception\\\":type(e).__name__, \\\"before\\\":width, \\\"after\\\":formatting.FORCED_WIDTH}\nfinally:\n    formatting.FORCED_WIDTH = width\nctx = click.Context(click.Command(\\\"audit\\\"))\nbefore = click.get_current_context(silent=True)\nseen = []\n@ctx.call_on_close\ndef failing_cleanup():\n    seen.append(click.get_current_context() is ctx)\n    raise RuntimeError(\\\"cleanup failure\\\")\ntry:\n    with ctx:\n        pass\nexcept RuntimeError as e:\n    out[\\\"cleanup_failure\\\"] = {\\\"exception\\\":str(e), \\\"cleanup_sees_current\\\":seen, \\\"before_is_none\\\": before is None, \\\"after_is_exited_ctx\\\":click.get_current_context(silent=True) is ctx, \\\"depth\\\":ctx._depth}\nfinally:\n    while click.get_current_context(silent=True) is not before:\n        click_globals.pop_context()\ndef snapshot():\n    return (sys.stdin, sys.stdout, sys.stderr, formatting.FORCED_WIDTH, termui.visible_prompt_func, termui.hidden_prompt_func, termui._getchar, utils.should_strip_ansi, _compat.should_strip_ansi)\ninitial = snapshot()\nwith CliRunner().isolation():\n    outer = snapshot()\n    with CliRunner().isolation():\n        pass\n    inner_restored = snapshot() == outer\nout[\\\"nested_isolation\\\"] = {\\\"inner_restored\\\": inner_restored, \\\"outer_restored\\\": snapshot() == initial}\nprint(json.dumps(out, ensure_ascii=False, indent=2))\n'\"",
+      "exit_code": 0,
+      "output_sha256": "7f3e67302eee4eff6c423b8a07769a5de318f72fb6d849ca9391b8d38c340ffb"
+    },
+    {
+      "command": "/bin/zsh -lc \"git remote -v; git show --no-patch --format=fuller HEAD; git merge-base --is-ancestor ffd43e9 HEAD; git merge-base --is-ancestor d83868a HEAD; nl -ba src/click/core.py | sed -n '1140,1175p'; nl -ba src/click/core.py | sed -n '690,805p'; nl -ba src/click/core.py | sed -n '1675,1742p'; nl -ba src/click/core.py | sed -n '2370,2425p'; nl -ba src/click/core.py | sed -n '340,350p'\"",
+      "exit_code": 0,
+      "output_sha256": "547eb5cca7102c507246e21b1da28cd31c040bc6136ee21bb9345e6151824e10"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba docs/commands.rst | sed -n '395,427p'; nl -ba docs/commands.rst | sed -n '543,580p'; nl -ba tests/test_context.py | sed -n '300,322p'; nl -ba docs/api.rst | sed -n '225,260p'; git show 8934907 --stat; rg -n 'python|pytest|Click|official|https' README.md CONTRIBUTING* docs/contributing* docs/conf.py; git status --short\"",
+      "exit_code": 0,
+      "output_sha256": "9acecf4a94472822b31b67365eebe9c35d3bb896139867ef536eb64c7a53df59"
+    },
+    {
+      "command": "/bin/zsh -lc \"git status --porcelain; nl -ba src/click/core.py | sed -n '425,440p'; rg -n 'contributing|Pallets|pallets/click' README.md pyproject.toml docs/conf.py; nl -ba tox.ini | sed -n '1,48p'; nl -ba .github/workflows/tests.yaml | sed -n '9,25p'\"",
+      "exit_code": 0,
+      "output_sha256": "d635d0e78ebc7982f5bcfc26ed643cad20c30e6528f4dc93c80046a9e7161950"
+    }
+  ],
+  "stderr": "",
+  "companion_inventory": [],
+  "capture_success": true
+}

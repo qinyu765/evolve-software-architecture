@@ -1,0 +1,197 @@
+{
+  "id": "airi-boundary-bootstrap",
+  "kind": "behavior",
+  "repository": "airi",
+  "returncode": 0,
+  "timed_out": false,
+  "answer_present": true,
+  "repository_unchanged": true,
+  "elapsed_seconds": 423.84,
+  "usage": {
+    "input_tokens": 1164291,
+    "cached_input_tokens": 1042432,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 8254,
+    "reasoning_output_tokens": 1785
+  },
+  "read_commands": [
+    {
+      "command": "/bin/zsh -lc \"pwd; rg --files -g 'AGENTS.md' -g '*plugin*' -g '*electron*' -g 'package.json' -g '*architecture*' -g '*permission*' -g '*capabilit*'\"",
+      "exit_code": 0,
+      "output_sha256": "f044407f8b74cb393dab1270ce4778c49ddf274ed45cc027d872ae4d37754717"
+    },
+    {
+      "command": "/bin/zsh -lc \"cat '.agents/skills/evolve-software-architecture/SKILL.md' '.agents/skills/evolve-software-architecture/references/technology-context.md' '.agents/skills/evolve-software-architecture/references/core/assessment-framework.md' '.agents/skills/evolve-software-architecture/references/core/quality-attributes.md' '.agents/skills/eventa/SKILL.md' '.agents/skills/vue-best-practices/SKILL.md' '.agents/skills/vue/SKILL.md'\"",
+      "exit_code": 0,
+      "output_sha256": "aec52cd69f4e83de44d72d4303dd0f1066502937e5b232281df233073dc6ea75"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files apps/stage-tamagotchi/src/main/services/airi/plugins apps/stage-tamagotchi/src/preload apps/stage-tamagotchi/src/shared/eventa/plugin packages/plugin-sdk/src/plugin-host packages/electron-eventa/src; rg -n 'plugin|createWindow|provide|sandbox|contextIsolation|nodeIntegration' apps/stage-tamagotchi/src/main/index.ts apps/stage-tamagotchi/electron.vite.config.ts apps/stage-tamagotchi/src/main/windows\"",
+      "exit_code": 0,
+      "output_sha256": "9608107cd35505607d3c648013ca7f941a702d3064722625d4c10859c79d728d"
+    },
+    {
+      "command": "/bin/zsh -lc \"cat AGENTS.md; cat apps/stage-tamagotchi/package.json; cat packages/plugin-sdk/package.json; cat packages/electron-eventa/package.json; rg -n 'electron:|eventa:|vue:|injeca:|electron@|@moeru/eventa@' pnpm-workspace.yaml pnpm-lock.yaml | head -65\"",
+      "exit_code": 0,
+      "output_sha256": "b40d5abbf23997f3a53820288ec412a0923c398af3b8348129625d331d6c9b89"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat .agents/skills/evolve-software-architecture/references/core/quality-attributes.md; cat .agents/skills/evolve-software-architecture/references/core/assessment-framework.md; git status --short; git log -7 --oneline -- apps/stage-tamagotchi/src/main/services/airi/plugins packages/plugin-sdk packages/electron-eventa'",
+      "exit_code": 0,
+      "output_sha256": "6a584d1f92b68d90dc16349ffaf84958f22144f604dce5b8d74a63b18367813f"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/index.ts; nl -ba apps/stage-tamagotchi/src/preload/index.ts; nl -ba apps/stage-tamagotchi/src/main/windows/shared/window.ts; nl -ba packages/electron-eventa/src/renderer.ts'",
+      "exit_code": 1,
+      "output_sha256": "6f372e98406f4defc5d3380aa49e8fdf07220a28440c56e89efb93d026c85dfb"
+    },
+    {
+      "command": "/bin/zsh -lc 'nl -ba packages/stage-ui/src/stores/devtools/plugin-host-debug.ts; nl -ba apps/stage-tamagotchi/src/shared/eventa/plugin/host.ts; nl -ba packages/plugin-sdk/src/plugin-host/runtimes/shared/services/permissions.ts; cat packages/plugin-sdk/docs/design/architecture.md'",
+      "exit_code": 0,
+      "output_sha256": "e6fded85334ebe58d9d5f091351a5a8c1b04587e3c622aeb84cdbf44975657b1"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'electron|eventa|vue|injeca' pnpm-workspace.yaml; rg -n '\"'^  electron@|''^  vue@|''^  .moeru/eventa@'\"' pnpm-lock.yaml; nl -ba apps/stage-tamagotchi/src/main/index.ts | sed -n '120,280p'; nl -ba apps/stage-tamagotchi/electron.vite.config.ts | sed -n '15,102p'; rg --files packages/electron-eventa/src apps/stage-tamagotchi/src/shared/eventa/plugin apps/stage-tamagotchi/src/main/services/airi/plugins\"",
+      "exit_code": 0,
+      "output_sha256": "9320886b17ab4bebf068060dcfe79f5b346931bf0a1947ad339492b58d7e2670"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba apps/stage-tamagotchi/src/preload/shared.ts; rg -n 'PluginHost|pluginHost|setBridge|electronPlugin|plugin-host-capabilities' apps/stage-tamagotchi/src/renderer; nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/host/index.ts; nl -ba packages/plugin-sdk/src/plugin-host/runtimes/shared/services/permissions.ts\"",
+      "exit_code": 0,
+      "output_sha256": "eb2b0d4160d56d19b5269c249f6a561c8711e272d7aa178eefe8813a96139cd2"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/host/index.ts | sed -n '224,530p'; nl -ba apps/stage-tamagotchi/src/renderer/App.vue | sed -n '80,260p'; nl -ba packages/electron-vueuse/src/composables/use-electron-eventa-context.ts\"",
+      "exit_code": 0,
+      "output_sha256": "740f5c6aabbeebc1280f8c50d08811b33d6009101e88450e20453ab043744a34"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba packages/plugin-sdk/src/plugin-host/core.ts | head -180; rg -n 'start\\\\(|grant|permission|runtime|stop\\\\(' packages/plugin-sdk/src/plugin-host/core.ts; rg -n 'permissions|grant|authorize|isAllowed|assert|apiInvoke|apiCall' packages/plugin-sdk/src/plugin-host/runtimes/electron packages/plugin-sdk/src/plugin-host/runtimes/shared | head -110; rg --files packages/plugin-sdk/src/plugin-host/runtimes; nl -ba apps/stage-tamagotchi/src/main/windows/settings/index.ts | sed -n '40,120p'; nl -ba apps/stage-tamagotchi/src/main/windows/main/index.ts | sed -n '75,140p'\"",
+      "exit_code": 0,
+      "output_sha256": "f409810cb939c5bb24aa2d4fc3b14d2e984a78d44173c0ac1f1cb50f7a2bf490"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'extension|permission|sandbox|worker|createContext|entrypoint|ipcMain|authenticate' packages/plugin-sdk/src/plugin-host/runtimes/node/index.ts packages/plugin-sdk/src/plugin-host/runtimes/electron/index.ts; rg -n 'setEnabled|loadPlugin|load\\\\(|unload|Load|Enable' packages/stage-pages/src/pages/devtools/plugin-host.vue; nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/host/config.ts | head -145; rg -n 'permission|grant|worker|disable|enabled|sender|frame|concurrent|runtime' apps/stage-tamagotchi/src/main/services/airi/plugins/index.test.ts | head -100; test -d node_modules && echo node_modules-present; rg --files docs/solutions | head -30; git log -4 --format='%h %s' -- packages/plugin-sdk/src/plugin-host/runtimes/electron apps/stage-tamagotchi/src/preload/shared.ts\"",
+      "exit_code": 0,
+      "output_sha256": "536037936b9fd73f2d5edc37024d619ee3ae0b6d9ad8867225621d17a3b4bdab"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba packages/plugin-sdk/src/plugin-host/core.ts | sed -n '200,370p'; nl -ba packages/plugin-sdk/src/plugin-host/runtimes/node/loaders/fs.ts | sed -n '1,205p'; nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/kits/index.ts | sed -n '1,200p'; rg -n 'it\\\\(|test\\\\(' packages/plugin-sdk/src/plugin-host/core.test.ts packages/plugin-sdk/src/plugin-host/runtimes/shared/services/permissions.test.ts | head -80\"",
+      "exit_code": 0,
+      "output_sha256": "e604ed9d6d5ed6b9ad1b8d3fe90cc336e32bdba35d38c1d227027084cc543915"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba packages/stage-pages/src/pages/devtools/plugin-host.vue | sed -n '75,155p'; nl -ba packages/stage-ui/src/stores/devtools/plugin-host-debug.ts | sed -n '158,220p'; nl -ba packages/stage-ui/src/stores/plugin-host-capabilities.ts | sed -n '1,155p'; nl -ba apps/stage-tamagotchi/src/shared/eventa/plugin/host.ts | sed -n '1,100p'; nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/host/config.ts | sed -n '1,105p'; nl -ba apps/stage-tamagotchi/src/renderer/stores/plugin-tools.ts | sed -n '1,145p'; rg -n 'iframe|src|sandbox|import|module' apps/stage-tamagotchi/src/renderer/widgets/extension-ui/components/extension-ui-host.vue; rg -n 'source|origin|owner|requestId|session|pending|close|dispose' apps/stage-tamagotchi/src/renderer/widgets/extension-ui/composables/use-iframe-message-port.ts\"",
+      "exit_code": 0,
+      "output_sha256": "e61ec745fd94a9ae9a04d139b17b8ff62b56972376fe9a74358502a9779bb04f"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba apps/stage-tamagotchi/src/renderer/widgets/extension-ui/composables/use-iframe-message-port.ts | sed -n '1,205p'; rg --files packages/plugin-sdk/src | rg 'iframe'; rg -n 'createContext\\\\(|webContents|dispose|owner|requestId|pending|timeout|closed' apps/stage-tamagotchi/src/main/windows/widgets/rpc/index.electron.ts; nl -ba packages/plugin-sdk/src/plugin-host/core.ts | sed -n '450,525p'; nl -ba packages/plugin-sdk/src/plugin-host/core.ts | sed -n '755,830p'; nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/index.test.ts | sed -n '445,560p'\"",
+      "exit_code": 0,
+      "output_sha256": "dec4bc92cd7555833d7171beb89fac5393355cf70906bbdaafe63e57ca6bcff2"
+    },
+    {
+      "command": "/bin/zsh -lc \"cat .agents/skills/vueuse-functions/SKILL.md | head -100; nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/host/registry.ts | sed -n '1,155p'; nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/host/debug.ts | sed -n '1,65p'; rg -n 'permissions|permissionResolver' packages/plugin-sdk/src/plugin-host/shared/types.ts | head -25; rg -n 'sandbox|no-sandbox|contextIsolation|nodeIntegration|enableSandbox|web-contents-created' apps/stage-tamagotchi/src/main apps/stage-tamagotchi/electron-builder.config.ts\"",
+      "exit_code": 0,
+      "output_sha256": "98f63dd6e86be52c60647bffd57588ed16b5ad76020e8e5771fb073c289c300f"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n 'ipcMain|sender|senderFrame|createContext|before-quit|stop\\\\(' apps/stage-tamagotchi/src/main/services/airi/plugins/index.test.ts | head -35; nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/index.test.ts | sed -n '1,125p'; nl -ba packages/plugin-sdk-tamagotchi/src/tools/registry.ts | sed -n '1,120p'; rg -n 'invoke\\\\(|owner|session|parse|permission' packages/plugin-sdk-tamagotchi/src/tools/registry.ts; rg -n 'iframe|sandbox|srcdoc' apps/stage-tamagotchi/src/renderer/widgets/extension-ui/host.ts; nl -ba apps/stage-tamagotchi/src/renderer/widgets/extension-ui/components/extension-ui-host.vue | sed -n '101,148p'; nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/features/auto-reload/index.ts | sed -n '85,145p'; rg -n 'main|version|typecheck|type-check' apps/stage-tamagotchi/package.json package.json | head -35; git log -5 --format='%h %s' -- apps/stage-tamagotchi/src/main/services/airi/plugins/host/index.ts packages/plugin-sdk/src/plugin-host/core.ts\"",
+      "exit_code": 0,
+      "output_sha256": "f493c305ead79d45e1f18da04677d162048fde085ff8b569e1e64526a8dd861e"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba apps/stage-tamagotchi/src/main/libs/electron/persistence.ts | sed -n '1,110p'; nl -ba packages/plugin-sdk/src/plugin-host/core.ts | sed -n '375,422p'; nl -ba packages/plugin-sdk/src/plugin-host/core.ts | sed -n '855,900p'; nl -ba packages/plugin-sdk-tamagotchi/src/tools/registry.ts | sed -n '225,245p'; rg -n 'requestId|owner|sender|closed|pending|timeout|dispose' apps/stage-tamagotchi/src/main/windows/widgets/index.ts | tail -50; rg -n 'permission|deny|assert|invoke|register' packages/plugin-sdk-tamagotchi/src/tools/index.ts; nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/host/registry.ts | sed -n '195,285p'; git rev-parse --short HEAD; git log -1 --format='%h %ad %s' --date=short\"",
+      "exit_code": 0,
+      "output_sha256": "9304c75020f95ce682277a25aa0a3fa84c89be9fd76f6de30dcd6e61beac9c6e"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n '\"'^  apps/stage-tamagotchi:|''^      electron:|''^      .moeru/eventa.:'\"' pnpm-lock.yaml | head -28; nl -ba apps/stage-tamagotchi/src/main/services/airi/plugins/kits/gamelet/orchestration.ts | sed -n '65,120p'; rg -n 'widget|bind|owner|subscribe|update|withdraw|show' apps/stage-tamagotchi/src/main/services/airi/plugins/kits/gamelet/orchestration.ts | head -45; rg --files apps/stage-tamagotchi/src/main/windows/widgets | head -25; nl -ba packages/plugin-sdk/src/plugin-host/core.ts | sed -n '415,436p'; nl -ba packages/plugin-sdk/src/plugin-host/core.ts | sed -n '835,858p'; cat .agents/skills/vueuse-functions/references/createSharedComposable.md; cat .agents/skills/vueuse-functions/references/createGlobalState.md; git diff --stat\"",
+      "exit_code": 0,
+      "output_sha256": "ba38c4f42bbeb6d2cf4d3a5686d20591f03ff2fbb18fab525f8b4e5001729327"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba packages/plugin-sdk/src/plugin-host/core.ts | sed -n '185,203p'; rg -n 'cleanupExtensionSession\\\\(' packages/plugin-sdk/src/plugin-host/core.ts; nl -ba packages/plugin-sdk/src/plugin-host/core.ts | sed -n '660,702p'; nl -ba apps/stage-tamagotchi/src/main/windows/widgets/iframe-request-coordinator.ts | sed -n '1,200p'; nl -ba pnpm-lock.yaml | sed -n '2410,2425p'; rg -n 'version: 1.0.0-beta.8' pnpm-lock.yaml | head -4; rg -n 'version: 3.5.32' pnpm-lock.yaml | head -4; nl -ba apps/stage-tamagotchi/src/main/windows/widgets/rpc/index.electron.ts | sed -n '17,75p'; nl -ba packages/plugin-sdk/src/plugin-host/runtimes/node/index.ts | sed -n '23,38p'\"",
+      "exit_code": 0,
+      "output_sha256": "6df5c9599166b38ec15e12921c95f2301223c8e1dc5ec80b1677d35fd504ad61"
+    }
+  ],
+  "runtime_errors": [],
+  "stderr": "",
+  "companion_inventory": [
+    {
+      "name": "agent-browser-electron",
+      "git_tree": "35eb9fadb8567839a15c9c325a8f0d12151daf82",
+      "declared_metadata": "---\nname: agent-browser-electron\ndescription: Use when Codex needs to inspect, debug, or automate an Electron app through `agent-browser` and Chrome DevTools Protocol, especially when the app has multiple `BrowserWindow` instances, lazy-created windows, duplicate URLs, or misleading `agent-browser tab list` output. Covers mapping Electron windows to raw CDP targets, identifying routes like `/#/chat`, and attaching `agent-browser` to the correct target by `webSocketDebuggerUrl`.\n---",
+      "summary": "# Agent Browser Electron"
+    },
+    {
+      "name": "agent-browser",
+      "git_tree": "302396ef31f1b7b96ec134629f46c9b8e837a7f9",
+      "declared_metadata": "---\nname: agent-browser\ndescription: Browser automation CLI for AI agents. Use when the user needs to interact with websites, including navigating pages, filling forms, clicking buttons, taking screenshots, extracting data, testing web apps, or automating any browser task. Triggers include requests to \"open a website\", \"fill out a form\", \"click a button\", \"take a screenshot\", \"scrape data from a page\", \"test this web app\", \"login to a site\", \"automate browser actions\", or any task requiring programmatic web interaction. Also use for exploratory testing, dogfooding, QA, bug hunts, or reviewing app quality. Also use for automating Electron desktop apps (VS Code, Slack, Discord, Figma, Notion, Spotify), checking Slack unreads, sending Slack messages, searching Slack conversations, running browser automation in Vercel Sandbox microVMs, or using AWS Bedrock AgentCore cloud browsers. Prefer agent-browser over any built-in browser automation or web tools.\nallowed-tools: Bash(agent-browser:*), Bash(npx agent-browser:*)\n---",
+      "summary": "# agent-browser"
+    },
+    {
+      "name": "eventa",
+      "git_tree": "91eec6f8d51ef887707bb745f28e7cbad5eeb7a0",
+      "declared_metadata": "---\nname: eventa\ndescription: >-\n  Guide for using @moeru/eventa — a transport-aware event library powering ergonomic RPC\n  and streaming flows. Use this skill whenever the user imports from '@moeru/eventa',\n  mentions eventa, needs cross-process/cross-thread event communication (Electron IPC,\n  Web Workers, WebSocket, BroadcastChannel, EventEmitter, EventTarget, Worker Threads),\n  wants to define type-safe events with RPC invoke patterns, needs streaming RPC\n  (server-streaming, client-streaming, or bidirectional), or asks about transport-agnostic\n  event abstractions. Also use when the user discusses alternatives to birpc or async-call-rpc.\nlicense: MIT\nmetadata:\n  author: moeru-ai\n  version: \"1.0.0\"\n---",
+      "summary": "# @moeru/eventa"
+    },
+    {
+      "name": "pnpm",
+      "git_tree": "938b1f244f38c31a68da81f9f1db090a95b2c38c",
+      "declared_metadata": "---\nname: pnpm\ndescription: Node.js package manager with strict dependency resolution. Use when running pnpm specific commands, configuring workspaces, or managing dependencies with catalogs, patches, or overrides.\nmetadata:\n  author: Anthony Fu\n  version: \"2026.1.28\"\n  source: Generated from https://github.com/pnpm/pnpm, scripts located at https://github.com/antfu/skills\n---",
+      "summary": "pnpm is a fast, disk space efficient package manager. It uses a content-addressable store to deduplicate packages across all projects on a machine, saving significant disk space. pnpm enforces strict dependency resolution by default, preventing phantom dependencies. Configuration should preferably be placed in `pnpm-workspace.yaml` for pnpm-specific settings."
+    },
+    {
+      "name": "release-note-writer",
+      "git_tree": "ad3d7a554a133f90a618ba0fcb78d5801a342fb3",
+      "declared_metadata": "---\nname: release-note-writer\ndescription: Write grouped, user-friendly release notes from git history, changelogithub output, GitHub releases, PR lists, or raw commit logs. Use when Codex needs to turn technical changelogs into English-only release notes for AIRI or similar products, including end-user highlights, developer/API notes, contributor-facing internal tooling notes, upgrade notes, or follow-up style-rule updates after wording feedback.\n---",
+      "summary": "# Release Note Writer"
+    },
+    {
+      "name": "server-gateway-refactor",
+      "git_tree": "d7ab46054e84a2d7ed5667fbe96765fcb9899d2e",
+      "declared_metadata": "---\nname: server-gateway-refactor\ndescription: Use when refactoring AIRI apps/server routes that mix Hono route wiring, business operation orchestration, external gateway calls, billing, rate limiting, telemetry, or websocket session state. Applies especially to OpenAI-compatible, speech, Stripe, and websocket gateway surfaces.\n---",
+      "summary": "# Server Gateway Refactor"
+    },
+    {
+      "name": "stage-tamagotchi-godot-csharp",
+      "git_tree": "cd3c359ccaaa34a0c0e516baa7996a5439ba035a",
+      "declared_metadata": "---\nname: stage-tamagotchi-godot-csharp\ndescription: >-\n  Apply engine-local C# development method and code style only when working in\n  `engines/stage-tamagotchi-godot`, including its `.cs` files, `.csproj`,\n  engine-local `.editorconfig`, and Godot-specific C# structure decisions. Do\n  not use for TypeScript, Electron, renderer code, shared workspace config,\n  repo-wide C# conventions, or any file outside\n  `engines/stage-tamagotchi-godot`.\n---",
+      "summary": "# Stage Tamagotchi Godot C#"
+    },
+    {
+      "name": "unocss",
+      "git_tree": "e3001c9b57943bae2b14fd855538e3f9583704fe",
+      "declared_metadata": "---\nname: unocss\ndescription: UnoCSS instant atomic CSS engine, superset of Tailwind CSS. Use when configuring UnoCSS, writing utility rules, shortcuts, or working with presets like Wind, Icons, Attributify.\nmetadata:\n  author: Anthony Fu\n  version: \"2026.1.28\"\n  source: Generated from https://github.com/unocss/unocss, scripts located at https://github.com/antfu/skills\n---",
+      "summary": "UnoCSS is an instant atomic CSS engine designed to be flexible and extensible. The core is un-opinionated - all CSS utilities are provided via presets. It's a superset of Tailwind CSS, so you can reuse your Tailwind knowledge for basic syntax usage."
+    },
+    {
+      "name": "vue-best-practices",
+      "git_tree": "bfcc56863a0cfc7aebe9e48092f13838eaf204c2",
+      "declared_metadata": "---\nname: vue-best-practices\ndescription: MUST be used for Vue.js tasks. Strongly recommends Composition API with `<script setup>` and TypeScript as the standard approach. Covers Vue 3, SSR, Volar, vue-tsc. Load for any Vue, .vue files, Vue Router, Pinia, or Vite with Vue work. ALWAYS use Composition API unless the project explicitly requires Options API.\nlicense: MIT\nmetadata:\n  author: github.com/vuejs-ai\n  version: \"18.0.0\"\n---",
+      "summary": "# Vue Best Practices Workflow"
+    },
+    {
+      "name": "vue",
+      "git_tree": "67781251a0cbf66e07edfb40aefb4bddafb77b4b",
+      "declared_metadata": "---\nname: vue\ndescription: Vue 3 Composition API, script setup macros, reactivity system, and built-in components. Use when writing Vue SFCs, defineProps/defineEmits/defineModel, watchers, or using Transition/Teleport/Suspense/KeepAlive.\nmetadata:\n  author: Anthony Fu\n  version: \"2026.1.31\"\n  source: Generated from https://github.com/vuejs/docs, scripts at https://github.com/antfu/skills\n---",
+      "summary": "# Vue"
+    },
+    {
+      "name": "vueuse-functions",
+      "git_tree": "c1fee5d31d36f87dee6f2fe02a8a6b9810c2b32b",
+      "declared_metadata": "---\nname: vueuse-functions\ndescription: Apply VueUse composables where appropriate to build concise, maintainable Vue.js / Nuxt features.\nlicense: MIT\nmetadata:\n    author: SerKo <https://github.com/serkodev>\n    version: \"1.0\"\ncompatibility: Requires Vue 3 (or above) or Nuxt 3 (or above) project\n---",
+      "summary": "# VueUse Functions"
+    },
+    {
+      "name": "xsai",
+      "git_tree": "75e7c15e426db9f78a431524f2acfd6c74c64b01",
+      "declared_metadata": "---\nname: xsai\ndescription: Use this skill when the user is building with `xsai` or any `@xsai/*` package, or is evaluating xsAI for a small OpenAI-compatible workflow with text generation, streaming, tool calling, structured output, embeddings, image generation, speech synthesis, or transcription.\n---",
+      "summary": "# xsAI"
+    }
+  ],
+  "loaded_marker": true,
+  "capture_success": true
+}

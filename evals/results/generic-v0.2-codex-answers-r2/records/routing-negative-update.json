@@ -1,0 +1,55 @@
+{
+  "id": "routing-negative-update",
+  "kind": "routing",
+  "repository": "click",
+  "returncode": 0,
+  "timed_out": false,
+  "answer_present": true,
+  "repository_unchanged": true,
+  "elapsed_seconds": 79.56,
+  "usage": {
+    "input_tokens": 115616,
+    "cached_input_tokens": 100224,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1569,
+    "reasoning_output_tokens": 397
+  },
+  "read_commands": [
+    {
+      "command": "/bin/zsh -lc \"pwd; rg --files -g 'AGENTS.md' -g 'pyproject.toml' -g '*lock*' -g '*requirements*' -g '*constraints*' -g 'tox.ini' -g 'Makefile' -g '.github/workflows/*'\"",
+      "exit_code": 0,
+      "output_sha256": "846d78e94e34ab71b31bad7b286744047254a35ed92e673be5ad4ddd9c4aee15"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat pyproject.toml; cat tox.ini'",
+      "exit_code": 0,
+      "output_sha256": "4cbf6ae66a0c054e5845c5c11d4eb29a67a3f2030dc6ed74b7b1f7f8065765a8"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files --hidden -g '\"'!'\"\\\\.git/**' -g 'AGENTS.md' -g '*lock*' -g '*requirements*' -g '*constraints*' -g '.github/workflows/**'; rg -n --hidden -g '\"'!.git/**'\"' 'flit_core|flit|uv lock|poetry lock|pip-compile|pdm lock|requirements' .\"",
+      "exit_code": 0,
+      "output_sha256": "c0cd3437ea539e3105ba08a83dafa7e98fa39f9a659a5c0d56064c66ff481e96"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n --hidden -g '\"'!.git/**'\"' 'flit[-_]core|build-system|no-build-isolation|build-constraint|PIP_CONSTRAINT|pip-compile-multi' pyproject.toml requirements .github tox.ini .pip-compile*; git status --short\"",
+      "exit_code": 0,
+      "output_sha256": "9d3e31948c4d14b17ca3cb539d75b7a6f7eb699e81aad28e8b527065c387d46f"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files --hidden -g '\"'!.git/**'\"' requirements; nl -ba requirements/build.in; nl -ba requirements/build.txt; nl -ba requirements/dev.in; nl -ba .github/workflows/publish.yaml; nl -ba .github/workflows/lock.yaml\"",
+      "exit_code": 0,
+      "output_sha256": "328dbf6f0938293d3508383d08a0364ab73b257bbb070efbed6d79bad35ebc39"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n --hidden -g '\"'!.git/**'\"' 'flit[-_]core|no-build-isolation|build-constraint|PIP_CONSTRAINT' pyproject.toml requirements .github tox.ini; rg --files --hidden -g '\"'!.git/**'\"' -g '\"'! .agents/**'\"' -g '*lock*' -g '*pip-compile*'\"",
+      "exit_code": 0,
+      "output_sha256": "6da0c12cf7495a4bc5d9c8d06379adb242c89b376fef544ec2a7eb35793a79e8"
+    }
+  ],
+  "stderr": "",
+  "companion_inventory": [],
+  "loaded_marker": false,
+  "expected_loaded": false,
+  "routing_pass": true,
+  "capture_success": true
+}

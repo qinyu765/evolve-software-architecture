@@ -1,0 +1,233 @@
+{
+  "protocol": "generic-v0.2-compact",
+  "date": "2026-10-01",
+  "release_readiness": "pass",
+  "accepted_package_commit": "769449aaa93f9edea5cc06859808095e38bdaebc",
+  "accepted_package_sha256": "2bdb544160efd813e066ee6d7fa5044a6361f1883ba1f5e6b44999301034eb30",
+  "profile": {
+    "runtime": "codex",
+    "cli_version": "codex-cli 0.159.2",
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "high",
+    "sandbox": "read-only",
+    "ephemeral": true,
+    "ignore_user_config": true,
+    "ignore_rules": true,
+    "timeout_seconds": 900,
+    "concurrency": 3,
+    "platform": "Darwin",
+    "architecture": "arm64"
+  },
+  "repositories": {
+    "airi": {
+      "url": "https://github.com/moeru-ai/airi",
+      "commit": "5228f94123e42416435e7f7e8215df26f3bb065b"
+    },
+    "click": {
+      "url": "https://github.com/pallets/click",
+      "version": "8.1.8",
+      "commit": "934813e4d421071a1b3db3973c02fe2721359a6e"
+    }
+  },
+  "behavior": [
+    {
+      "task": "airi-review",
+      "verdict": "pass_with_recorded_limits",
+      "producer": "generic-v0.2-codex-answers-r2",
+      "review": "generic-v0.2-codex-airi-reviews-r1",
+      "producer_manifest_sha256": "95f44c70f35596bcccc52291e3653b89b0725eb98f927d844b5eeb1df697d8c8",
+      "review_manifest_sha256": "4492d449d827b68bc0fffbf1a527b929cc98c62c87a75298cc2eb34470d82f2e",
+      "answer_sha256": "7aa2ad7196fbbcb468286a0b1d711fce16cecfb2c60cb0447ad3345aadec543a",
+      "review_sha256": "a91c8ae44949571896524b74cbbeb8ced528faa95dd7315fa30ac71a7d0112bb",
+      "candidate_commit": "acf1da808885c17000837f74792144b019bf0461"
+    },
+    {
+      "task": "airi-major-requirement",
+      "verdict": "pass_with_recorded_limits",
+      "producer": "generic-v0.2-codex-answers-r2",
+      "review": "generic-v0.2-codex-airi-reviews-r1",
+      "producer_manifest_sha256": "95f44c70f35596bcccc52291e3653b89b0725eb98f927d844b5eeb1df697d8c8",
+      "review_manifest_sha256": "4492d449d827b68bc0fffbf1a527b929cc98c62c87a75298cc2eb34470d82f2e",
+      "answer_sha256": "d2e61139defb0287bd0a126cd964307c9a08e0c8da21444c3f4fd3dddcff865b",
+      "review_sha256": "0d9f2bc8d95a685fdbc79c11969897b807c57100145e52f40bf43c4f24930ac0",
+      "candidate_commit": "acf1da808885c17000837f74792144b019bf0461"
+    },
+    {
+      "task": "airi-companion-conflict",
+      "verdict": "pass_with_recorded_limits",
+      "producer": "generic-v0.2-codex-answers-r2",
+      "review": "generic-v0.2-codex-airi-reviews-r1",
+      "producer_manifest_sha256": "95f44c70f35596bcccc52291e3653b89b0725eb98f927d844b5eeb1df697d8c8",
+      "review_manifest_sha256": "4492d449d827b68bc0fffbf1a527b929cc98c62c87a75298cc2eb34470d82f2e",
+      "answer_sha256": "e8d373285bb3e67cfa2ab2895863dfb469831fd21c7afbbba4f8cb69d64517e2",
+      "review_sha256": "61aafb5d93701aeb0b49488e87a9291bd26756a79f4de9473cc900a3b5a2236b",
+      "candidate_commit": "acf1da808885c17000837f74792144b019bf0461"
+    },
+    {
+      "task": "click-review-authorized",
+      "verdict": "pass_with_recorded_limits",
+      "producer": "generic-v0.2-codex-answers-r2",
+      "review": "generic-v0.2-codex-click-api-review-r1",
+      "producer_manifest_sha256": "95f44c70f35596bcccc52291e3653b89b0725eb98f927d844b5eeb1df697d8c8",
+      "review_manifest_sha256": "57ebf38cf4aebfc5f1ed21d147ba76db44dd00e2272ae51ae8974c5189277896",
+      "answer_sha256": "aa163e91a2a8b637c52142f5727af0370611edb05f5fd1389f3115870f0488cf",
+      "review_sha256": "03675b0802553026f35fded83360d7ae8db39d65a03dce3a18dc6d331834c89e",
+      "candidate_commit": "acf1da808885c17000837f74792144b019bf0461"
+    },
+    {
+      "task": "click-major-requirement",
+      "verdict": "pass_with_recorded_limits",
+      "producer": "generic-v0.2-codex-click-requirement-answers-r3",
+      "review": "generic-v0.2-codex-click-requirement-review-r3",
+      "producer_manifest_sha256": "ffbe4bad6955e8dad36edf848c624f17e7777f14e1dbfb10b3909278f492b967",
+      "review_manifest_sha256": "b54be936861c51031c19ffae1eb00efaf73e82f3e4bba33e3a3f787ae1f40545",
+      "answer_sha256": "b7cabd8a8273c3bd90afb7ab82080e264685013282b3de13a68f3efa47791abe",
+      "review_sha256": "532012b44063a0cc249412b7b26541427777f5fc45bdbface5c2097e4e284b13",
+      "candidate_commit": "769449aaa93f9edea5cc06859808095e38bdaebc"
+    },
+    {
+      "task": "click-missing-skill",
+      "verdict": "pass_with_recorded_limits",
+      "producer": "generic-v0.2-codex-missing-r3",
+      "review": "generic-v0.2-codex-missing-review-r2",
+      "producer_manifest_sha256": "9cbc7adff4f25ac1148674283626af9a2450f6f631afebe4c9d928c90f1b5a7d",
+      "review_manifest_sha256": "348b9d41554344b08cd28017938c3869a01314bf4e7c4762270b459cbef3ecae",
+      "answer_sha256": "cc542982c83804d8f3e6c01ece4a48cd00666de64fcc955fd13b6fd56a9fb9c9",
+      "review_sha256": "b95b0c5362f96c213ec62c9df8197d69cbd627b07c11b7ea605ffc6ab0318e4b",
+      "candidate_commit": "9c5c6f567257011d4b52161279203f6e6bd5b721"
+    },
+    {
+      "task": "airi-boundary-bootstrap",
+      "verdict": "pass_with_recorded_limits",
+      "producer": "generic-v0.2-codex-boundary-answers-r2",
+      "review": "generic-v0.2-codex-boundary-review-r1",
+      "producer_manifest_sha256": "8b85bf3960cc9daf29287cb010ca90de62d7a5716f80114c6a00c029b2452af3",
+      "review_manifest_sha256": "72f342852dd91312c6d9b37a95e60f04ac3a0385298aaa37f36284d074adf407",
+      "answer_sha256": "99ff3c92aa325a764662e4c7cf9eb827b8deb9b652a40d97f4812b35c1a70374",
+      "review_sha256": "af9023facad14a31d293f6fea21e4f5ddff7771460d7cf5727ac6804afc363c1",
+      "candidate_commit": "9c5c6f567257011d4b52161279203f6e6bd5b721"
+    }
+  ],
+  "routing": [
+    {
+      "task": "routing-negative-rename",
+      "expected_loaded": false,
+      "loaded_marker": false,
+      "pass": true
+    },
+    {
+      "task": "routing-negative-style",
+      "expected_loaded": false,
+      "loaded_marker": false,
+      "pass": true
+    },
+    {
+      "task": "routing-negative-update",
+      "expected_loaded": false,
+      "loaded_marker": false,
+      "pass": true
+    },
+    {
+      "task": "routing-positive-refactoring",
+      "expected_loaded": true,
+      "loaded_marker": true,
+      "pass": true
+    },
+    {
+      "task": "routing-positive-requirement",
+      "expected_loaded": true,
+      "loaded_marker": true,
+      "pass": true
+    },
+    {
+      "task": "routing-positive-review",
+      "expected_loaded": true,
+      "loaded_marker": true,
+      "pass": true
+    }
+  ],
+  "audit_runs": [
+    {
+      "run": "generic-v0.2-codex-airi-reviews-r1",
+      "manifest_sha256": "4492d449d827b68bc0fffbf1a527b929cc98c62c87a75298cc2eb34470d82f2e",
+      "dataset_complete": true
+    },
+    {
+      "run": "generic-v0.2-codex-answers-r1",
+      "manifest_sha256": "2531b605d6d1958c5620348ee3b7dfcfa5b260f1760bf87038109558f114fab4",
+      "dataset_complete": false
+    },
+    {
+      "run": "generic-v0.2-codex-answers-r2",
+      "manifest_sha256": "95f44c70f35596bcccc52291e3653b89b0725eb98f927d844b5eeb1df697d8c8",
+      "dataset_complete": true
+    },
+    {
+      "run": "generic-v0.2-codex-boundary-answers-r1",
+      "manifest_sha256": "77c3feb2b67e24bf6341f18c7868fdbf92eb31a648c94cfd4cf15406720272e9",
+      "dataset_complete": false
+    },
+    {
+      "run": "generic-v0.2-codex-boundary-answers-r2",
+      "manifest_sha256": "8b85bf3960cc9daf29287cb010ca90de62d7a5716f80114c6a00c029b2452af3",
+      "dataset_complete": true
+    },
+    {
+      "run": "generic-v0.2-codex-boundary-review-r1",
+      "manifest_sha256": "72f342852dd91312c6d9b37a95e60f04ac3a0385298aaa37f36284d074adf407",
+      "dataset_complete": true
+    },
+    {
+      "run": "generic-v0.2-codex-click-api-review-r1",
+      "manifest_sha256": "57ebf38cf4aebfc5f1ed21d147ba76db44dd00e2272ae51ae8974c5189277896",
+      "dataset_complete": true
+    },
+    {
+      "run": "generic-v0.2-codex-click-requirement-answers-r3",
+      "manifest_sha256": "ffbe4bad6955e8dad36edf848c624f17e7777f14e1dbfb10b3909278f492b967",
+      "dataset_complete": true
+    },
+    {
+      "run": "generic-v0.2-codex-click-requirement-review-r1",
+      "manifest_sha256": "98b7741b0e4765244cb79e23a1e0f690e72292e49c4f1eedd901136f494ada7d",
+      "dataset_complete": false
+    },
+    {
+      "run": "generic-v0.2-codex-click-requirement-review-r2",
+      "manifest_sha256": "d08b3206eafd0ac4ab817cee2b9d5b88bcc050a0baa3e2863fef6848cc16ce82",
+      "dataset_complete": true
+    },
+    {
+      "run": "generic-v0.2-codex-click-requirement-review-r3",
+      "manifest_sha256": "b54be936861c51031c19ffae1eb00efaf73e82f3e4bba33e3a3f787ae1f40545",
+      "dataset_complete": true
+    },
+    {
+      "run": "generic-v0.2-codex-missing-r1",
+      "manifest_sha256": "c84dfd5219328eebac84aa3c85f080236d71ed957ed661d01972be14ac53a458",
+      "dataset_complete": false
+    },
+    {
+      "run": "generic-v0.2-codex-missing-r3",
+      "manifest_sha256": "9cbc7adff4f25ac1148674283626af9a2450f6f631afebe4c9d928c90f1b5a7d",
+      "dataset_complete": true
+    },
+    {
+      "run": "generic-v0.2-codex-missing-review-r1",
+      "manifest_sha256": "3eda38574dab82724cf845ef7c86989f5fb19d094a484758e1fdfb62e2b0c84c",
+      "dataset_complete": true
+    },
+    {
+      "run": "generic-v0.2-codex-missing-review-r2",
+      "manifest_sha256": "348b9d41554344b08cd28017938c3869a01314bf4e7c4762270b459cbef3ecae",
+      "dataset_complete": true
+    }
+  ],
+  "limitations": [
+    "Single configured Codex model and one successful sample per task; no statistical or universal model-improvement claim.",
+    "Independent reviews establish conditional proposal quality, not implemented migration correctness or full upstream test coverage.",
+    "Final package has narrow missing-guidance and compatibility/assumption corrections; only affected behavior tasks were rerun.",
+    "AIRI startup boundary coverage is a targeted additional task; broad reviews are not guaranteed to enumerate every boundary.",
+    "Routing uses temporary entrypoint instrumentation; published traces and original-answer redactions retain source-relative suffixes."
+  ]
+}

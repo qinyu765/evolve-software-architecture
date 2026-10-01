@@ -1,0 +1,128 @@
+{
+  "id": "click-review-authorized",
+  "kind": "behavior",
+  "repository": "click",
+  "returncode": 0,
+  "timed_out": false,
+  "answer_present": true,
+  "repository_unchanged": true,
+  "elapsed_seconds": 354.59,
+  "usage": {
+    "input_tokens": 533758,
+    "cached_input_tokens": 455040,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 8262,
+    "reasoning_output_tokens": 1684
+  },
+  "read_commands": [
+    {
+      "command": "/bin/zsh -lc \"pwd; rg --files -g 'AGENTS.md' -g 'pyproject.toml' -g 'setup.cfg' -g 'setup.py' -g 'CHANGES*' -g 'README*' -g '*architecture*' -g 'SKILL.md' -g 'assessment-framework.md' -g 'quality-attributes.md' -g 'technology-context.md' -g 'decision-record.md'\"",
+      "exit_code": 0,
+      "output_sha256": "aa78e49d56dbfe774a2c5e52acd972f1a2556bd626cbcd56068d329c835c5267"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat .agents/skills/evolve-software-architecture/SKILL.md .agents/skills/evolve-software-architecture/references/technology-context.md .agents/skills/evolve-software-architecture/references/core/assessment-framework.md .agents/skills/evolve-software-architecture/references/core/quality-attributes.md .agents/skills/evolve-software-architecture/references/core/decision-record.md'",
+      "exit_code": 0,
+      "output_sha256": "b31c2c122b04e4f0ea9277a834ca97d733cf572ca10cd1387935fc5cb60d05ab"
+    },
+    {
+      "command": "/bin/zsh -lc 'for p in /AGENTS.md /private/AGENTS.md /private/var/AGENTS.md /evaluation-path /evaluation-path /evaluation-path /evaluation-path /evaluation-path/AGENTS.md; do if test -f \"$p\"; then cat \"$p\"; fi; done'",
+      "exit_code": 0,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat pyproject.toml README.md'",
+      "exit_code": 0,
+      "output_sha256": "778b03ab93c3e0301a9a6abdec574bc00992e25019d3e8c48ad8929c37ef7921"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg --files --hidden -g '\"'!'\"\\\\.git/**' -g 'AGENTS.md' -g 'CLAUDE.md' -g '*CONTRIBUT*' -g '*tox*' -g '*pytest*' -g '.github/**' -g 'src/**' -g 'tests/**' -g 'docs/**'\"",
+      "exit_code": 0,
+      "output_sha256": "409a88099c80a2f67f22404d0bc7e766407896083a957a193b0ba417881b266e"
+    },
+    {
+      "command": "/bin/zsh -lc 'git status --short; git log -10 --oneline; git describe --tags --always; git remote -v'",
+      "exit_code": 0,
+      "output_sha256": "adb7807631319627144900dadec6a855b9d1441a7d36e42997aba8ae5402b720"
+    },
+    {
+      "command": "/bin/zsh -lc 'cat src/click/__init__.py docs/api.rst docs/testing.rst docs/exceptions.rst tox.ini .github/workflows/tests.yaml tests/conftest.py tests/test_imports.py'",
+      "exit_code": 0,
+      "output_sha256": "6a51124028f06f54fe6a07bbc2a869f57891dbb75fcd4ad40e3d99d2af3e2c04"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n '\"'^class |''^    def (main|invoke|make_context|parse_args|resolve_command|process_value|handle_parse_result|close|__call__|scope|isolation|get_result|__exit__|call_on_close|with_resource)|''^def |standalone_mode|sys'\"\\\\.(exit|argv|stdin|stdout|stderr)|get_current_context|push_context|pop_context' src/click/core.py src/click/testing.py src/click/globals.py src/click/decorators.py\"",
+      "exit_code": 0,
+      "output_sha256": "0ca95d608da0dc7190ca47266ac0a9d975958b4fff4ef69f7d6bd098fe69eec7"
+    },
+    {
+      "command": "/bin/zsh -lc \"cat CONTRIBUTING.rst; git log -25 --oneline -- src/click/core.py src/click/testing.py src/click/__init__.py tests/test_testing.py; sed -n '1,220p' CHANGES.rst; rg -n 'subclass|Command|MultiCommand|invoke|context|thread|standalone|forward|exit|result_callback' docs/commands.rst docs/advanced.rst docs/complex.rst docs/upgrading.rst tests/test_custom_classes.py tests/test_context.py tests/test_testing.py\"",
+      "exit_code": 0,
+      "output_sha256": "783f51b1517e33f189cda847b71458f9cf10409c3671b8a3d896f02e2e8f3ec7"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,115p' CHANGES.rst; git log -18 --oneline -- src/click/core.py src/click/testing.py; cat CONTRIBUTING.rst\"",
+      "exit_code": 0,
+      "output_sha256": "7fe16c2fa2fd0921345a049fecff61a541309b77494e7275b5dad6189c0ae09d"
+    },
+    {
+      "command": "/bin/zsh -lc \"sed -n '1,130p' src/click/core.py; sed -n '290,330p' src/click/core.py; sed -n '460,625p' src/click/core.py; sed -n '735,835p' src/click/core.py; sed -n '850,1140p' src/click/core.py; cat src/click/globals.py\"",
+      "exit_code": 0,
+      "output_sha256": "de1ac41ab207144b3baefb269fbbc2493a6d368eaff71ccfbd0ae2a785802754"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/testing.py | sed -n '1,265p'\"",
+      "exit_code": 0,
+      "output_sha256": "a948c9d40ea6f9189a7e5ec2db629a6d956c5c3b73500a2382e571cc36ac498c"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/testing.py | sed -n '265,590p'\"",
+      "exit_code": 0,
+      "output_sha256": "8be41adffc86324add8286f249edfbe3e5fcec58ad2a46dcb2d4431c65ce8e3c"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba tests/test_testing.py | sed -n '1,370p'; nl -ba tests/test_context.py | sed -n '1,235p'\"",
+      "exit_code": 0,
+      "output_sha256": "f3f47034e0ca9ea00eea95707b17e0187d23f62026283c1f26a123cb492743bd"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n '\"'^def test_|subprocess|CliRunner|make_context|'\"\\\\.invoke\\\\(|standalone_mode|with_resource|call_on_close|_pause_echo|should_strip_ansi|FORCED_WIDTH' tests/test_commands.py tests/test_context.py tests/test_custom_classes.py tests/test_testing.py tests/test_parser.py tests/test_chain.py; git show --stat fdc6b02; git show fdc6b02 -- tests/test_testing.py; git show ffd43e9 -- src/click/testing.py\"",
+      "exit_code": 0,
+      "output_sha256": "77471b4707691d65f0f35b0e5f1aec62e6ae7c630d146518286bd5779ba8dc05"
+    },
+    {
+      "command": "/bin/zsh -lc \"rg -n '\"'^class |''^    def (make_parser|parse_args|invoke|resolve_command|process_value|consume_value|handle_parse_result|exit|__call__)'\"' src/click/core.py; nl -ba src/click/core.py | sed -n '1140,1165p'; nl -ba src/click/core.py | sed -n '1390,1455p'; nl -ba src/click/core.py | sed -n '1585,1635p'; nl -ba src/click/core.py | sed -n '1660,1755p'\"",
+      "exit_code": 0,
+      "output_sha256": "23e1cc26ad1da74c81f85a659930ea2a061e80a2409202d6b96b6f23906291cc"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/decorators.py | sed -n '150,255p'; nl -ba src/click/core.py | sed -n '2350,2430p'; nl -ba tests/test_commands.py | sed -n '532,548p'; nl -ba tests/test_context.py | sed -n '238,255p'; rg -n 'subprocess|Popen|check_output|check_call|\\\\.run\\\\(' tests; rg -n 'should_strip_ansi|visible_prompt_func|hidden_prompt_func|_getchar|FORCED_WIDTH|_local' src/click/{_compat,utils,termui,formatting,testing,globals}.py\"",
+      "exit_code": 0,
+      "output_sha256": "e6664eb306f37d8dead63bcfbbff1e920fb5dc166e74fd6f735d0d298518d910"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/core.py | sed -n '470,489p'; nl -ba src/click/core.py | sed -n '535,610p'; nl -ba src/click/core.py | sed -n '680,711p'; nl -ba src/click/core.py | sed -n '1060,1126p'; nl -ba src/click/__init__.py | sed -n '1,24p'; nl -ba docs/exceptions.rst | sed -n '30,64p'\"",
+      "exit_code": 0,
+      "output_sha256": "75cf0619ace9196e8ca4fca12b048c3eacc2b06d3a80d016a403d103a4f5697d"
+    },
+    {
+      "command": "/bin/zsh -lc \"PYTHONPATH=src python3 -B -c 'import json\nimport sys\nimport click\nfrom click import formatting\nfrom click.globals import pop_context\nfrom click.testing import CliRunner\nassert click.__version__ == \\\"8.1.8\\\"\nprint(json.dumps({\\\"version\\\": click.__version__, \\\"source\\\": click.__file__}))\nold_width = formatting.FORCED_WIDTH\nold_streams = (sys.stdin, sys.stdout, sys.stderr)\ntry:\n    with CliRunner(charset=\\\"nonexistent-click-encoding\\\").isolation(input=b\\\"\\\"):\n        pass\nexcept LookupError as error:\n    width_result = {\\\"probe\\\": \\\"isolation_setup_failure\\\", \\\"exception\\\": type(error).__name__, \\\"width_before\\\": old_width, \\\"width_after\\\": formatting.FORCED_WIDTH, \\\"streams_restored\\\": all(a is b for a, b in zip(old_streams, (sys.stdin, sys.stdout, sys.stderr)))}\nfinally:\n    formatting.FORCED_WIDTH = old_width\n    sys.stdin, sys.stdout, sys.stderr = old_streams\nprint(json.dumps(width_result))\nctx = click.Context(click.Command(\\\"cleanup-probe\\\"))\ndef fail_cleanup():\n    raise RuntimeError(\\\"cleanup failed\\\")\nctx.call_on_close(fail_cleanup)\ntry:\n    with ctx:\n        pass\nexcept RuntimeError as error:\n    context_result = {\\\"probe\\\": \\\"context_cleanup_failure\\\", \\\"exception\\\": type(error).__name__, \\\"current_context_leaked\\\": click.get_current_context(silent=True) is ctx}\nfinally:\n    if click.get_current_context(silent=True) is ctx:\n        pop_context()\nprint(json.dumps(context_result))\n@click.command()\ndef return_one():\n    return 1\n@click.command()\n@click.pass_context\ndef exit_one(ctx):\n    ctx.exit(1)\nrunner = CliRunner()\nresults = []\nfor command in (return_one, exit_one):\n    for standalone in (True, False):\n        result = runner.invoke(command, standalone_mode=standalone)\n        results.append({\\\"command\\\": command.name, \\\"standalone\\\": standalone, \\\"exit_code\\\": result.exit_code, \\\"return_value\\\": result.return_value, \\\"exception\\\": type(result.exception).__name__ if result.exception else None})\nprint(json.dumps({\\\"probe\\\": \\\"return_and_exit_contracts\\\", \\\"results\\\": results}))\nsnap = (sys.stdin, sys.stdout, sys.stderr, formatting.FORCED_WIDTH)\nwith runner.isolation():\n    try:\n        with runner.isolation():\n            raise ValueError(\\\"nested body failure\\\")\n    except ValueError:\n        pass\nprint(json.dumps({\\\"probe\\\": \\\"nested_body_failure\\\", \\\"state_restored\\\": all(a is b for a, b in zip(snap, (sys.stdin, sys.stdout, sys.stderr, formatting.FORCED_WIDTH)))}))\n'\"",
+      "exit_code": 0,
+      "output_sha256": "8b4abc133a4fd2ffa96c5607ed073b0dad398cac76fbe73a0d3ab7e8be0668df"
+    },
+    {
+      "command": "/bin/zsh -lc \"nl -ba src/click/core.py | sed -n '495,524p'; nl -ba src/click/core.py | sed -n '911,952p'; nl -ba src/click/core.py | sed -n '2268,2298p'; nl -ba tests/test_custom_classes.py | sed -n '1,118p'; nl -ba tests/test_commands.py | sed -n '148,181p'; nl -ba tests/test_imports.py | sed -n '54,72p'; nl -ba docs/testing.rst | sed -n '1,25p'; nl -ba pyproject.toml | sed -n '1,24p'; nl -ba tox.ini | sed -n '1,59p'\"",
+      "exit_code": 0,
+      "output_sha256": "919b1f202598aab28ca4b04a6bc658ae8488ad073b22e211e6245270942ee639"
+    },
+    {
+      "command": "/bin/zsh -lc \"git diff --stat; git status --short; git log -6 --oneline -- docs/exceptions.rst; git show --stat 422e211; git show --stat d83868a; rg -n 'isolation|_compat|should_strip|FORCED_WIDTH|close.*(error|exception)|cleanup.*(error|exception)|LookupError|charset|encoding' tests/test_testing.py tests/test_context.py tests/test_commands.py tests/test_compat.py tests/test_termui.py\"",
+      "exit_code": 0,
+      "output_sha256": "a01c8ba321d407364ad76cdd82c9381f486c126e7d0f5995992c1a21f6504ad5"
+    }
+  ],
+  "stderr": "",
+  "companion_inventory": [],
+  "loaded_marker": true,
+  "capture_success": true
+}
