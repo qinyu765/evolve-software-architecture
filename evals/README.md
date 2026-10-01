@@ -1,5 +1,13 @@
 # Evaluation status
 
+## Current release acceptance
+
+v0.2 uses the compact cross-type protocol in [acceptance-v0.2.md](acceptance-v0.2.md). It verifies AIRI/Click behavior, companion cooperation, user choice on missing guidance, and triggering. It does not require a new scorer matrix or measured two-point improvement.
+
+## Historical desktop experiments
+
+The remaining instructions and results describe the original AIRI/MarkText desktop experiment. Its scorer policy, case definitions, and results are retained unchanged. The runner's Electron-specific generalization gate is intentional historical behavior, not a general-purpose or v0.2 release gate.
+
 The v0.1 XiLuoLin case remains the first vertical reference. The machine-readable `cases/airi-v0.2.json` definition is the single source of truth for the independent second-desktop routing and behavior baseline.
 
 The v2 rubric keeps the nine dimensions and an 18-point total, then adds an independent accuracy gate. Its scorer records claim-level evidence and documentation drift; documentation is treated as intent or historical context until implementation, configuration, tests, or history confirm it. A material factual error or unresolved decision-relevant documentation conflict blocks a Treatment result. Control errors remain diagnostic.

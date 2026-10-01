@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Print a compact, read-only repository inventory for architecture reviews."""
+"""Print a partial, read-only inventory; this is not a technology classifier."""
 
 from __future__ import annotations
 
@@ -32,8 +32,6 @@ def main() -> int:
         "package.json",
         "pyproject.toml",
         "go.mod",
-        "src-tauri/tauri.conf.json",
-        "src-tauri/Cargo.toml",
         "docs/solution-design.md",
         "docs/roadmap.md",
     ]
@@ -42,6 +40,7 @@ def main() -> int:
         path.name for path in repo.iterdir() if path.name not in {".git", "node_modules"}
     )
     payload = {
+        "inventory_scope": "top-level entries and a non-exhaustive file shortlist; inspect entry points and nested packages separately",
         "repository": str(repo),
         "branch": run(repo, "git", "branch", "--show-current"),
         "head": run(repo, "git", "rev-parse", "HEAD"),

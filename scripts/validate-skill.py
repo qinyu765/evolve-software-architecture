@@ -56,8 +56,7 @@ def main() -> int:
         "references/core/assessment-framework.md",
         "references/core/quality-attributes.md",
         "references/core/decision-record.md",
-        "references/project-types/project-type-selection.md",
-        "references/project-types/desktop-tauri.md",
+        "references/technology-context.md",
     ]:
         if not (skill / relative).is_file():
             fail(f"missing required reference: {relative}")

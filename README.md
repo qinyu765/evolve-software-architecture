@@ -2,13 +2,19 @@
 
 An agent Skill for evidence-based software architecture guidance.
 
-It helps an agent understand a repository before recommending structural change, choose quality attributes deliberately, compare viable options, and produce an incremental migration path. It is intentionally project-aware: Desktop/Tauri guidance is an adapter, not a default model for SDKs, Web, CLI, Mobile, Data, or AI projects.
+It helps an agent understand a repository before recommending structural change, choose quality attributes deliberately, compare viable options, and produce an incremental migration path. The architecture method is generic; applicable technology Skills supply platform constraints rather than built-in framework adapters.
 
 ## What it does
 
-Use it when a decision affects module boundaries, process boundaries, extensibility, long-term maintainability, technical-debt direction, or cross-cutting design. It produces an architecture review with evidence, current friction, quality-attribute trade-offs, options, a recommendation, migration steps, and verification criteria.
+Use it for existing-repository architecture reviews, structural refactoring, or substantial new requirements affecting ownership, boundaries, compatibility, or extensibility. It produces evidence, trade-offs, alternatives, a recommendation, and a migration/verification plan at the task's scale. It changes code only when the user requests implementation; ordinary local work and a separate greenfield-design workflow are outside its trigger.
 
 It is not a promise of a final architecture. The goal is to reduce future change cost while keeping uncertain decisions reversible.
+
+## Technology Skills
+
+The Skill selects installed, accessible guidance relevant to the project's technologies and versions. It prefers verified maintainer-published Skills, then credible community Skills with inspectable provenance, and reports material source/version gaps. It does not treat a Skill's preferred pattern as a fact about the repository.
+
+If suitable guidance is missing, it asks you whether to use official documentation, supply a Skill, or narrow the analysis. It honors permission already given for that task and never installs Skills automatically. For example: “Review this repository's API evolution; use its installed technology Skills, and if none fits, I authorize version-appropriate official documentation.”
 
 ## Install
 
@@ -24,9 +30,10 @@ This installs the current public source into `.agents/skills` and writes the eco
 ## Repository layout
 
 - `skills/evolve-software-architecture/` — the installable Skill.
-- `evals/` — trigger, quality, and cross-project evaluation cases.
+- `evals/` — compact v0.2 acceptance and immutable historical desktop experiments.
 - `ROADMAP.md` — capability phases and promotion gates.
 - `docs/adr/` — decisions about the Skill itself.
+- `docs/archive/` — unchanged v0.1.2 adapter references, excluded from installation.
 - `scripts/` — validation and controlled vendor synchronization.
 
 ## Development
@@ -39,7 +46,7 @@ python3 -m py_compile skills/evolve-software-architecture/scripts/collect_repo_s
 python3 skills/evolve-software-architecture/scripts/collect_repo_signals.py --repo .
 ```
 
-The Skill's runtime instructions are deliberately concise. Detailed domain guidance belongs in one-level-deep references so only the relevant project adapter is loaded.
+The Skill's runtime instructions are deliberately concise. Optional references deepen evidence, trade-offs, decisions, and cooperation with technology Skills. See [v0.2 acceptance](evals/acceptance-v0.2.md) for real-repository tasks and release evidence. The historical forward-evaluation dry run above does not measure v0.2 release readiness.
 
 ## Design principles
 
@@ -50,6 +57,10 @@ The Skill's runtime instructions are deliberately concise. Detailed domain guida
 - migrations are incremental, observable, and reversible;
 - XiLuoLin is the first evaluation case, not a hidden default;
 - lessons enter the core only after surviving materially different project types.
+
+## Releases and maintenance
+
+v0.2.0 replaces built-in adapters with companion Skill cooperation and adds substantial-requirement analysis. Package names, implicit invocation, and vendor-lock format are retained; old pinned releases remain reproducible. This release is validated for observable cross-type behavior, not universal measured improvement over base models. Framework-specific updates belong to companion guidance; core updates follow reproduced failures. Project copies are updated explicitly after an upstream release.
 
 ## License
 
